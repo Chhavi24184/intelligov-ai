@@ -31,7 +31,7 @@ function Home() {
         </h2>
 
         
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8">
 
           <div className="bg-white shadow-lg rounded-xl p-8 text-center hover:shadow-xl transition duration-300">
             <h3 className="text-2xl font-bold text-[#1a56db]">
@@ -52,6 +52,16 @@ function Home() {
               Discover scholarships that match your profile.
             </p>
           </div>
+
+          <div className="bg-white shadow-lg rounded-xl p-8 text-center"> 
+            <h3 className="text-2xl font-bold text-[#1a56db]"> 
+                Jobs & Internships 
+            </h3> 
+
+            <p className="mt-4 text-gray-600"> 
+                Explore career opportunities and internships. 
+            </p> 
+          </div> 
 
         </div>
 

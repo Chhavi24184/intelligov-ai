@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+<<<<<<< HEAD
 from pydantic import BaseModel
 
 app = FastAPI(
@@ -92,3 +93,18 @@ def get_schemes():
             }
         ]
     }
+=======
+
+app = FastAPI(
+    title="My First FastAPI",
+    version="1.0.0"
+)
+
+@app.get("/")
+def home():
+    return {"message": "Welcome to FastAPI!"}
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
+>>>>>>> 38d3a54 (Update main.py)

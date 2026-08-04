@@ -119,14 +119,115 @@
 //   )
 // }
 
-import Navbar from "./components/layout/Navbar"
+// import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// import Navbar from "./components/layout/Navbar";
+
+// import Home from "./pages/Home";
+
+// import Dashboard from "./pages/Dashboard";
+
+// function App() {
+
+//   return (
+
+//     <BrowserRouter>
+
+//       <Navbar />
+
+//       <Routes>
+
+//         <Route path="/" element={<Home />} />
+
+//         <Route path="/dashboard" element={<Dashboard />} />
+
+//       </Routes>
+
+//     </BrowserRouter>
+
+//   );
+
+// }
+
+// export default App;
+
+
+// import Navbar from "./components/layout/Navbar";
+// import Home from "./pages/Home";
+
+// function App() {
+
+//   return (
+//     <>
+//       <Navbar />
+//       <Home />
+//     </>
+//   );
+
+// }
+
+// export default App;
+
+// import { Routes, Route } from "react-router-dom";
+
+// import Navbar from "./components/layout/Navbar";
+
+// import Home from "./pages/Home";
+// import Dashboard from "./pages/Dashboard";
+// import AIChat from "./pages/AIChat";
+// import SchemeRecommendation from "./pages/SchemeRecommendation";
+// import EligibilityChecker from "./pages/EligibilityChecker";
+
+// function App() {
+//   return (
+//     <>
+//       <Navbar />
+
+//       <Routes>
+//         <Route path="/" element={<Home />} />
+//         <Route path="/dashboard" element={<Dashboard />} />
+//         <Route path="/chat" element={<AIChat />} />
+//         <Route
+//           path="/schemes"
+//           element={<SchemeRecommendation />}
+//         />
+//         <Route
+//           path="/eligibility"
+//           element={<EligibilityChecker />}
+//         />
+//       </Routes>
+//     </>
+//   );
+// }
+
+// export default App;
+
+
+import { Routes, Route, useLocation } from "react-router-dom";
+
+import Navbar from "./components/layout/Navbar";
+
 import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import AIChat from "./pages/AIChat";
+import SchemeRecommendation from "./pages/SchemeRecommendation";
+import EligibilityChecker from "./pages/EligibilityChecker";
 
 function App() {
+
+  const location = useLocation();
+
   return (
     <>
-      <Navbar />
-      <Home />
+      {location.pathname !== "/dashboard" && <Navbar />}
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/chat" element={<AIChat />} />
+        <Route path="/schemes" element={<SchemeRecommendation />} />
+        <Route path="/eligibility" element={<EligibilityChecker />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
     </>
   );
 }

@@ -38,7 +38,16 @@
 
 // export default Dashboard;
 
+
+
+import { Link } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 import Sidebar from "../components/dashboard/Sidebar";
+import StatsCards from "../components/dashboard/StatsCards";
+import WelcomeBanner from "../components/dashboard/WelcomeBanner";
+import WelcomeSection from "../components/dashboard/WelcomeSection";
+import AIAssistantCard from "../components/dashboard/AIAssistantCard";
+
 
 function Dashboard() {
   return (
@@ -46,7 +55,20 @@ function Dashboard() {
       
       <Sidebar />
 
-      <main className="flex-1 p-6 overflow-hidden">
+      <main className="flex-1 bg-[#0a1628] p-4 overflow-hidden">
+
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sky-300 hover:text-white transition mb-3"
+        >
+          ← Back
+        </Link>
+
+        <WelcomeSection />
+
+        <StatsCards />
+
+        <AIAssistantCard />
 
       </main>
 

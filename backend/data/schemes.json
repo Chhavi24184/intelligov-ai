@@ -1,0 +1,115 @@
+[
+  {
+    "id": 1,
+    "name": "PM Kisan Samman Nidhi",
+    "category": "Farmer",
+    "description": "Income support scheme for eligible farmers.",
+    "eligibility": "Small and marginal farmers",
+    "documents": [
+      "Aadhaar Card",
+      "Bank Passbook",
+      "Land Records"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Ayushman Bharat",
+    "category": "Healthcare",
+    "description": "Health insurance scheme for eligible families.",
+    "eligibility": "Eligible low-income families",
+    "documents": [
+      "Aadhaar Card",
+      "Ration Card"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "PM Awas Yojana",
+    "category": "Housing",
+    "description": "Affordable housing scheme for economically weaker sections.",
+    "eligibility": "EWS/LIG families",
+    "documents": [
+      "Aadhaar Card",
+      "Income Certificate"
+    ]
+  },
+  {
+    "id": 4,
+    "name": "PM Mudra Yojana",
+    "category": "Business",
+    "description": "Loan scheme for small businesses and startups.",
+    "eligibility": "Entrepreneurs and MSMEs",
+    "documents": [
+      "PAN Card",
+      "Aadhaar Card",
+      "Business Proof"
+    ]
+  },
+  {
+    "id": 5,
+    "name": "PM Vishwakarma",
+    "category": "Artisan",
+    "description": "Support scheme for traditional artisans and craftsmen.",
+    "eligibility": "Registered artisans",
+    "documents": [
+      "Aadhaar Card",
+      "Occupation Proof"
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Sukanya Samriddhi Yojana",
+    "category": "Girl Child",
+    "description": "Savings scheme for girl children.",
+    "eligibility": "Girl below 10 years",
+    "documents": [
+      "Birth Certificate",
+      "Aadhaar Card"
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Atal Pension Yojana",
+    "category": "Pension",
+    "description": "Pension scheme for unorganized sector workers.",
+    "eligibility": "18 to 40 years",
+    "documents": [
+      "Aadhaar Card",
+      "Bank Account"
+    ]
+  },
+  {
+    "id": 8,
+    "name": "PM Kaushal Vikas Yojana",
+    "category": "Skill Development",
+    "description": "Skill training and certification programme.",
+    "eligibility": "Indian youth",
+    "documents": [
+      "Aadhaar Card",
+      "Educational Certificate"
+    ]
+  },
+  {
+    "id": 9,
+    "name": "National Scholarship Portal",
+    "category": "Education",
+    "description": "Scholarship schemes for students.",
+    "eligibility": "Eligible students",
+    "documents": [
+      "Aadhaar Card",
+      "Income Certificate",
+      "Marksheet"
+    ]
+  },
+  {
+    "id": 10,
+    "name": "PM Employment Generation Programme",
+    "category": "Employment",
+    "description": "Financial assistance for self-employment projects.",
+    "eligibility": "Entrepreneurs above 18 years",
+    "documents": [
+      "Aadhaar Card",
+      "Project Report"
+    ]
+  }
+]

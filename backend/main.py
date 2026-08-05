@@ -1,110 +1,20 @@
 from fastapi import FastAPI
-<<<<<<< HEAD
-from pydantic import BaseModel
 
+# Create FastAPI application
 app = FastAPI(
     title="IntelliGov AI Backend",
     description="Backend APIs for IntelliGov AI",
     version="1.0.0"
 )
 
+# Import API routers
+from api.health import router as health_router
+from api.chat import router as chat_router
+from api.eligibility import router as eligibility_router
+from api.schemes import router as schemes_router
 
-# =========================
-# Root API
-# =========================
-@app.get("/")
-def root():
-    return {
-        "success": True,
-        "message": "IntelliGov AI Backend Running 🚀"
-    }
-
-
-# =========================
-# Health Check API
-# =========================
-@app.get("/health")
-def health():
-    return {
-        "success": True,
-        "status": "healthy",
-        "service": "IntelliGov AI Backend"
-    }
-
-
-# =========================
-# Chat API
-# =========================
-class ChatRequest(BaseModel):
-    message: str
-
-
-@app.post("/chat")
-def chat(request: ChatRequest):
-    return {
-        "success": True,
-        "reply": f"You said: {request.message}"
-    }
-
-
-# =========================
-# Eligibility API
-# =========================
-class EligibilityRequest(BaseModel):
-    age: int
-    occupation: str
-
-
-@app.post("/eligibility")
-def check_eligibility(request: EligibilityRequest):
-    return {
-        "success": True,
-        "eligible": True,
-        "message": "Eligibility checking module is working.",
-        "user": {
-            "age": request.age,
-            "occupation": request.occupation
-        }
-    }
-
-
-# =========================
-# Government Schemes API
-# =========================
-@app.get("/schemes")
-def get_schemes():
-    return {
-        "success": True,
-        "schemes": [
-            {
-                "name": "PM Kisan",
-                "category": "Farmer",
-                "description": "Income support scheme for farmers."
-            },
-            {
-                "name": "Ayushman Bharat",
-                "category": "Healthcare",
-                "description": "Health insurance scheme for eligible families."
-            },
-            {
-                "name": "PM Awas Yojana",
-                "category": "Housing",
-                "description": "Affordable housing scheme for eligible citizens."
-            }
-        ]
-    }
-=======
-
-app = FastAPI(
-    title="My First FastAPI",
-    version="1.0.0"
-)
-
-@app.get("/")
-def home():
-    return {"message": "Welcome to FastAPI!"}
-
-@app.get("/health")
-def health():
-    return {"status": "healthy"}
->>>>>>> 38d3a54 (Update main.py)
+# Register API routers
+app.include_router(health_router)
+app.include_router(chat_router)
+app.include_router(eligibility_router)
+app.include_router(schemes_router)

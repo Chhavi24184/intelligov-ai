@@ -6,62 +6,80 @@ def generate_reply(message: str):
 
     schemes = get_all_schemes()
 
-    if "farmer" in message:
-        for scheme in schemes:
-            if scheme["category"] == "Farmer":
-                return {
-                    "reply": f"I recommend {scheme['name']}.",
-                    "recommended_scheme": scheme
-                }
+    keyword_map = {
+        "farmer": "Farmer",
+        "agriculture": "Farmer",
+        "crop": "Farmer",
 
-    elif "student" in message:
-        for scheme in schemes:
-            if scheme["category"] == "Education":
-                return {
-                    "reply": f"I recommend {scheme['name']}.",
-                    "recommended_scheme": scheme
-                }
+        "student": "Education",
+        "scholarship": "Education",
+        "education": "Education",
 
-    elif "business" in message:
-        for scheme in schemes:
-            if scheme["category"] == "Business":
-                return {
-                    "reply": f"I recommend {scheme['name']}.",
-                    "recommended_scheme": scheme
-                }
-    elif "health" in message or "hospital" in message:
-        for scheme in schemes:
-            if scheme["category"] == "Healthcare":
-                return {
-                    "reply": f"I recommend {scheme['name']}.",
-                    "recommended_scheme": scheme
-                }
+        "business": "Business",
+        "startup": "Business",
+        "loan": "Business",
+        "entrepreneur": "Business",
 
-    elif "house" in message or "home" in message:
-        for scheme in schemes:
-            if scheme["category"] == "Housing":
-                return {
-                    "reply": f"I recommend {scheme['name']}.",
-                    "recommended_scheme": scheme
-                }
+        "artisan": "Artisan",
+        "craft": "Artisan",
 
-    elif "job" in message or "employment" in message:
-        for scheme in schemes:
-            if scheme["category"] == "Employment":
-                return {
-                    "reply": f"I recommend {scheme['name']}.",
-                    "recommended_scheme": scheme
-                }
-    elif "artisan" in message or "craft" in message:
-        for scheme in schemes:
-            if scheme["category"] == "Artisan":
-                return {
-                    "reply": f"I recommend {scheme['name']}.",
-                    "recommended_scheme": scheme
-                }
+        "health": "Healthcare",
+        "hospital": "Healthcare",
+        "medical": "Healthcare",
+        "insurance": "Healthcare",
 
- 
+        "house": "Housing",
+        "home": "Housing",
+        "housing": "Housing",
+
+        "employment": "Employment",
+        "job": "Employment",
+        "unemployed": "Employment",
+
+        "skill": "Skill Development",
+        "training": "Skill Development",
+
+        "pension": "Pension",
+        "retirement": "Pension",
+
+        "girl": "Girl Child",
+        "female": "Girl Child",
+        "women": "Girl Child",
+        "daughter": "Girl Child"
+    }
+
+    recommended_schemes = []
+
+    for keyword, category in keyword_map.items():
+
+        if keyword in message:
+
+            for scheme in schemes:
+
+                if (
+                    scheme["category"].lower()
+                    == category.lower()
+                    and scheme not in recommended_schemes
+                ):
+                    recommended_schemes.append(scheme)
+
+    if recommended_schemes:
+
+        scheme_names = ", ".join(
+            scheme["name"] for scheme in recommended_schemes
+        )
+
+        return {
+            "reply": f"Based on your query, I recommend these government schemes: {scheme_names}.",
+            "recommended_schemes": recommended_schemes
+        }
+
     return {
-        "reply": "Please tell me your occupation (e.g. Farmer, Student, Business, Artisan) or your need (healthcare, housing, employment) so I can recommend a suitable government scheme.",
-        "recommended_scheme": None
+        "reply": (
+            "I couldn't understand your requirement. "
+            "Please mention your occupation or need such as "
+            "Farmer, Student, Business, Healthcare, Housing, "
+            "Employment, Skill Training or Pension."
+        ),
+        "recommended_schemes": []
     }

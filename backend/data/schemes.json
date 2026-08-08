@@ -3,113 +3,390 @@
     "id": 1,
     "name": "PM Kisan Samman Nidhi",
     "category": "Farmer",
-    "description": "Income support scheme for eligible farmers.",
-    "eligibility": "Small and marginal farmers",
+    "description": "Income support scheme for eligible farmer families.",
+    "eligibility": "Eligible landholding farmer families, subject to scheme conditions.",
     "documents": [
       "Aadhaar Card",
       "Bank Passbook",
       "Land Records"
     ]
   },
+
   {
     "id": 2,
-    "name": "Ayushman Bharat",
+    "name": "Ayushman Bharat PM-JAY",
     "category": "Healthcare",
-    "description": "Health insurance scheme for eligible families.",
-    "eligibility": "Eligible low-income families",
+    "description": "Health assurance scheme for eligible families.",
+    "eligibility": "Families identified under applicable government eligibility criteria.",
     "documents": [
       "Aadhaar Card",
-      "Ration Card"
+      "Ration Card",
+      "Family ID or Eligibility Proof"
     ]
   },
+
   {
     "id": 3,
-    "name": "PM Awas Yojana",
+    "name": "Pradhan Mantri Awas Yojana",
     "category": "Housing",
-    "description": "Affordable housing scheme for economically weaker sections.",
-    "eligibility": "EWS/LIG families",
+    "description": "Housing assistance scheme for eligible households.",
+    "eligibility": "Eligible EWS, LIG, or other beneficiary categories under the applicable PMAY component.",
     "documents": [
       "Aadhaar Card",
-      "Income Certificate"
+      "Income Certificate",
+      "Address Proof"
     ]
   },
+
   {
     "id": 4,
-    "name": "PM Mudra Yojana",
+    "name": "Pradhan Mantri Mudra Yojana",
     "category": "Business",
-    "description": "Loan scheme for small businesses and startups.",
-    "eligibility": "Entrepreneurs and MSMEs",
+    "description": "Credit support scheme for micro enterprises and small businesses.",
+    "eligibility": "Eligible non-corporate small business owners and entrepreneurs.",
     "documents": [
       "PAN Card",
       "Aadhaar Card",
       "Business Proof"
     ]
   },
+
   {
     "id": 5,
     "name": "PM Vishwakarma",
     "category": "Artisan",
-    "description": "Support scheme for traditional artisans and craftsmen.",
-    "eligibility": "Registered artisans",
+    "description": "Support programme for traditional artisans and craftspeople.",
+    "eligibility": "Eligible artisans engaged in notified traditional trades.",
     "documents": [
       "Aadhaar Card",
-      "Occupation Proof"
+      "Occupation Proof",
+      "Bank Account Details"
     ]
   },
+
   {
     "id": 6,
     "name": "Sukanya Samriddhi Yojana",
     "category": "Girl Child",
-    "description": "Savings scheme for girl children.",
-    "eligibility": "Girl below 10 years",
+    "description": "Small-savings scheme for a girl child.",
+    "eligibility": "Account may be opened for an eligible girl child below the prescribed age limit.",
     "documents": [
       "Birth Certificate",
-      "Aadhaar Card"
+      "Aadhaar Card",
+      "Parent or Guardian ID Proof"
     ]
   },
+
   {
     "id": 7,
     "name": "Atal Pension Yojana",
     "category": "Pension",
-    "description": "Pension scheme for unorganized sector workers.",
-    "eligibility": "18 to 40 years",
+    "description": "Pension scheme for eligible citizens, especially workers in the unorganised sector.",
+    "eligibility": "Eligible bank-account holders within the prescribed age range.",
     "documents": [
       "Aadhaar Card",
-      "Bank Account"
+      "Bank Account Details",
+      "Mobile Number"
     ]
   },
+
   {
     "id": 8,
-    "name": "PM Kaushal Vikas Yojana",
+    "name": "Pradhan Mantri Kaushal Vikas Yojana",
     "category": "Skill Development",
-    "description": "Skill training and certification programme.",
-    "eligibility": "Indian youth",
+    "description": "Industry-relevant skill training, certification, upskilling, and reskilling programme.",
+    "eligibility": "Eligible Indian youth seeking approved skill training.",
     "documents": [
       "Aadhaar Card",
-      "Educational Certificate"
+      "Educational Certificate",
+      "Bank Account Details"
     ]
   },
+
   {
     "id": 9,
-    "name": "National Scholarship Portal",
+    "name": "Central Sector Scholarship Scheme",
     "category": "Education",
-    "description": "Scholarship schemes for students.",
-    "eligibility": "Eligible students",
+    "description": "Scholarship support for eligible students pursuing higher education.",
+    "eligibility": "Eligible students meeting academic, income, and other notified criteria.",
     "documents": [
       "Aadhaar Card",
       "Income Certificate",
       "Marksheet"
     ]
   },
+
   {
     "id": 10,
-    "name": "PM Employment Generation Programme",
+    "name": "Prime Minister's Employment Generation Programme",
     "category": "Employment",
-    "description": "Financial assistance for self-employment projects.",
-    "eligibility": "Entrepreneurs above 18 years",
+    "description": "Credit-linked subsidy support for setting up eligible micro-enterprises.",
+    "eligibility": "Eligible entrepreneurs and self-employment project applicants.",
     "documents": [
       "Aadhaar Card",
-      "Project Report"
+      "Project Report",
+      "Educational Certificate"
+    ]
+  },
+
+  {
+    "id": 11,
+    "name": "Mahatma Gandhi National Rural Employment Guarantee Scheme",
+    "category": "Rural Employment",
+    "description": "Provides demand-driven wage employment to rural households.",
+    "eligibility": "Adult members of rural households willing to do unskilled manual work.",
+    "documents": [
+      "Job Card",
+      "Aadhaar Card",
+      "Bank Account Details"
+    ]
+  },
+
+  {
+    "id": 12,
+    "name": "Pradhan Mantri Ujjwala Yojana",
+    "category": "Women Welfare",
+    "description": "Provides LPG connection support to eligible households.",
+    "eligibility": "Eligible adult women from qualifying households.",
+    "documents": [
+      "Aadhaar Card",
+      "Ration Card",
+      "Bank Account Details"
+    ]
+  },
+
+  {
+    "id": 13,
+    "name": "PM Surya Ghar Muft Bijli Yojana",
+    "category": "Energy",
+    "description": "Supports installation of rooftop solar systems for eligible households.",
+    "eligibility": "Eligible residential electricity consumers with suitable rooftop space.",
+    "documents": [
+      "Aadhaar Card",
+      "Electricity Bill",
+      "Bank Account Details"
+    ]
+  },
+
+  {
+    "id": 14,
+    "name": "Pradhan Mantri Fasal Bima Yojana",
+    "category": "Farmer",
+    "description": "Crop insurance scheme that helps protect farmers against specified crop losses.",
+    "eligibility": "Eligible farmers growing notified crops in notified areas.",
+    "documents": [
+      "Aadhaar Card",
+      "Land Records",
+      "Bank Account Details"
+    ]
+  },
+
+  {
+    "id": 15,
+    "name": "Kisan Credit Card Scheme",
+    "category": "Farmer",
+    "description": "Provides timely short-term credit support for agricultural and allied activities.",
+    "eligibility": "Eligible farmers, tenant farmers, sharecroppers, and allied-sector applicants.",
+    "documents": [
+      "Aadhaar Card",
+      "Land Records or Cultivation Proof",
+      "Bank Account Details"
+    ]
+  },
+
+  {
+    "id": 16,
+    "name": "Soil Health Card Scheme",
+    "category": "Agriculture",
+    "description": "Provides soil nutrient information and fertilizer-use recommendations to farmers.",
+    "eligibility": "Farmers with agricultural land or cultivation activity.",
+    "documents": [
+      "Aadhaar Card",
+      "Land Records",
+      "Mobile Number"
+    ]
+  },
+
+  {
+    "id": 17,
+    "name": "PM KUSUM",
+    "category": "Agriculture Energy",
+    "description": "Supports solar pumps and solarisation solutions for eligible agricultural users.",
+    "eligibility": "Eligible farmers and agricultural consumers, subject to state implementation rules.",
+    "documents": [
+      "Aadhaar Card",
+      "Land Records",
+      "Electricity Connection Details"
+    ]
+  },
+
+  {
+    "id": 18,
+    "name": "Pradhan Mantri Matru Vandana Yojana",
+    "category": "Maternity",
+    "description": "Maternity benefit programme for eligible pregnant women and lactating mothers.",
+    "eligibility": "Eligible beneficiaries under current programme conditions.",
+    "documents": [
+      "Aadhaar Card",
+      "Bank Account Details",
+      "Pregnancy Registration Record"
+    ]
+  },
+
+  {
+    "id": 19,
+    "name": "Pradhan Mantri Jeevan Jyoti Bima Yojana",
+    "category": "Insurance",
+    "description": "Renewable life-insurance cover for eligible bank or post-office account holders.",
+    "eligibility": "Eligible account holders within the prescribed age range.",
+    "documents": [
+      "Aadhaar Card",
+      "Bank Account Details",
+      "Consent Form"
+    ]
+  },
+
+  {
+    "id": 20,
+    "name": "Pradhan Mantri Suraksha Bima Yojana",
+    "category": "Insurance",
+    "description": "Renewable accidental-death and disability insurance cover.",
+    "eligibility": "Eligible bank or post-office account holders within the prescribed age range.",
+    "documents": [
+      "Aadhaar Card",
+      "Bank Account Details",
+      "Consent Form"
+    ]
+  },
+
+  {
+    "id": 21,
+    "name": "PM SVANidhi",
+    "category": "Street Vendors",
+    "description": "Provides working-capital support for eligible street vendors.",
+    "eligibility": "Eligible street vendors identified under applicable scheme rules.",
+    "documents": [
+      "Aadhaar Card",
+      "Vendor Certificate or ID Card",
+      "Bank Account Details"
+    ]
+  },
+
+  {
+    "id": 22,
+    "name": "Stand-Up India",
+    "category": "Entrepreneurship",
+    "description": "Facilitates bank loans for eligible women and SC/ST entrepreneurs.",
+    "eligibility": "Eligible women or SC/ST entrepreneurs starting a greenfield enterprise.",
+    "documents": [
+      "PAN Card",
+      "Aadhaar Card",
+      "Business Plan"
+    ]
+  },
+
+  {
+    "id": 23,
+    "name": "National Apprenticeship Promotion Scheme",
+    "category": "Apprenticeship",
+    "description": "Promotes apprenticeship training and workplace learning opportunities.",
+    "eligibility": "Eligible candidates and establishments under apprenticeship rules.",
+    "documents": [
+      "Aadhaar Card",
+      "Educational Certificate",
+      "Bank Account Details"
+    ]
+  },
+
+  {
+    "id": 24,
+    "name": "Jan Shikshan Sansthan Scheme",
+    "category": "Skill Development",
+    "description": "Provides non-formal vocational training, especially for disadvantaged groups.",
+    "eligibility": "Eligible youth and adults, with priority for women and disadvantaged communities.",
+    "documents": [
+      "Aadhaar Card",
+      "Address Proof",
+      "Educational Certificate if Available"
+    ]
+  },
+
+  {
+    "id": 25,
+    "name": "Deen Dayal Upadhyaya Grameen Kaushalya Yojana",
+    "category": "Rural Skill Development",
+    "description": "Skill training and placement support for rural youth from poor households.",
+    "eligibility": "Eligible rural youth under programme guidelines.",
+    "documents": [
+      "Aadhaar Card",
+      "Ration Card or Rural Household Proof",
+      "Educational Certificate"
+    ]
+  },
+
+  {
+    "id": 26,
+    "name": "Deendayal Antyodaya Yojana National Rural Livelihoods Mission",
+    "category": "Rural Livelihood",
+    "description": "Supports rural livelihoods through self-help groups, financial inclusion, and enterprise development.",
+    "eligibility": "Eligible rural households, particularly women members of self-help groups.",
+    "documents": [
+      "Aadhaar Card",
+      "Bank Account Details",
+      "Self-Help Group Details"
+    ]
+  },
+
+  {
+    "id": 27,
+    "name": "National Social Assistance Programme",
+    "category": "Social Security",
+    "description": "Provides social assistance support through pension and family-benefit components.",
+    "eligibility": "Eligible elderly persons, widows, persons with disabilities, or bereaved families under notified conditions.",
+    "documents": [
+      "Aadhaar Card",
+      "Income or BPL Certificate",
+      "Bank Account Details"
+    ]
+  },
+
+  {
+    "id": 28,
+    "name": "Pradhan Mantri Jan Dhan Yojana",
+    "category": "Financial Inclusion",
+    "description": "Promotes access to basic banking services and financial inclusion.",
+    "eligibility": "Individuals without access to a suitable bank account, subject to bank rules.",
+    "documents": [
+      "Aadhaar Card",
+      "PAN Card if Available",
+      "Address Proof"
+    ]
+  },
+
+  {
+    "id": 29,
+    "name": "PM YASASVI Scholarship Scheme",
+    "category": "Education",
+    "description": "Scholarship support for eligible students from specified social categories.",
+    "eligibility": "Eligible students from notified OBC, EBC, DNT, or other categories meeting academic and income conditions.",
+    "documents": [
+      "Aadhaar Card",
+      "Caste Certificate",
+      "Income Certificate",
+      "Marksheet"
+    ]
+  },
+  
+  {
+    "id": 30,
+    "name": "National Career Service",
+    "category": "Employment",
+    "description": "Digital career platform offering job search, career counselling, job fairs, and skill information.",
+    "eligibility": "Job seekers, students, employers, and career-service users.",
+    "documents": [
+      "Aadhaar Card",
+      "Educational Certificate",
+      "Resume or Employment Details"
     ]
   }
 ]

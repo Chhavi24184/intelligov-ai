@@ -8,23 +8,65 @@
 
 // export default API;
 
-const API_BASE_URL = "http://localhost:5000";
+import axios from "axios";
 
-export const api = {
-  get: async (endpoint) => {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`);
-    return response.json();
+// Backend Base URL
+const API = axios.create({
+  baseURL: "http://127.0.0.1:8000",
+  headers: {
+    "Content-Type": "application/json",
   },
+});
 
-  post: async (endpoint, data) => {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
 
-    return response.json();
-  },
+// ===============================
+// CHAT API
+// ===============================
+
+export const chatAPI = async (message) => {
+  const response = await API.post("/chat", {
+    message: message,
+  });
+
+  return response.data;
 };
+
+
+// ===============================
+// ELIGIBILITY API
+// ===============================
+
+export const eligibilityAPI = async (userData) => {
+  const response = await API.post("/eligibility", userData);
+
+  return response.data;
+};
+
+
+// ===============================
+// SCHEMES API
+// ===============================
+
+export const schemesAPI = async () => {
+  const response = await API.get("/schemes");
+  return response.data;
+};
+
+
+// ===============================
+// SEARCH SCHEMES API
+// ===============================
+
+export const searchSchemesAPI = async (query) => {
+  const response = await API.get("/schemes/search", {
+    params: {
+      keyword: query,
+    },
+  });
+
+  return response.data;
+};
+
+
+
+export default API;

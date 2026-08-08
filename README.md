@@ -503,3 +503,4 @@ This project is licensed under the **Apache License 2.0** — see [`LICENSE`](LI
 - **IBM SkillsBuild** and the **IBM watsonx.ai** team for the hackathon platform and Granite foundation models.
 - The open-source maintainers of **FastAPI**, **React**, **ChromaDB**, **NetworkX**, and **sentence-transformers**.
 - Public government data initiatives — **MyScheme**, **National Career Service (NCS)**, **National Scholarship Portal (NSP)**, and **Skill India** — whose structure informed our mock datasets.
+

@@ -202,7 +202,6 @@
 
 // export default App;
 
-
 import { Routes, Route, useLocation } from "react-router-dom";
 
 import Navbar from "./components/layout/Navbar";
@@ -214,19 +213,33 @@ import SchemeRecommendation from "./pages/SchemeRecommendation";
 import EligibilityChecker from "./pages/EligibilityChecker";
 
 function App() {
-
   const location = useLocation();
 
   return (
     <>
+      {/* Navbar */}
       {location.pathname !== "/dashboard" && <Navbar />}
 
+      {/* Application Routes */}
       <Routes>
         <Route path="/" element={<Home />} />
+
         <Route path="/chat" element={<AIChat />} />
-        <Route path="/schemes" element={<SchemeRecommendation />} />
-        <Route path="/eligibility" element={<EligibilityChecker />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+
+        <Route
+          path="/schemes"
+          element={<SchemeRecommendation />}
+        />
+
+        <Route
+          path="/eligibility"
+          element={<EligibilityChecker />}
+        />
+
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
       </Routes>
     </>
   );

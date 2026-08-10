@@ -1,8 +1,9 @@
 from services.scheme_service import get_all_schemes
+from services.granite_service import granite_client
 
 
 def generate_reply(message: str):
-    message = message.lower()
+    message = message.lower().strip()
 
     schemes = get_all_schemes()
 
@@ -48,8 +49,9 @@ def generate_reply(message: str):
         "daughter": "Girl Child"
     }
 
-    recommended_schemes = []
+    retrieved_schemes = []
 
+    # Retrieve schemes based on query
     for keyword, category in keyword_map.items():
 
         if keyword in message:
@@ -57,29 +59,35 @@ def generate_reply(message: str):
             for scheme in schemes:
 
                 if (
-                    scheme["category"].lower()
+                    scheme.get("category", "").lower()
                     == category.lower()
-                    and scheme not in recommended_schemes
+                    and scheme not in retrieved_schemes
                 ):
-                    recommended_schemes.append(scheme)
+                    retrieved_schemes.append(scheme)
 
-    if recommended_schemes:
-
-        scheme_names = ", ".join(
-            scheme["name"] for scheme in recommended_schemes
-        )
-
+    # No relevant scheme found
+    if not retrieved_schemes:
         return {
-            "reply": f"Based on your query, I recommend these government schemes: {scheme_names}.",
-            "recommended_schemes": recommended_schemes
+            "reply": (
+                "I couldn't find a relevant government scheme "
+                "in the available government data. Please try "
+                "asking about education, farming, employment, "
+                "healthcare, housing, business, skill development "
+                "or pensions."
+            ),
+            "recommended_schemes": []
         }
 
+    # Limit context sent to LLM
+    retrieved_schemes = retrieved_schemes[:5]
+
+    # Generate grounded response using Granite
+    reply = granite_client.generate(
+        query=message,
+        context=retrieved_schemes
+    )
+
     return {
-        "reply": (
-            "I couldn't understand your requirement. "
-            "Please mention your occupation or need such as "
-            "Farmer, Student, Business, Healthcare, Housing, "
-            "Employment, Skill Training or Pension."
-        ),
-        "recommended_schemes": []
+        "reply": reply,
+        "recommended_schemes": retrieved_schemes
     }

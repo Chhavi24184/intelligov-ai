@@ -1,0 +1,46 @@
+1. What is IBM Granite?
+IBM Granite is IBM’s family of enterprise-focused foundation models, including large language models (LLMs). These models are available through IBM watsonx.ai and can understand and generate human-like text.
+
+Granite can be used for tasks such as:
+. Question answering
+. Text summarization
+. Information extraction
+. Classification
+. Retrieval-Augmented Generation (RAG)
+. Function and tool calling
+. Code-related tasks, depending on the Granite model selected
+
+# IBM positions Granite as an enterprise-ready model family because it is developed with attention to governed data, reliability, and business deployment requirements. IBM Granite documentation
+
+2. How will Granite be used in the IntelliGov AI project?
+In IntelliGov AI, Granite will act as the underlying AI language model for the multi-agent citizen-service platform. It will help the system understand citizen queries, use retrieved government information, and generate clear, personalized answers.
+
+# Its role in the project includes:
+. Understanding queries such as: “Which scholarship am I eligible for?” or “What government schemes can help me find a job?”
+. Supporting the Master Orchestrator by helping it interpret a request and coordinate the appropriate specialized agents.
+. Converting retrieved data from ChromaDB, the knowledge graph, and government-scheme JSON files into easy-to-understand responses.
+. Helping the Eligibility Verification and Opportunity Discovery agents explain matching schemes, jobs, scholarships, internships, or healthcare benefits.
+. Generating personalized recommendations based on the Citizen Digital Twin profile.
+. Powering the Explainable AI agent, which tells the citizen why a particular opportunity is recommended and which eligibility conditions were matched.
+. Producing structured responses or function calls that can support agent routing, retrieval, and recommendation workflows.
+
+For the hackathon, the report proposes a MockGraniteClient. It imitates the real IBM watsonx.ai SDK interface, allowing the team to build and demonstrate the application without IBM Cloud credentials. Later, this mock client can be replaced with a real Granite connection with minimal changes to the rest of the system. 
+
+3. Five key features of IBM Granite:
+
+. Strong instruction following:
+Granite can follow prompts and system instructions effectively. This is useful when the IntelliGov agents must produce responses in a specific format, such as eligibility results, recommendation lists, or simple explanations for citizens.
+
+. RAG compatibility:
+Granite supports Retrieval-Augmented Generation. In IntelliGov AI, the system can first retrieve relevant data about government schemes, scholarships, jobs, and benefits from ChromaDB or the knowledge graph. Granite can then use that retrieved information to create a relevant and understandable answer instead of relying only on its general knowledge.
+
+. Tool and function calling:
+Granite models can support tool-use workflows. This is important for a multi-agent platform because an agent may need to call an eligibility-check function, search the opportunity database, retrieve a citizen profile, or request another agent’s output.
+
+. Enterprise trust and governance focus:
+IBM develops Granite with enterprise deployment in mind, including data governance and trustworthy AI considerations. This is particularly valuable for IntelliGov AI because the platform handles sensitive citizen information such as age, income, education, state, category, and eligibility data. IBM watsonx.ai foundation-model documentation
+
+. Efficient long-context and agentic capabilities:
+Recent Granite 4 models are designed for long-context processing, RAG, tool use, and multi-agent workflows. IBM states that the Granite 4 architecture can reduce memory requirements and improve inference speed compared with similar models, making it suitable for scalable enterprise AI systems.
+
+# IBM Granite will serve as the core language model layer for IntelliGov AI. It will support the Master Orchestrator and specialized agents by understanding citizen queries, processing retrieved government-scheme information through RAG, generating personalized recommendations, and providing clear explanations for eligibility decisions. During the hackathon, a MockGraniteClient will simulate the watsonx.ai integration, enabling a future production upgrade to a real IBM Granite model with minimal code changes.

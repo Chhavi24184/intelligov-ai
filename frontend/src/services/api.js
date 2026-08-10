@@ -1,16 +1,9 @@
-// import axios from "axios";
-
-// const API = axios.create({
-
-// baseURL:"http://localhost:5000"
-
-// });
-
-// export default API;
-
 import axios from "axios";
 
-// Backend Base URL
+// ===============================
+// BACKEND BASE URL
+// ===============================
+
 const API = axios.create({
   baseURL: "http://127.0.0.1:8000",
   headers: {
@@ -49,6 +42,7 @@ export const eligibilityAPI = async (userData) => {
 
 export const schemesAPI = async () => {
   const response = await API.get("/schemes");
+
   return response.data;
 };
 
@@ -68,5 +62,8 @@ export const searchSchemesAPI = async (query) => {
 };
 
 
+// ===============================
+// DEFAULT EXPORT
+// ===============================
 
 export default API;

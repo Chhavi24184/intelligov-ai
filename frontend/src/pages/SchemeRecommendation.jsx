@@ -1,4 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  FaSearch,
+  FaTimes,
+  FaBookmark,
+  FaRegBookmark,
+  FaFileAlt,
+  FaArrowRight,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaFilter,
+  FaExternalLinkAlt,
+} from "react-icons/fa";
+
 import {
   schemesAPI,
   searchSchemesAPI,
@@ -7,25 +20,15 @@ import {
 function SchemeRecommendation() {
   const [schemes, setSchemes] = useState([]);
   const [search, setSearch] = useState("");
-
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
-
   const [error, setError] = useState("");
-
-  // =========================================
-  // NORMALIZE API RESPONSE
-  // =========================================
+  const [bookmarkedIds, setBookmarkedIds] = useState([]);
+  const [selectedSchemeModal, setSelectedSchemeModal] = useState(null);
 
   const extractSchemes = (response) => {
-    // Backend may return:
-    // { schemes: [...] }
-    // { data: [...] }
-    // { data: { schemes: [...] } }
-
-    if (Array.isArray(response)) {
-      return response;
-    }
+    if (Array.isArray(response)) return response;
 
     if (Array.isArray(response?.schemes)) {
       return response.schemes;
@@ -39,16 +42,16 @@ function SchemeRecommendation() {
       return response.data.schemes;
     }
 
+    if (Array.isArray(response?.recommended_schemes)) {
+      return response.recommended_schemes;
+    }
+
     if (Array.isArray(response?.data?.recommended_schemes)) {
       return response.data.recommended_schemes;
     }
 
     return [];
   };
-
-  // =========================================
-  // LOAD ALL SCHEMES
-  // =========================================
 
   const loadSchemes = async () => {
     try {
@@ -57,16 +60,16 @@ function SchemeRecommendation() {
 
       const response = await schemesAPI();
 
-      console.log("All Schemes API Response:", response);
+      console.log("Schemes API Response:", response);
 
       const schemeList = extractSchemes(response);
 
       setSchemes(schemeList);
-    } catch (error) {
-      console.error("Schemes API Error:", error);
+    } catch (err) {
+      console.error("Schemes API Error:", err);
 
       setError(
-        "Unable to load schemes. Please make sure the backend server is running."
+        "Unable to connect to server. Please make sure the backend is running."
       );
 
       setSchemes([]);
@@ -75,24 +78,15 @@ function SchemeRecommendation() {
     }
   };
 
-  // =========================================
-  // INITIAL LOAD
-  // =========================================
-
   useEffect(() => {
     loadSchemes();
   }, []);
-
-  // =========================================
-  // SEARCH SCHEMES
-  // =========================================
 
   const handleSearch = async (e) => {
     e.preventDefault();
 
     const query = search.trim();
 
-    // Empty search → load all schemes
     if (!query) {
       await loadSchemes();
       return;
@@ -104,16 +98,16 @@ function SchemeRecommendation() {
 
       const response = await searchSchemesAPI(query);
 
-      console.log("Search Schemes API Response:", response);
+      console.log("Search API Response:", response);
 
-      const schemeList = extractSchemes(response);
+      const searchResults = extractSchemes(response);
 
-      setSchemes(schemeList);
-    } catch (error) {
-      console.error("Search API Error:", error);
+      setSchemes(searchResults);
+    } catch (err) {
+      console.error("Search API Error:", err);
 
       setError(
-        "Unable to search schemes. Please try again."
+        "Unable to search schemes. Please check if the backend is running."
       );
 
       setSchemes([]);
@@ -122,361 +116,455 @@ function SchemeRecommendation() {
     }
   };
 
-  // =========================================
-  // CLEAR SEARCH
-  // =========================================
-
   const handleClearSearch = async () => {
     setSearch("");
+    setSelectedCategory("All");
     await loadSchemes();
   };
 
-  // =========================================
-  // RENDER
-  // =========================================
+  const toggleBookmark = (id) => {
+    setBookmarkedIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id]
+    );
+  };
+
+  const categories = useMemo(() => {
+    const categorySet = new Set();
+
+    schemes.forEach((scheme) => {
+      const category = scheme.category || scheme.type;
+
+      if (category) {
+        categorySet.add(category);
+      }
+    });
+
+    return ["All", ...Array.from(categorySet)];
+  }, [schemes]);
+
+  const filteredSchemes = schemes.filter((scheme) => {
+    if (selectedCategory === "All") {
+      return true;
+    }
+
+    const category = (
+      scheme.category ||
+      scheme.type ||
+      ""
+    ).toLowerCase();
+
+    return category.includes(selectedCategory.toLowerCase());
+  });
+
+  const getSchemeName = (scheme) =>
+    scheme.name ||
+    scheme.title ||
+    scheme.scheme_name ||
+    "Government Welfare Scheme";
+
+  const getCategory = (scheme) =>
+    scheme.category ||
+    scheme.type ||
+    "Welfare Scheme";
+
+  const getDescription = (scheme) =>
+    scheme.description ||
+    scheme.details ||
+    "No description available for this scheme.";
+
+  const getEligibility = (scheme) =>
+    scheme.eligibility ||
+    scheme.eligibility_criteria ||
+    "Eligibility details available on the official scheme portal.";
+
+  const getDocuments = (scheme) => {
+    if (Array.isArray(scheme.documents_required)) {
+      return scheme.documents_required;
+    }
+
+    if (Array.isArray(scheme.documents)) {
+      return scheme.documents;
+    }
+
+    if (scheme.documents_required) {
+      return [scheme.documents_required];
+    }
+
+    if (scheme.documents) {
+      return [scheme.documents];
+    }
+
+    return [
+      "Aadhaar Card",
+      "Income Certificate",
+      "Residence Proof",
+      "Bank Details",
+    ];
+  };
 
   return (
-    <section className="relative min-h-screen bg-[#0a1628] overflow-hidden">
+    <div className="min-h-screen bg-[#060c17] text-white">
+      <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#060c17] via-[#091528] to-[#060c17]">
 
-      {/* ===============================
-          BACKGROUND GLOW
-      =============================== */}
+        <div className="absolute top-10 left-[-120px] w-[420px] h-[420px] rounded-full bg-blue-600/15 blur-[150px] pointer-events-none" />
 
-      <div className="absolute top-20 left-10 w-[400px] h-[400px] bg-blue-600/20 blur-[160px] rounded-full"></div>
+        <div className="absolute top-[420px] right-[-120px] w-[420px] h-[420px] rounded-full bg-cyan-500/10 blur-[150px] pointer-events-none" />
 
-      <div className="absolute bottom-0 right-10 w-[350px] h-[350px] bg-purple-600/20 blur-[150px] rounded-full"></div>
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[250px] rounded-full bg-blue-600/10 blur-[150px] pointer-events-none" />
 
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
 
-      {/* ===============================
-          MAIN CONTENT
-      =============================== */}
-
-      <div className="relative max-w-6xl mx-auto px-6 py-8">
-
-        {/* ===============================
-            HEADING
-        =============================== */}
-
-        <div className="text-center mb-6">
-
-          <div className="text-4xl md:text-5xl font-black bg-gradient-to-r from-cyan-300 via-white to-yellow-400 bg-clip-text text-transparent">
-
-            Government Schemes
-
-          </div>
-
-          <p className="text-gray-300 mt-3">
-
-            Explore government schemes and discover
-            benefits available for you.
-
-          </p>
-
-        </div>
-
-
-        {/* ===============================
-            SEARCH BAR
-        =============================== */}
-
-        <form
-          onSubmit={handleSearch}
-          className="max-w-2xl mx-auto mb-8"
-        >
-
-          <div className="flex items-center bg-[#101d34] border border-blue-900/50 rounded-2xl p-2 focus-within:border-cyan-400 transition">
-
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search schemes... e.g. farmer"
-              className="flex-1 bg-transparent outline-none text-white placeholder-gray-500 px-4 py-2"
-            />
-
-            {/* Clear button */}
-
-            {search && !searching && (
-              <button
-                type="button"
-                onClick={handleClearSearch}
-                className="px-3 py-2 text-gray-400 hover:text-white transition"
-                title="Clear search"
-              >
-                ✕
-              </button>
-            )}
-
-            <button
-              type="submit"
-              disabled={searching}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-
-              {searching
-                ? "Searching..."
-                : "Search"}
-
-            </button>
-
-          </div>
-
-        </form>
-
-
-        {/* ===============================
-            LOADING
-        =============================== */}
-
-        {loading && (
-
-          <div className="text-center py-16">
-
-            <div className="inline-flex items-center gap-3 text-cyan-300">
-
-              <div className="w-5 h-5 border-2 border-cyan-300 border-t-transparent rounded-full animate-spin"></div>
-
-              <span>
-                Loading schemes...
-              </span>
-
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider mb-5">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              Smart Scheme Discovery
             </div>
 
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight">
+              Discover Government{" "}
+              <span className="bg-gradient-to-r from-cyan-300 via-white to-blue-400 bg-clip-text text-transparent">
+                Schemes
+              </span>
+            </h1>
+
+            <p className="text-slate-400 text-sm sm:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
+              Find welfare schemes, scholarships, healthcare benefits,
+              agricultural support and career opportunities that match
+              your needs.
+            </p>
           </div>
 
-        )}
+          <form
+            onSubmit={handleSearch}
+            className="max-w-4xl mx-auto mb-8"
+          >
+            <div className="flex items-center gap-2 bg-[#081224]/90 backdrop-blur-xl border border-blue-900/60 rounded-2xl p-2 shadow-xl shadow-blue-950/20 focus-within:border-cyan-400/50 transition-all">
 
+              <FaSearch className="text-slate-400 ml-4 shrink-0" />
 
-        {/* ===============================
-            ERROR
-        =============================== */}
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search schemes... e.g. farmer, student, health"
+                className="flex-1 min-w-0 bg-transparent text-sm text-white placeholder-slate-500 outline-none py-3 px-1"
+              />
 
-        {!loading && error && (
+              {search && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="p-2 text-slate-400 hover:text-white transition"
+                  title="Clear search"
+                >
+                  <FaTimes />
+                </button>
+              )}
 
-          <div className="max-w-xl mx-auto text-center py-12">
+              <button
+                type="submit"
+                disabled={searching}
+                className="px-5 sm:px-7 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold shadow-lg shadow-blue-600/20 hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {searching ? "Searching..." : "Search"}
+              </button>
+            </div>
+          </form>
 
-            <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
-
-              <div className="text-red-400 text-lg font-semibold mb-2">
-
-                Something went wrong
-
+          {!loading && !error && schemes.length > 0 && (
+            <div className="max-w-6xl mx-auto mb-8">
+              <div className="flex items-center gap-2 mb-3 text-xs text-slate-400">
+                <FaFilter className="text-cyan-400" />
+                <span className="font-semibold">
+                  Filter by category
+                </span>
               </div>
 
-              <p className="text-gray-400 text-sm mb-5">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
+                      selectedCategory === category
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-600 border-cyan-400/40 text-white shadow-lg shadow-blue-600/20"
+                        : "bg-[#081224] border-blue-900/50 text-slate-400 hover:text-white hover:border-cyan-400/40"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
+          {loading && (
+            <div className="max-w-xl mx-auto py-16 text-center">
+              <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center">
+                <FaSearch className="text-cyan-400 text-xl animate-pulse" />
+              </div>
+
+              <h3 className="text-white font-semibold mb-1">
+                Loading schemes...
+              </h3>
+
+              <p className="text-xs text-slate-500">
+                Fetching government scheme records
+              </p>
+            </div>
+          )}
+
+          {!loading && error && (
+            <div className="max-w-xl mx-auto glass-card p-8 rounded-3xl border border-red-500/30 text-center">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-red-500/10 flex items-center justify-center">
+                <FaExclamationTriangle className="text-red-400 text-xl" />
+              </div>
+
+              <h3 className="text-lg font-bold text-white mb-2">
+                Unable to Load Schemes
+              </h3>
+
+              <p className="text-sm text-slate-400 mb-5">
                 {error}
-
               </p>
 
               <button
                 onClick={loadSchemes}
-                className="px-5 py-2.5 rounded-xl bg-red-500/20 border border-red-400/30 text-red-300 hover:bg-red-500/30 transition"
+                className="px-5 py-2.5 rounded-xl bg-red-500/15 border border-red-400/30 text-red-300 text-xs font-semibold hover:bg-red-500/25 transition"
               >
-
                 Retry
-
               </button>
-
             </div>
-
-          </div>
-
-        )}
-
-
-        {/* ===============================
-            RESULT COUNT
-        =============================== */}
-
-        {!loading && !error && schemes.length > 0 && (
-
-          <div className="flex justify-between items-center mb-5">
-
-            <p className="text-gray-400 text-sm">
-
-              {search.trim()
-                ? `Search results for "${search.trim()}"`
-                : "Available government schemes"}
-
-            </p>
-
-            <span className="text-cyan-300 text-sm font-semibold">
-
-              {schemes.length} scheme
-              {schemes.length !== 1 ? "s" : ""}
-
-            </span>
-
-          </div>
-
-        )}
-
-
-        {/* ===============================
-            SCHEME CARDS
-        =============================== */}
-
-        {!loading && !error && schemes.length > 0 && (
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-            {schemes.map((scheme, index) => (
-
-              <div
-                key={scheme.id || scheme.scheme_id || index}
-                className="bg-[#101d34] border border-blue-900/40 rounded-2xl p-5 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(59,130,246,0.3)] hover:-translate-y-1 transition-all duration-300"
-              >
-
-                {/* Scheme Name */}
-
-                <div className="text-xl font-bold text-cyan-300">
-
-                  {scheme.name ||
-                    scheme.title ||
-                    scheme.scheme_name ||
-                    "Government Scheme"}
-
-                </div>
-
-
-                {/* Category */}
-
-                <div className="inline-block mt-3 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs">
-
-                  {scheme.category ||
-                    scheme.type ||
-                    "Government Scheme"}
-
-                </div>
-
-
-                {/* Description */}
-
-                <div className="mt-4">
-
-                  <div className="text-gray-300 text-sm font-semibold">
-
-                    Description
-
-                  </div>
-
-                  <p className="text-gray-400 text-sm mt-1 leading-6">
-
-                    {scheme.description ||
-                      scheme.details ||
-                      "No description available."}
-
-                  </p>
-
-                </div>
-
-
-                {/* Eligibility */}
-
-                <div className="mt-4">
-
-                  <div className="text-gray-300 text-sm font-semibold">
-
-                    Eligibility
-
-                  </div>
-
-                  <p className="text-gray-400 text-sm mt-1 leading-6">
-
-                    {scheme.eligibility ||
-                      scheme.eligibility_criteria ||
-                      "Eligibility details not available."}
-
-                  </p>
-
-                </div>
-
-
-                {/* Documents Required */}
-
-                <div className="mt-4">
-
-                  <div className="text-gray-300 text-sm font-semibold">
-
-                    Documents Required
-
-                  </div>
-
-                  <p className="text-gray-400 text-sm mt-1 leading-6">
-
-                    {Array.isArray(
-                      scheme.documents_required
-                    )
-                      ? scheme.documents_required.join(", ")
-                      : Array.isArray(
-                          scheme.documents
-                        )
-                      ? scheme.documents.join(", ")
-                      : scheme.documents_required ||
-                        scheme.documents ||
-                        "Information not available."}
-
-                  </p>
-
-                </div>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        )}
-
-
-        {/* ===============================
-            NO RESULTS
-        =============================== */}
-
-        {!loading &&
-          !error &&
-          schemes.length === 0 && (
-
-            <div className="max-w-xl mx-auto text-center py-16">
-
-              <div className="bg-[#101d34] border border-blue-900/40 rounded-2xl p-8">
-
-                <div className="text-4xl mb-4">
-                  🔍
-                </div>
-
-                <div className="text-gray-200 text-lg font-semibold">
-
-                  No matching schemes found
-
-                </div>
-
-                <p className="text-gray-500 text-sm mt-2">
-
-                  Try searching with another keyword such as
-                  farmer, student, women, education, or health.
-
-                </p>
-
-                {search && (
-                  <button
-                    onClick={handleClearSearch}
-                    className="mt-5 px-5 py-2.5 rounded-xl bg-blue-600/20 border border-blue-400/30 text-blue-300 hover:bg-blue-600/30 transition"
-                  >
-                    View All Schemes
-                  </button>
-                )}
-
-              </div>
-
-            </div>
-
           )}
 
-      </div>
+          {!loading && !error && filteredSchemes.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-5 px-1">
+                <div className="text-xs sm:text-sm text-slate-400">
+                  Showing{" "}
+                  <span className="text-white font-semibold">
+                    {filteredSchemes.length}
+                  </span>{" "}
+                  scheme
+                  {filteredSchemes.length !== 1 ? "s" : ""}
+                </div>
 
-    </section>
+                {bookmarkedIds.length > 0 && (
+                  <div className="flex items-center gap-1.5 text-xs text-amber-400">
+                    <FaBookmark />
+                    {bookmarkedIds.length} saved
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredSchemes.map((scheme, idx) => {
+                  const schemeId =
+                    scheme.id ||
+                    scheme.scheme_id ||
+                    `${getSchemeName(scheme)}-${idx}`;
+
+                  const isSaved =
+                    bookmarkedIds.includes(schemeId);
+
+                  return (
+                    <div
+                      key={schemeId}
+                      className="group relative flex flex-col bg-[#081224]/80 backdrop-blur-xl border border-blue-900/40 rounded-3xl p-6 hover:border-cyan-400/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-950/30 transition-all duration-300"
+                    >
+                      <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent opacity-0 group-hover:opacity-100 transition" />
+
+                      <div className="flex items-start justify-between gap-3 mb-5">
+                        <span className="px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/25 text-cyan-300 text-[11px] font-semibold">
+                          {getCategory(scheme)}
+                        </span>
+
+                        <button
+                          onClick={() => toggleBookmark(schemeId)}
+                          className="w-9 h-9 rounded-xl bg-[#0b1528] border border-blue-900/40 flex items-center justify-center text-slate-400 hover:text-amber-400 hover:border-amber-400/30 transition"
+                          title={
+                            isSaved
+                              ? "Remove bookmark"
+                              : "Save scheme"
+                          }
+                        >
+                          {isSaved ? (
+                            <FaBookmark className="text-amber-400" />
+                          ) : (
+                            <FaRegBookmark />
+                          )}
+                        </button>
+                      </div>
+
+                      <div className="w-11 h-11 rounded-xl bg-blue-600/15 border border-blue-500/20 flex items-center justify-center mb-4">
+                        <FaFileAlt className="text-cyan-400" />
+                      </div>
+
+                      <h3 className="text-lg font-bold text-white leading-snug mb-3 group-hover:text-cyan-300 transition-colors">
+                        {getSchemeName(scheme)}
+                      </h3>
+
+                      <p className="text-sm text-slate-400 leading-relaxed line-clamp-3 flex-1">
+                        {getDescription(scheme)}
+                      </p>
+
+                      <div className="mt-6 pt-4 border-t border-blue-900/40 flex items-center justify-between">
+                        <button
+                          onClick={() =>
+                            setSelectedSchemeModal(scheme)
+                          }
+                          className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-2 transition"
+                        >
+                          View Details
+                          <FaArrowRight className="text-[10px]" />
+                        </button>
+
+                        <span className="text-[10px] text-slate-600">
+                          #{String(idx + 1).padStart(2, "0")}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {!loading &&
+            !error &&
+            filteredSchemes.length === 0 && (
+              <div className="max-w-md mx-auto py-16 text-center">
+                <div className="text-5xl mb-5">🔍</div>
+
+                <h3 className="text-xl font-bold text-white mb-2">
+                  No Schemes Found
+                </h3>
+
+                <p className="text-sm text-slate-400 leading-relaxed mb-5">
+                  No matching government schemes were found
+                  {search
+                    ? ` for "${search}"`
+                    : selectedCategory !== "All"
+                    ? ` in ${selectedCategory}`
+                    : ""}.
+                </p>
+
+                <button
+                  onClick={handleClearSearch}
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-500 transition"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            )}
+        </div>
+      </section>
+
+      {selectedSchemeModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setSelectedSchemeModal(null)}
+        >
+          <div
+            className="w-full max-w-2xl max-h-[88vh] overflow-y-auto bg-[#081224] border border-cyan-400/30 rounded-3xl shadow-2xl shadow-black/50"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 z-10 bg-[#081224]/95 backdrop-blur-xl p-6 border-b border-blue-900/40">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="inline-block px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold">
+                    {getCategory(selectedSchemeModal)}
+                  </span>
+
+                  <h2 className="text-2xl sm:text-3xl font-black text-white mt-3">
+                    {getSchemeName(selectedSchemeModal)}
+                  </h2>
+                </div>
+
+                <button
+                  onClick={() =>
+                    setSelectedSchemeModal(null)
+                  }
+                  className="w-10 h-10 rounded-xl bg-[#0b1528] border border-blue-900/40 text-slate-400 hover:text-white flex items-center justify-center shrink-0"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-7">
+              <div>
+                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
+                  Overview & Benefits
+                </h4>
+
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  {getDescription(selectedSchemeModal)}
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
+                  Eligibility Criteria
+                </h4>
+
+                <div className="p-4 rounded-2xl bg-[#0b1528] border border-blue-900/40">
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    {getEligibility(selectedSchemeModal)}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
+                  Documents Required
+                </h4>
+
+                <div className="space-y-2">
+                  {getDocuments(selectedSchemeModal).map(
+                    (document, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-[#0b1528] border border-blue-900/40"
+                      >
+                        <FaCheckCircle className="text-emerald-400 shrink-0" />
+
+                        <span className="text-sm text-slate-300">
+                          {document}
+                        </span>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-5 border-t border-blue-900/40 flex flex-col sm:flex-row justify-end gap-3">
+                <button
+                  onClick={() =>
+                    setSelectedSchemeModal(null)
+                  }
+                  className="px-5 py-3 rounded-xl bg-[#0b1528] border border-blue-900/40 text-slate-300 text-sm font-semibold hover:text-white transition"
+                >
+                  Close
+                </button>
+
+                <a
+                  href="https://myScheme.gov.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 hover:scale-[1.02] transition"
+                >
+                  Proceed to Apply
+                  <FaExternalLinkAlt className="text-xs" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

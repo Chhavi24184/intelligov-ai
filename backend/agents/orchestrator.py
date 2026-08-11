@@ -26,18 +26,37 @@ class OrchestratorAgent:
     ) -> dict:
 
         # --------------------------------
-        # Step 1: Detect Intent
+        # Step 1: Validate Query
+        # --------------------------------
+
+        if not query or not query.strip():
+
+            return {
+                "success": False,
+                "query": query,
+                "intent": {
+                    "agent": "IntentDetectionAgent",
+                    "intent": "unknown",
+                    "confidence": 0.0
+                },
+                "agent_result": {
+                    "agent": "OrchestratorAgent",
+                    "success": False,
+                    "message": "Please provide a valid query."
+                }
+            }
+
+        # --------------------------------
+        # Step 2: Detect Intent
         # --------------------------------
 
         intent_result = self.intent_agent.run(query)
 
-        intent = intent_result["intent"]
+        intent = intent_result.get("intent", "general")
 
         # --------------------------------
-        # Step 2: Route to Agent
+        # Step 3: Route to Specialized Agent
         # --------------------------------
-
-        agent_result = {}
 
         if intent == "scheme":
 
@@ -73,17 +92,23 @@ class OrchestratorAgent:
 
         else:
 
+            # --------------------------------
+            # Unknown / General Query Fallback
+            # --------------------------------
+
             agent_result = {
                 "agent": "OrchestratorAgent",
                 "success": True,
                 "message": (
-                    "I can help you with government schemes, "
-                    "eligibility, documents, jobs and career opportunities."
+                    "I couldn't find relevant information in the "
+                    "available government data. Please ask about "
+                    "government schemes, eligibility, documents, "
+                    "employment, jobs, or career opportunities."
                 )
             }
 
         # --------------------------------
-        # Step 3: Final Response
+        # Step 4: Final Response
         # --------------------------------
 
         return {

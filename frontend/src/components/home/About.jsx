@@ -1,37 +1,229 @@
+import {
+  FaSearch,
+  FaFileAlt,
+  FaCheckCircle,
+  FaRobot,
+  FaUserCheck,
+} from "react-icons/fa";
+
+
 function About() {
+
+  const steps = [
+    {
+      num: "01",
+      icon: <FaUserCheck className="text-cyan-400 text-xl" />,
+      title: "Tell Us About Yourself",
+      desc: "Share your basic details, needs, and preferences so IntelliGov AI can understand your requirements.",
+    },
+
+    {
+      num: "02",
+      icon: <FaSearch className="text-blue-400 text-xl" />,
+      title: "AI Semantic Search",
+      desc: "IntelliGov AI searches and analyzes government scheme information to match your eligibility criteria.",
+    },
+
+    {
+      num: "03",
+      icon: <FaFileAlt className="text-amber-400 text-xl" />,
+      title: "Get Tailored Results",
+      desc: "Receive customized scheme recommendations with complete document checklists and eligibility details.",
+    },
+
+    {
+      num: "04",
+      icon: <FaCheckCircle className="text-emerald-400 text-xl" />,
+      title: "Apply Seamlessly",
+      desc: "Follow direct application links and step-by-step guidance to claim the benefits you are eligible for.",
+    },
+  ];
+
 
   return (
 
-    <section 
-      id="about"
-      className="bg-[#0a1628] text-white py-20 px-12"
-    >
+    <section className="relative bg-[#0a1628] text-white py-16 lg:py-20 overflow-hidden">
 
-      <div className="max-w-5xl mx-auto text-center px-10">
+      {/* =========================
+          BACKGROUND LIGHTS
+      ========================= */}
 
-        <h2 className="text-4xl text-white font-bold">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
 
-          About IntelliGov AI
+        <div className="absolute top-20 left-0 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl" />
 
-        </h2>
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" />
 
-        <p className="text-gray-300 text-xl mt-8 leading-9">
+        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl" />
 
-          IntelliGov AI is an intelligent government assistant
-          that recommends schemes and scholarships using
-          Artificial Intelligence.
+      </div>
 
-          It simplifies access to government services
-          through a fast, personalized, and user-friendly platform.
 
-        </p>
+      {/* =========================
+          MAIN CONTAINER
+      ========================= */}
+
+      <div className="relative max-w-7xl mx-auto px-6">
+
+
+        {/* =====================================================
+            ABOUT CARD
+        ===================================================== */}
+
+        <div className="glass-panel p-8 sm:p-12 rounded-3xl border border-blue-900/50 relative overflow-hidden mb-16">
+
+          {/* Card Glow */}
+
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+
+          <div className="grid lg:grid-cols-12 gap-8 items-center">
+
+
+            {/* About Content */}
+
+            <div className="lg:col-span-8 space-y-5 relative z-10">
+
+              {/* Badge */}
+
+              <span className="inline-block px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-semibold uppercase tracking-wider">
+
+                About IntelliGov AI Platform
+
+              </span>
+
+
+              {/* Main Heading */}
+
+              <div className="text-3xl sm:text-4xl font-black text-white leading-tight">
+
+                Bridging the Gap Between <br />
+
+                <span className="bg-gradient-to-r from-cyan-400 via-white to-amber-400 bg-clip-text text-transparent">
+
+                  Citizens & Welfare Services
+
+                </span>
+
+              </div>
+
+
+              {/* Description */}
+
+              <p className="text-slate-300 text-base leading-relaxed">
+
+                Millions of eligible citizens miss out on government schemes
+                every year due to complex portals and lack of awareness.
+                IntelliGov AI acts as an intelligent digital bridge—parsing
+                complex government mandates into clear, personalized answers.
+
+              </p>
+
+            </div>
+
+
+            {/* AI Icon Side */}
+
+            <div className="lg:col-span-4 flex justify-center lg:justify-end relative z-10">
+
+              <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-br from-blue-600/20 to-cyan-500/10 border border-cyan-400/20 flex items-center justify-center shadow-2xl shadow-cyan-500/10">
+
+                <FaRobot className="text-6xl sm:text-7xl text-cyan-400" />
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* =====================================================
+            HOW IT WORKS HEADER
+        ===================================================== */}
+
+        <div className="text-center mb-12">
+
+          {/* Using div instead of h3 */}
+
+          <div className="text-2xl sm:text-3xl font-bold text-white">
+
+            How IntelliGov AI Works
+
+          </div>
+
+
+          <p className="text-slate-400 text-sm mt-2">
+
+            Four simple steps from discovery to benefit delivery
+
+          </p>
+
+        </div>
+
+
+        {/* =====================================================
+            STEP CARDS
+        ===================================================== */}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          {steps.map((step, idx) => (
+
+            <div
+              key={idx}
+              className="glass-card p-6 rounded-2xl relative border border-blue-900/30 hover:border-cyan-400/40 hover:-translate-y-1 transition-all duration-300 group"
+            >
+
+              {/* Step Number */}
+
+              <div className="text-4xl font-black text-blue-900/40 absolute top-4 right-4 group-hover:text-cyan-900/40 transition-colors">
+
+                {step.num}
+
+              </div>
+
+
+              {/* Icon */}
+
+              <div className="w-12 h-12 rounded-xl bg-[#0d1b32] border border-blue-900/40 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-300">
+
+                {step.icon}
+
+              </div>
+
+
+              {/* Title */}
+
+              <div className="text-lg font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors">
+
+                {step.title}
+
+              </div>
+
+
+              {/* Description */}
+
+              <p className="text-slate-400 text-xs leading-relaxed">
+
+                {step.desc}
+
+              </p>
+
+            </div>
+
+          ))}
+
+        </div>
+
 
       </div>
 
     </section>
 
   );
-
 }
+
 
 export default About;

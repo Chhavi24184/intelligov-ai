@@ -12,7 +12,6 @@ import {
 
 import robot from "../../assets/robot.png";
 
-
 function Hero() {
   const quickPrompts = [
     "PM Kisan Samman Nidhi",
@@ -38,7 +37,6 @@ function Hero() {
 
       </div>
 
-
       {/* =========================
           MAIN CONTAINER
       ========================= */}
@@ -46,7 +44,6 @@ function Hero() {
       <div className="relative max-w-7xl mx-auto px-6 py-12 lg:py-16">
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-
 
           {/* =====================================================
               LEFT HERO CONTENT
@@ -68,7 +65,6 @@ function Hero() {
 
             </div>
 
-
             {/* MAIN HEADLINE */}
 
             <div className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15]">
@@ -83,7 +79,6 @@ function Hero() {
 
             </div>
 
-
             {/* DESCRIPTION */}
 
             <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">
@@ -93,7 +88,6 @@ function Hero() {
               AI-powered citizen assistant.
 
             </p>
-
 
             {/* BUTTONS */}
 
@@ -110,7 +104,6 @@ function Hero() {
 
               </Link>
 
-
               <Link
                 to="/eligibility"
                 className="px-8 py-4 rounded-xl bg-[#0d1b32] border border-blue-800/60 text-slate-200 font-semibold hover:border-cyan-400 hover:text-white hover:bg-blue-900/30 transition-all duration-300 flex items-center gap-2 text-base"
@@ -123,7 +116,6 @@ function Hero() {
               </Link>
 
             </div>
-
 
             {/* POPULAR QUERIES */}
 
@@ -157,29 +149,23 @@ function Hero() {
 
           </div>
 
-
           {/* =====================================================
               RIGHT ROBOT SECTION
           ===================================================== */}
 
           <div className="lg:col-span-5 flex justify-center">
 
-            {/* This container controls ONLY the robot + badges */}
-
             <div className="relative w-[380px] max-w-full">
-
 
               {/* Robot Glow */}
 
               <div className="absolute inset-10 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
 
               {/* =================================================
                   ROBOT + FLOATING BADGES AREA
               ================================================= */}
 
               <div className="relative h-[330px] flex items-center justify-center">
-
 
                 {/* ROBOT */}
 
@@ -188,7 +174,6 @@ function Hero() {
                   alt="IntelliGov AI Assistant"
                   className="relative z-10 w-48 sm:w-56 lg:w-60 animate-float drop-shadow-[0_0_35px_rgba(34,211,238,0.5)]"
                 />
-
 
                 {/* =================================================
                     VERIFIED SCHEMES BADGE
@@ -215,7 +200,6 @@ function Hero() {
                   </div>
 
                 </div>
-
 
                 {/* =================================================
                     ACCURACY BADGE
@@ -245,10 +229,8 @@ function Hero() {
 
               </div>
 
-
               {/* =================================================
                   AI AGENT INFORMATION
-                  NOW COMPLETELY SEPARATE FROM BADGES
               ================================================= */}
 
               <div className="relative z-10 mt-2 pt-5 border-t border-blue-900/40 text-center">
@@ -260,7 +242,6 @@ function Hero() {
                   <span>IntelliGov AI Agent v2.0</span>
 
                 </div>
-
 
                 <p className="text-xs text-slate-400 mt-2 px-4">
 
@@ -281,6 +262,5 @@ function Hero() {
     </section>
   );
 }
-
 
 export default Hero;

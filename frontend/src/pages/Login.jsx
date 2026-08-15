@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../services/api";
 
 function Login() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     // Check empty fields
@@ -16,26 +18,66 @@ function Login() {
       return;
     }
 
-    // Get registered user details
-    const registeredEmail = localStorage.getItem("userEmail");
-    const registeredPassword = localStorage.getItem("userPassword");
+    try {
+      setLoading(true);
 
-    // Check credentials
-    if (
-      email.trim() !== registeredEmail ||
-      password !== registeredPassword
-    ) {
-      alert("Invalid email or password");
-      return;
+      // Call FastAPI backend
+      const data = await loginUser(
+        email.trim(),
+        password
+      );
+
+      console.log("Login response:", data);
+
+      /*
+        Backend se user information save kar rahe hain
+      */
+
+      // User ID
+      if (data.user_id) {
+        localStorage.setItem(
+          "userId",
+          String(data.user_id)
+        );
+      }
+
+      // User name
+      if (data.name) {
+        localStorage.setItem(
+          "userName",
+          data.name
+        );
+      }
+
+      // User email
+      if (data.email) {
+        localStorage.setItem(
+          "userEmail",
+          data.email
+        );
+      }
+
+      // Login status
+      localStorage.setItem(
+        "isLoggedIn",
+        "true"
+      );
+
+      alert("Login successful!");
+
+      // Go to Dashboard
+      navigate("/dashboard");
+
+    } catch (error) {
+      console.error("Login error:", error);
+
+      alert(
+        error.message || "Invalid email or password"
+      );
+
+    } finally {
+      setLoading(false);
     }
-
-    // Login successful
-    localStorage.setItem("isLoggedIn", "true");
-
-    alert("Login successful!");
-
-    // Go to Dashboard
-    navigate("/dashboard");
   };
 
   return (
@@ -69,7 +111,10 @@ function Login() {
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form
+            onSubmit={handleLogin}
+            className="space-y-5"
+          >
 
             {/* Email */}
             <div>
@@ -82,7 +127,9 @@ function Login() {
                 type="email"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
                 className="w-full px-4 py-3 rounded-xl bg-[#060c17] border border-blue-900/50 text-white placeholder-slate-500 outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-500/10 transition-all"
               />
 
@@ -99,7 +146,9 @@ function Login() {
                 type="password"
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
                 className="w-full px-4 py-3 rounded-xl bg-[#060c17] border border-blue-900/50 text-white placeholder-slate-500 outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-500/10 transition-all"
               />
 
@@ -108,9 +157,10 @@ function Login() {
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold shadow-lg shadow-cyan-500/20 hover:scale-[1.02] hover:shadow-cyan-500/30 transition-all duration-300"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold shadow-lg shadow-cyan-500/20 hover:scale-[1.02] hover:shadow-cyan-500/30 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
 
           </form>

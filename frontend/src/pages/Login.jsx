@@ -29,31 +29,28 @@ function Login() {
 
       console.log("Login response:", data);
 
-      /*
-        Backend se user information save kar rahe hain
-      */
+      // =========================================
+      // SAVE USER INFORMATION
+      // Backend response:
+      // data.user.id
+      // data.user.name
+      // data.user.email
+      // =========================================
 
-      // User ID
-      if (data.user_id) {
+      if (data.user) {
         localStorage.setItem(
           "userId",
-          String(data.user_id)
+          String(data.user.id)
         );
-      }
 
-      // User name
-      if (data.name) {
         localStorage.setItem(
           "userName",
-          data.name
+          data.user.name
         );
-      }
 
-      // User email
-      if (data.email) {
         localStorage.setItem(
           "userEmail",
-          data.email
+          data.user.email
         );
       }
 

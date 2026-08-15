@@ -8,6 +8,10 @@ import {
   FaCheck,
   FaPaperPlane,
   FaShieldAlt,
+  FaSearch,
+  FaGraduationCap,
+  FaTractor,
+  FaBriefcase,
 } from "react-icons/fa";
 
 import { MdOutlineAccountBalance } from "react-icons/md";
@@ -17,27 +21,28 @@ import { HiBriefcase } from "react-icons/hi";
 import { chatAPI } from "../services/api";
 import robot from "../assets/robot.png";
 
+
 function AIChat() {
+
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([]);
   const [copiedIndex, setCopiedIndex] = useState(null);
-
-  // Shows ↓ button when user is away from latest message
   const [showChatBottomButton, setShowChatBottomButton] = useState(false);
 
   const chatContainerRef = useRef(null);
+
 
   // =====================================================
   // SEND MESSAGE
   // =====================================================
 
   const handleSend = async () => {
+
     if (!message.trim() || loading) return;
 
     const userMessage = message.trim();
 
-    // Add user's message immediately
     setMessages((prev) => [
       ...prev,
       {
@@ -54,54 +59,18 @@ function AIChat() {
     setLoading(true);
 
     try {
+
       console.log("Sending message:", userMessage);
 
-      // Call backend
       const response = await chatAPI(userMessage);
 
       console.log("FULL CHAT API RESPONSE:", response);
-
-      // =================================================
-      // HANDLE DIFFERENT POSSIBLE BACKEND RESPONSE TYPES
-      // =================================================
-
-      /*
-        Possible backend responses:
-
-        {
-          "success": true,
-          "reply": "I recommend PM Kisan."
-        }
-
-        OR
-
-        {
-          "success": true,
-          "response": "I recommend PM Kisan."
-        }
-
-        OR
-
-        {
-          "data": {
-            "reply": "I recommend PM Kisan."
-          }
-        }
-
-        OR
-
-        {
-          "result": {
-            "answer": "I recommend PM Kisan."
-          }
-      */
 
       const chatData =
         response?.data ||
         response?.result ||
         response;
 
-      // Extract actual AI response
       const reply =
         chatData?.reply ||
         chatData?.response ||
@@ -113,7 +82,6 @@ function AIChat() {
         response?.message ||
         "Sorry, I could not generate a response.";
 
-      // Extract recommended scheme
       const recommendedScheme =
         chatData?.recommended_scheme ||
         chatData?.recommendedScheme ||
@@ -124,7 +92,6 @@ function AIChat() {
       console.log("AI Reply:", reply);
       console.log("Recommended Scheme:", recommendedScheme);
 
-      // Add AI response
       setMessages((prev) => [
         ...prev,
         {
@@ -137,10 +104,11 @@ function AIChat() {
           }),
         },
       ]);
+
     } catch (error) {
+
       console.error("Chat API Error:", error);
 
-      // Display error inside chat
       setMessages((prev) => [
         ...prev,
         {
@@ -154,78 +122,93 @@ function AIChat() {
           }),
         },
       ]);
+
     } finally {
+
       setLoading(false);
+
     }
   };
+
 
   // =====================================================
   // ENTER KEY
   // =====================================================
 
   const handleKeyDown = (e) => {
+
     if (e.key === "Enter" && !e.shiftKey) {
+
       e.preventDefault();
       handleSend();
+
     }
+
   };
+
 
   // =====================================================
   // CHAT SCROLL DETECTION
   // =====================================================
 
   useEffect(() => {
+
     const container = chatContainerRef.current;
 
     if (!container) return;
 
     const handleScroll = () => {
+
       const distanceFromBottom =
         container.scrollHeight -
         container.scrollTop -
         container.clientHeight;
 
-      // Show button only when user has moved away
-      // from the latest message
       setShowChatBottomButton(distanceFromBottom > 120);
+
     };
 
     container.addEventListener("scroll", handleScroll);
 
-    // Check initial state
     handleScroll();
 
     return () => {
       container.removeEventListener("scroll", handleScroll);
     };
+
   }, []);
 
+
   // =====================================================
-  // AUTO SCROLL TO LATEST MESSAGE
+  // AUTO SCROLL
   // =====================================================
 
   useEffect(() => {
+
     const container = chatContainerRef.current;
 
     if (!container) return;
 
-    // Small timeout makes sure newly-rendered
-    // message content is already present
     setTimeout(() => {
+
       container.scrollTo({
         top: container.scrollHeight,
         behavior: "smooth",
       });
 
       setShowChatBottomButton(false);
+
     }, 50);
+
   }, [messages, loading]);
+
 
   // =====================================================
   // SCROLL TO BOTTOM
   // =====================================================
 
   const scrollToChatBottom = () => {
+
     const container = chatContainerRef.current;
 
     if (!container) return;
@@ -236,72 +219,129 @@ function AIChat() {
     });
 
     setShowChatBottomButton(false);
+
   };
+
 
   // =====================================================
   // SUGGESTION
   // =====================================================
 
   const useSuggestion = (question) => {
+
     setMessage(question);
+
   };
+
 
   // =====================================================
   // CLEAR CHAT
   // =====================================================
 
   const clearHistory = () => {
+
     setMessages([]);
     setCopiedIndex(null);
+
   };
+
 
   // =====================================================
   // COPY RESPONSE
   // =====================================================
 
   const copyToClipboard = async (text, index) => {
+
     try {
+
       await navigator.clipboard.writeText(text);
 
       setCopiedIndex(index);
 
       setTimeout(() => {
+
         setCopiedIndex(null);
+
       }, 2000);
+
     } catch (error) {
+
       console.error("Copy failed:", error);
+
     }
+
   };
 
+
+  // =====================================================
+  // SUGGESTED QUESTIONS
+  // =====================================================
+
+  const suggestions = [
+
+    {
+      icon: <FaTractor />,
+      title: "Farmer Schemes",
+      question:
+        "What agricultural schemes are available for farmers?",
+      color: "text-cyan-400",
+    },
+
+    {
+      icon: <PiStudentFill />,
+      title: "Scholarships",
+      question:
+        "Tell me about scholarships for college students.",
+      color: "text-blue-400",
+    },
+
+    {
+      icon: <FaShieldAlt />,
+      title: "Health Benefits",
+      question:
+        "How to check eligibility for health schemes?",
+      color: "text-emerald-400",
+    },
+
+    {
+      icon: <HiBriefcase />,
+      title: "Jobs & Internships",
+      question:
+        "Show government job vacancies and internships.",
+      color: "text-amber-400",
+    },
+
+  ];
+
+
   return (
+
     <div className="min-h-screen bg-[#060c17] text-white">
 
-      {/* =================================================
-          MAIN SECTION
-      ================================================= */}
+      <section className="relative max-w-6xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
 
-      <section className="relative max-w-6xl mx-auto px-4 sm:px-6 py-8">
 
         {/* =================================================
             CHAT HEADER
         ================================================= */}
 
-        <div className="glass-panel rounded-3xl border border-blue-900/40 p-5 sm:p-6 mb-5">
+        <div className="glass-panel rounded-2xl sm:rounded-3xl border border-blue-900/40 p-4 sm:p-6 mb-4 sm:mb-5">
 
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-3">
+
 
             {/* AI INFORMATION */}
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
 
               <div className="relative shrink-0">
 
-                <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-cyan-400/40 flex items-center justify-center">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-600/20 border border-cyan-400/40 flex items-center justify-center">
 
                   <img
                     src={robot}
-                    alt="AI Assistant"
-                    className="w-14 h-14 object-contain animate-float drop-shadow-[0_0_20px_rgba(34,211,238,0.6)]"
+                    alt="IntelliGov AI Assistant"
+                    className="w-11 h-11 sm:w-14 sm:h-14 object-contain animate-float drop-shadow-[0_0_20px_rgba(34,211,238,0.6)]"
                   />
 
                 </div>
@@ -310,42 +350,50 @@ function AIChat() {
 
               </div>
 
-              <div>
 
-                <div className="text-xl sm:text-2xl font-black text-white flex items-center gap-2 flex-wrap">
+              <div className="min-w-0">
+
+                <div className="text-base sm:text-2xl font-black text-white flex items-center gap-2 flex-wrap">
 
                   <span>
                     IntelliGov AI Assistant
                   </span>
 
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+                  <span className="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-400/30">
                     Online
                   </span>
 
                 </div>
 
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Real-time welfare scheme, scholarship & job recommendation
-                  agent
+                <p className="text-[11px] sm:text-xs text-slate-400 mt-1 truncate sm:whitespace-normal">
+
+                  Your AI assistant for government schemes, scholarships,
+                  healthcare & careers.
+
                 </p>
 
               </div>
 
             </div>
 
+
             {/* CLEAR CHAT */}
 
             {messages.length > 0 && (
+
               <button
                 onClick={clearHistory}
-                className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-semibold hover:bg-red-500/20 transition flex items-center gap-2"
+                className="shrink-0 px-3 sm:px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-semibold hover:bg-red-500/20 transition flex items-center gap-2"
               >
+
                 <FaTrashAlt />
 
                 <span className="hidden sm:inline">
                   Clear Chat
                 </span>
+
               </button>
+
             )}
 
           </div>
@@ -357,7 +405,8 @@ function AIChat() {
             CHAT BOX
         ================================================= */}
 
-        <div className="relative glass-panel rounded-3xl border border-blue-900/40 overflow-hidden">
+        <div className="relative glass-panel rounded-2xl sm:rounded-3xl border border-blue-900/40 overflow-hidden">
+
 
           {/* =================================================
               INTERNAL CHAT AREA
@@ -365,30 +414,168 @@ function AIChat() {
 
           <div
             ref={chatContainerRef}
-            className="h-[430px] overflow-y-auto p-4 sm:p-6 space-y-5 scroll-smooth"
+            className="h-[500px] sm:h-[540px] overflow-y-auto p-3 sm:p-6 space-y-5 scroll-smooth"
           >
 
-            {/* EMPTY STATE */}
+
+            {/* =================================================
+                EMPTY STATE
+            ================================================= */}
 
             {messages.length === 0 && !loading && (
-              <div className="h-full flex flex-col items-center justify-center text-center px-6">
 
-                <img
-                  src={robot}
-                  alt="IntelliGov AI"
-                  className="w-24 h-24 object-contain opacity-80 mb-4"
-                />
+              <div className="min-h-full flex flex-col items-center justify-center text-center px-4 py-8">
 
-                <div className="text-xl font-bold text-white mb-2">
-                  How can I help you today?
+
+                {/* ROBOT */}
+
+                <div className="relative mb-5">
+
+                  <div className="absolute inset-0 bg-cyan-500/10 rounded-full blur-3xl" />
+
+                  <img
+                    src={robot}
+                    alt="IntelliGov AI"
+                    className="relative w-24 h-24 sm:w-28 sm:h-28 object-contain opacity-90 animate-float drop-shadow-[0_0_25px_rgba(34,211,238,0.4)]"
+                  />
+
                 </div>
 
-                <p className="text-sm text-slate-400 max-w-md">
-                  Ask me about government schemes, scholarships, healthcare
-                  benefits, jobs, or eligibility.
+
+                {/* GREETING */}
+
+                <div className="text-2xl sm:text-3xl font-black text-white mb-2">
+
+                  👋 Namaste!
+
+                </div>
+
+                <div className="text-lg sm:text-xl font-bold text-cyan-300 mb-2">
+
+                  I'm IntelliGov AI.
+
+                </div>
+
+                <p className="text-sm text-slate-400 max-w-md mb-7">
+
+                  How can I help you today?
+
+                  <br />
+
+                  Ask me about schemes, scholarships, healthcare,
+                  documents, jobs or eligibility.
+
                 </p>
 
+
+                {/* QUICK QUESTIONS */}
+
+                <div className="w-full max-w-3xl">
+
+                  <div className="flex items-center justify-center gap-2 text-xs text-slate-400 uppercase tracking-wider font-semibold mb-3">
+
+                    <FaSearch className="text-cyan-400" />
+
+                    Try asking
+
+                  </div>
+
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                    <button
+                      onClick={() =>
+                        useSuggestion(
+                          "What schemes are available for farmers?"
+                        )
+                      }
+                      className="text-left p-3 sm:p-4 rounded-xl bg-[#0b1528] border border-blue-900/40 hover:border-cyan-400/60 hover:bg-cyan-500/5 transition-all group"
+                    >
+
+                      <div className="flex items-center gap-3">
+
+                        <FaTractor className="text-cyan-400 text-lg group-hover:scale-110 transition-transform" />
+
+                        <span className="text-xs sm:text-sm text-slate-200">
+                          What schemes are available for farmers?
+                        </span>
+
+                      </div>
+
+                    </button>
+
+
+                    <button
+                      onClick={() =>
+                        useSuggestion(
+                          "Am I eligible for any scholarship?"
+                        )
+                      }
+                      className="text-left p-3 sm:p-4 rounded-xl bg-[#0b1528] border border-blue-900/40 hover:border-blue-400/60 hover:bg-blue-500/5 transition-all group"
+                    >
+
+                      <div className="flex items-center gap-3">
+
+                        <FaGraduationCap className="text-blue-400 text-lg group-hover:scale-110 transition-transform" />
+
+                        <span className="text-xs sm:text-sm text-slate-200">
+                          Am I eligible for any scholarship?
+                        </span>
+
+                      </div>
+
+                    </button>
+
+
+                    <button
+                      onClick={() =>
+                        useSuggestion(
+                          "What documents do I need for government schemes?"
+                        )
+                      }
+                      className="text-left p-3 sm:p-4 rounded-xl bg-[#0b1528] border border-blue-900/40 hover:border-emerald-400/60 hover:bg-emerald-500/5 transition-all group"
+                    >
+
+                      <div className="flex items-center gap-3">
+
+                        <FaSearch className="text-emerald-400 text-lg group-hover:scale-110 transition-transform" />
+
+                        <span className="text-xs sm:text-sm text-slate-200">
+                          What documents do I need?
+                        </span>
+
+                      </div>
+
+                    </button>
+
+
+                    <button
+                      onClick={() =>
+                        useSuggestion(
+                          "Tell me about PM Kisan."
+                        )
+                      }
+                      className="text-left p-3 sm:p-4 rounded-xl bg-[#0b1528] border border-blue-900/40 hover:border-amber-400/60 hover:bg-amber-500/5 transition-all group"
+                    >
+
+                      <div className="flex items-center gap-3">
+
+                        <FaBriefcase className="text-amber-400 text-lg group-hover:scale-110 transition-transform" />
+
+                        <span className="text-xs sm:text-sm text-slate-200">
+                          Tell me about PM Kisan.
+                        </span>
+
+                      </div>
+
+                    </button>
+
+                  </div>
+
+                </div>
+
               </div>
+
             )}
 
 
@@ -408,7 +595,7 @@ function AIChat() {
 
                   <div className="flex justify-end">
 
-                    <div className="flex gap-3 max-w-2xl items-end">
+                    <div className="flex gap-2 sm:gap-3 max-w-[90%] sm:max-w-2xl items-end">
 
                       <div className="bg-indigo-600/30 border border-indigo-400/30 rounded-2xl rounded-br-md px-4 py-3">
 
@@ -416,14 +603,16 @@ function AIChat() {
                           {msg.text}
                         </div>
 
-                        <div className="text-[10px] text-slate-400 mt-1">
+                        <div className="text-[10px] text-slate-400 mt-1 text-right">
                           {msg.timestamp}
                         </div>
 
                       </div>
 
-                      <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
+
                         <FaUser />
+
                       </div>
 
                     </div>
@@ -436,18 +625,22 @@ function AIChat() {
                      AI MESSAGE
                   ================================================= */
 
-                  <div className="flex gap-3 sm:gap-4 max-w-2xl">
+                  <div className="flex gap-2 sm:gap-4 max-w-[95%] sm:max-w-2xl">
+
 
                     {/* AI ICON */}
 
-                    <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
+
                       <FaRobot />
+
                     </div>
 
 
-                    <div className="w-full">
+                    <div className="w-full min-w-0">
 
-                      {/* AI RESPONSE CARD */}
+
+                      {/* AI RESPONSE */}
 
                       <div
                         className={`p-4 rounded-2xl text-sm leading-relaxed relative group ${
@@ -462,9 +655,10 @@ function AIChat() {
                         </div>
 
 
-                        {/* COPY BUTTON */}
+                        {/* COPY */}
 
                         {!msg.error && (
+
                           <button
                             onClick={() =>
                               copyToClipboard(msg.text, idx)
@@ -474,22 +668,28 @@ function AIChat() {
                           >
 
                             {copiedIndex === idx ? (
+
                               <FaCheck className="text-emerald-400" />
+
                             ) : (
+
                               <FaCopy />
+
                             )}
 
                           </button>
+
                         )}
 
                       </div>
 
 
                       {/* =================================================
-                          RECOMMENDED SCHEME CARD
+                          RECOMMENDED SCHEME
                       ================================================= */}
 
                       {msg.scheme && (
+
                         <div className="mt-3 p-4 rounded-2xl bg-cyan-500/10 border border-cyan-400/30">
 
                           <div className="text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-1">
@@ -504,27 +704,37 @@ function AIChat() {
                           </div>
 
                           {msg.scheme.category && (
+
                             <div className="text-xs text-cyan-300 mt-1">
                               Category: {msg.scheme.category}
                             </div>
+
                           )}
 
                           {msg.scheme.description && (
+
                             <p className="text-xs text-slate-400 mt-2">
                               {msg.scheme.description}
                             </p>
+
                           )}
 
                           {msg.scheme.eligibility && (
+
                             <p className="text-xs text-slate-400 mt-2">
+
                               <span className="text-slate-300 font-semibold">
                                 Eligibility:
                               </span>{" "}
+
                               {msg.scheme.eligibility}
+
                             </p>
+
                           )}
 
                         </div>
+
                       )}
 
 
@@ -551,20 +761,35 @@ function AIChat() {
 
             {loading && (
 
-              <div className="flex gap-4">
+              <div className="flex gap-3 sm:gap-4">
 
-                <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
 
-                  <FaRobot className="animate-spin" />
+                  <FaRobot className="animate-pulse" />
 
                 </div>
 
-                <div className="glass-card p-4 rounded-2xl text-xs text-cyan-300 flex items-center gap-3">
 
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                <div className="glass-card px-4 py-3 rounded-2xl text-xs sm:text-sm text-cyan-300 flex items-center gap-3 border border-cyan-400/20">
+
+                  <span className="flex gap-1">
+
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce" />
+
+                    <span
+                      className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce"
+                      style={{ animationDelay: "150ms" }}
+                    />
+
+                    <span
+                      className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce"
+                      style={{ animationDelay: "300ms" }}
+                    />
+
+                  </span>
 
                   <span>
-                    IntelliGov AI is searching government schemes...
+                    🤖 IntelliGov AI is thinking...
                   </span>
 
                 </div>
@@ -577,8 +802,7 @@ function AIChat() {
 
 
           {/* =================================================
-              GO TO LATEST MESSAGE BUTTON
-              CENTERED INSIDE CHAT
+              GO TO LATEST MESSAGE
           ================================================= */}
 
           {showChatBottomButton && (
@@ -599,9 +823,9 @@ function AIChat() {
               MESSAGE INPUT
           ================================================= */}
 
-          <div className="border-t border-blue-900/40 p-4">
+          <div className="border-t border-blue-900/40 p-3 sm:p-4">
 
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
 
               <textarea
                 value={message}
@@ -610,13 +834,13 @@ function AIChat() {
                 placeholder="Ask IntelliGov AI about government schemes..."
                 rows={1}
                 disabled={loading}
-                className="flex-1 resize-none bg-[#0b1528] border border-blue-900/50 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400/50 disabled:opacity-50"
+                className="flex-1 min-w-0 resize-none bg-[#0b1528] border border-blue-900/50 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400/50 disabled:opacity-50"
               />
 
               <button
                 onClick={handleSend}
                 disabled={!message.trim() || loading}
-                className="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-cyan-500/20 transition"
+                className="px-4 sm:px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-cyan-500/20 transition shrink-0"
               >
 
                 <span className="hidden sm:inline">
@@ -629,6 +853,10 @@ function AIChat() {
 
             </div>
 
+            <p className="text-[10px] text-slate-600 mt-2 text-center">
+              IntelliGov AI provides guidance based on available scheme data.
+            </p>
+
           </div>
 
         </div>
@@ -638,101 +866,54 @@ function AIChat() {
             SUGGESTED QUESTIONS
         ================================================= */}
 
-        <div className="space-y-3 mt-6">
+        {messages.length > 0 && (
 
-          <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold block">
-            💡 Suggested Questions:
-          </span>
+          <div className="space-y-3 mt-6">
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold block">
 
-            {/* FARMER */}
+              💡 Suggested Questions
 
-            <button
-              onClick={() =>
-                useSuggestion(
-                  "What agricultural schemes are available for farmers?"
-                )
-              }
-              className="glass-card p-3 rounded-2xl text-left border border-blue-900/40 hover:border-cyan-400/60 transition group"
-            >
-
-              <MdOutlineAccountBalance className="text-cyan-400 text-xl mb-1 group-hover:scale-110 transition-transform" />
-
-              <div className="text-xs font-bold text-white">
-                Farmer Schemes
-              </div>
-
-            </button>
+            </span>
 
 
-            {/* SCHOLARSHIPS */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
-            <button
-              onClick={() =>
-                useSuggestion(
-                  "Tell me about scholarships for college students."
-                )
-              }
-              className="glass-card p-3 rounded-2xl text-left border border-blue-900/40 hover:border-cyan-400/60 transition group"
-            >
+              {suggestions.map((item, index) => (
 
-              <PiStudentFill className="text-blue-400 text-xl mb-1 group-hover:scale-110 transition-transform" />
+                <button
+                  key={index}
+                  onClick={() => useSuggestion(item.question)}
+                  className="glass-card p-3 rounded-2xl text-left border border-blue-900/40 hover:border-cyan-400/60 transition group"
+                >
 
-              <div className="text-xs font-bold text-white">
-                Scholarships
-              </div>
+                  <div className={`${item.color} text-xl mb-1 group-hover:scale-110 transition-transform`}>
 
-            </button>
+                    {item.icon}
 
+                  </div>
 
-            {/* HEALTH */}
+                  <div className="text-xs font-bold text-white">
+                    {item.title}
+                  </div>
 
-            <button
-              onClick={() =>
-                useSuggestion(
-                  "How to check eligibility for health schemes?"
-                )
-              }
-              className="glass-card p-3 rounded-2xl text-left border border-blue-900/40 hover:border-cyan-400/60 transition group"
-            >
+                </button>
 
-              <FaShieldAlt className="text-emerald-400 text-xl mb-1 group-hover:scale-110 transition-transform" />
+              ))}
 
-              <div className="text-xs font-bold text-white">
-                Health Coverage
-              </div>
-
-            </button>
-
-
-            {/* JOBS */}
-
-            <button
-              onClick={() =>
-                useSuggestion(
-                  "Show government job vacancies and internships."
-                )
-              }
-              className="glass-card p-3 rounded-2xl text-left border border-blue-900/40 hover:border-cyan-400/60 transition group"
-            >
-
-              <HiBriefcase className="text-amber-400 text-xl mb-1 group-hover:scale-110 transition-transform" />
-
-              <div className="text-xs font-bold text-white">
-                Jobs & Internships
-              </div>
-
-            </button>
+            </div>
 
           </div>
 
-        </div>
+        )}
 
       </section>
 
     </div>
+
   );
+
 }
+
 
 export default AIChat;

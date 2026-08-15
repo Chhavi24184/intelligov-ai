@@ -201,16 +201,20 @@
 // }
 
 // export default App;
-
 import { Routes, Route, useLocation } from "react-router-dom";
 
 import Navbar from "./components/layout/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import AIChat from "./pages/AIChat";
 import SchemeRecommendation from "./pages/SchemeRecommendation";
 import EligibilityChecker from "./pages/EligibilityChecker";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 
 function App() {
   const location = useLocation();
@@ -218,28 +222,97 @@ function App() {
   return (
     <>
       {/* Navbar */}
-      {location.pathname !== "/dashboard" && <Navbar />}
+      {location.pathname !== "/dashboard" &&
+        location.pathname !== "/login" &&
+        location.pathname !== "/register" &&
+        location.pathname !== "/profile" &&
+        location.pathname !== "/settings" && <Navbar />}
 
-      {/* Application Routes */}
       <Routes>
-        <Route path="/" element={<Home />} />
 
-        <Route path="/chat" element={<AIChat />} />
+        {/* ================= PUBLIC ROUTES ================= */}
 
+        {/* Home */}
         <Route
-          path="/schemes"
-          element={<SchemeRecommendation />}
+          path="/"
+          element={<Home />}
         />
 
+        {/* Login */}
         <Route
-          path="/eligibility"
-          element={<EligibilityChecker />}
+          path="/login"
+          element={<Login />}
         />
 
+        {/* Register */}
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
+
+        {/* ================= PROTECTED ROUTES ================= */}
+
+        {/* Dashboard */}
         <Route
           path="/dashboard"
-          element={<Dashboard />}
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
         />
+
+        {/* AI Chat */}
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute>
+              <AIChat />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Government Schemes */}
+        <Route
+          path="/schemes"
+          element={
+            <ProtectedRoute>
+              <SchemeRecommendation />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Eligibility */}
+        <Route
+          path="/eligibility"
+          element={
+            <ProtectedRoute>
+              <EligibilityChecker />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Profile */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Settings */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </>
   );

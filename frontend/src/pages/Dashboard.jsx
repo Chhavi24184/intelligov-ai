@@ -40,10 +40,9 @@ function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 min-w-0">
 
-        {/* Background */}
         <div className="relative min-h-screen overflow-hidden">
 
-          {/* Glow Effects */}
+          {/* Background Glow */}
           <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-blue-600/10 blur-[150px] rounded-full pointer-events-none" />
 
           <div className="absolute top-1/2 right-0 w-[350px] h-[350px] bg-cyan-500/10 blur-[140px] rounded-full pointer-events-none" />

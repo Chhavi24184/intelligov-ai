@@ -1,119 +1,216 @@
-const API_BASE_URL = "http://127.0.0.1:8000";
+import axios from "axios";
 
 // =========================================================
-// Register User
+// BACKEND BASE URL
 // =========================================================
 
-export const registerUser = async (name, email, password) => {
-  try {
-    const res = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.detail || "Registration failed");
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Register error:", error);
-    throw error;
-  }
-};
+const API = axios.create({
+  baseURL: "http://127.0.0.1:8000",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 
 // =========================================================
-// Login User
+// LOGIN USER
 // =========================================================
 
 export const loginUser = async (email, password) => {
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
+    const response = await API.post("/auth/login", {
+      email: email,
+      password: password,
     });
 
-    const data = await res.json();
+    return response.data;
 
-    if (!res.ok) {
-      throw new Error(data.detail || "Login failed");
+  } catch (error) {
+
+    console.error("Login API Error:", error);
+
+    if (error.response?.data?.detail) {
+      throw new Error(error.response.data.detail);
     }
 
-    return data;
-  } catch (error) {
-    console.error("Login error:", error);
-    throw error;
+    throw new Error("Login failed");
   }
 };
 
 
 // =========================================================
-// Save Chat Message
+// REGISTER USER
 // =========================================================
 
-export const saveChatMessage = async (userId, message, response) => {
+export const registerUser = async (
+  name,
+  email,
+  password,
+  phone = null
+) => {
   try {
-    const res = await fetch(`${API_BASE_URL}/chat-history/save`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+
+    const response = await API.post("/auth/register", {
+      name: name,
+      email: email,
+      password: password,
+      phone: phone,
+    });
+
+    return response.data;
+
+  } catch (error) {
+
+    console.error("Register API Error:", error);
+
+    if (error.response?.data?.detail) {
+      throw new Error(error.response.data.detail);
+    }
+
+    throw new Error("Registration failed");
+  }
+};
+
+
+// =========================================================
+// CHAT API
+// =========================================================
+
+export const chatAPI = async (message) => {
+
+  const response = await API.post("/chat", {
+    message: message,
+  });
+
+  return response.data;
+};
+
+
+// =========================================================
+// ELIGIBILITY API
+// =========================================================
+
+export const eligibilityAPI = async (userData) => {
+
+  const response = await API.post(
+    "/eligibility",
+    userData
+  );
+
+  return response.data;
+};
+
+
+// =========================================================
+// SCHEMES API
+// =========================================================
+
+export const schemesAPI = async () => {
+
+  const response = await API.get("/schemes");
+
+  return response.data;
+};
+
+
+// =========================================================
+// SEARCH SCHEMES API
+// =========================================================
+
+export const searchSchemesAPI = async (query) => {
+
+  const response = await API.get(
+    "/schemes/search",
+    {
+      params: {
+        keyword: query,
       },
-      body: JSON.stringify({
+    }
+  );
+
+  return response.data;
+};
+
+
+// =========================================================
+// SAVE CHAT MESSAGE
+// =========================================================
+
+export const saveChatMessage = async (
+  userId,
+  message,
+  response
+) => {
+
+  try {
+
+    const result = await API.post(
+      "/chat-history/save",
+      {
         user_id: userId,
         message: message,
         response: response,
-      }),
-    });
+      }
+    );
 
-    const data = await res.json();
+    return result.data;
 
-    if (!res.ok) {
-      throw new Error(data.detail || "Failed to save chat");
+  } catch (error) {
+
+    console.error(
+      "Save Chat Error:",
+      error
+    );
+
+    if (error.response?.data?.detail) {
+      throw new Error(
+        error.response.data.detail
+      );
     }
 
-    return data;
-  } catch (error) {
-    console.error("Save chat error:", error);
-    throw error;
+    throw new Error(
+      "Failed to save chat"
+    );
   }
 };
 
 
 // =========================================================
-// Get Chat History
+// GET CHAT HISTORY
 // =========================================================
 
 export const getChatHistory = async (userId) => {
+
   try {
-    const res = await fetch(
-      `${API_BASE_URL}/chat-history/${userId}`
+
+    const response = await API.get(
+      `/chat-history/${userId}`
     );
 
-    const data = await res.json();
+    return response.data;
 
-    if (!res.ok) {
-      throw new Error(data.detail || "Failed to fetch chat history");
+  } catch (error) {
+
+    console.error(
+      "Get Chat History Error:",
+      error
+    );
+
+    if (error.response?.data?.detail) {
+      throw new Error(
+        error.response.data.detail
+      );
     }
 
-    return data;
-  } catch (error) {
-    console.error("Get chat history error:", error);
-    throw error;
+    throw new Error(
+      "Failed to fetch chat history"
+    );
   }
 };
+
+
+// =========================================================
+// DEFAULT EXPORT
+// =========================================================
+
+export default API;

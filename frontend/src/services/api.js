@@ -56,3 +56,8 @@ export const searchSchemesAPI = async (query) => {
 // DEFAULT EXPORT
 // ===============================
 export default API;
+export const loginUser = async (email, password) => {
+  const response = await API.post('/auth/login', { email, password });
+  return response.data;
+};
+

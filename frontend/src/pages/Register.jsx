@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Register() {
   const navigate = useNavigate();
@@ -8,28 +9,58 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
+    // Check empty fields
     if (!name || !email || !password || !confirmPassword) {
       alert("Please fill all fields");
       return;
     }
 
+    // Check password
     if (password !== confirmPassword) {
       alert("Passwords do not match");
       return;
     }
 
-    // Save user information
-    localStorage.setItem("userName", name);
-    localStorage.setItem("userEmail", email);
-    localStorage.setItem("userPassword", password);
+    try {
+      setLoading(true);
 
-    alert("Account created successfully!");
+      // Send registration data to FastAPI backend
+      const response = await axios.post(
+        "http://127.0.0.1:8000/auth/register",
+        {
+          name: name,
+          email: email,
+          password: password,
+        }
+      );
 
-    navigate("/login");
+      console.log("Register response:", response.data);
+
+      alert("Account created successfully!");
+
+      // Go to login page
+      navigate("/login");
+
+    } catch (error) {
+      console.error("Registration error:", error);
+
+      if (error.response) {
+        alert(
+          error.response.data?.detail ||
+          "Registration failed"
+        );
+      } else {
+        alert("Cannot connect to backend");
+      }
+
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,7 +85,7 @@ function Register() {
           boxSizing: "border-box",
         }}
       >
-        {/* Heading */}
+
         <h2
           style={{
             textAlign: "center",
@@ -201,20 +232,22 @@ function Register() {
           {/* Register Button */}
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: "100%",
               padding: "13px",
               border: "none",
               borderRadius: "8px",
-              background: "#2563eb",
+              background: loading ? "#9ca3af" : "#2563eb",
               color: "#ffffff",
               fontSize: "16px",
               fontWeight: "600",
-              cursor: "pointer",
+              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
+
         </form>
 
         {/* Login Link */}
@@ -238,6 +271,7 @@ function Register() {
             Login
           </Link>
         </p>
+
       </div>
     </div>
   );

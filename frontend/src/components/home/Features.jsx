@@ -11,11 +11,19 @@ import {
 } from "react-icons/fa";
 
 
+// =====================================================
+// SERVICE CARD
+// =====================================================
+
 function ServiceCard({ service, index }) {
 
   const cardRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
+
+  // =====================================================
+  // SCROLL REVEAL
+  // =====================================================
 
   useEffect(() => {
 
@@ -51,6 +59,7 @@ function ServiceCard({ service, index }) {
 
     <div
       ref={cardRef}
+
       className={`
         glass-card
         p-7 lg:p-8
@@ -59,11 +68,13 @@ function ServiceCard({ service, index }) {
         flex flex-col justify-between
         group
         border border-blue-900/30
-        hover:border-cyan-400/40
+
         transition-all
         duration-700
-        ease-out
-        hover:-translate-y-1
+        ease-[cubic-bezier(0.22,1,0.36,1)]
+
+        hover:border-cyan-400/40
+        hover:-translate-y-2
 
         ${
           isVisible
@@ -71,27 +82,90 @@ function ServiceCard({ service, index }) {
             : "opacity-0 translate-y-16 scale-[0.96]"
         }
       `}
+
       style={{
         transitionDelay: `${index * 100}ms`,
       }}
     >
 
-      {/* CARD CONTENT */}
+      {/* =====================================================
+          SUBTLE HOVER GLOW
+      ===================================================== */}
 
-      <div>
+      <div
+        className="
+          absolute
+          inset-0
+          rounded-3xl
+          bg-gradient-to-br
+          from-cyan-400/[0.04]
+          via-transparent
+          to-blue-500/[0.04]
+          opacity-0
+          group-hover:opacity-100
+          transition-opacity
+          duration-500
+          pointer-events-none
+        "
+      />
 
-        {/* Icon + Badge */}
+
+      {/* =====================================================
+          CARD CONTENT
+      ===================================================== */}
+
+      <div className="relative z-10">
+
+
+        {/* =====================================================
+            ICON + BADGE
+        ===================================================== */}
 
         <div className="flex items-center justify-between mb-6">
 
-          <div className="p-4 rounded-2xl bg-[#0d1b32] border border-blue-900/40 group-hover:scale-110 transition-transform duration-300">
+          {/* ICON */}
+
+          <div
+            className="
+              p-4
+              rounded-2xl
+              bg-[#0d1b32]
+              border border-blue-900/40
+
+              group-hover:border-cyan-400/30
+              group-hover:scale-110
+              group-hover:-rotate-2
+
+              transition-all
+              duration-500
+            "
+          >
 
             {service.icon}
 
           </div>
 
 
-          <span className="px-3 py-1 rounded-full bg-blue-950/60 border border-blue-800/40 text-slate-300 text-xs font-medium">
+          {/* BADGE */}
+
+          <span
+            className="
+              px-3
+              py-1
+              rounded-full
+              bg-blue-950/60
+              border border-blue-800/40
+              text-slate-300
+              text-xs
+              font-medium
+
+              group-hover:border-cyan-400/30
+              group-hover:text-cyan-300
+
+              transition-all
+              duration-300
+            "
+          >
 
             {service.badge}
 
@@ -100,18 +174,41 @@ function ServiceCard({ service, index }) {
         </div>
 
 
-        {/* Title */}
+        {/* =====================================================
+            TITLE
+        ===================================================== */}
 
-        <div className="text-xl font-bold text-white mb-3 group-hover:text-cyan-300 transition-colors">
+        <div
+          className="
+            text-xl
+            font-bold
+            text-white
+            mb-3
+
+            group-hover:text-cyan-300
+
+            transition-colors
+            duration-300
+          "
+        >
 
           {service.title}
 
         </div>
 
 
-        {/* Description */}
+        {/* =====================================================
+            DESCRIPTION
+        ===================================================== */}
 
-        <p className="text-slate-400 text-sm leading-relaxed mb-6">
+        <p
+          className="
+            text-slate-400
+            text-sm
+            leading-relaxed
+            mb-6
+          "
+        >
 
           {service.description}
 
@@ -120,23 +217,76 @@ function ServiceCard({ service, index }) {
       </div>
 
 
-      {/* EXPLORE FEATURE ONLY */}
+      {/* =====================================================
+          EXPLORE FEATURE
+          ONLY THIS PART IS CLICKABLE
+      ===================================================== */}
 
-      <div>
+      <div className="relative z-10">
 
         <Link
           to={service.link}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-400 hover:text-cyan-300 transition-colors group-hover:translate-x-1 duration-200"
+
+          className="
+            inline-flex
+            items-center
+            gap-2
+
+            text-sm
+            font-semibold
+            text-cyan-400
+
+            hover:text-cyan-300
+
+            transition-all
+            duration-300
+
+            group-hover:translate-x-1
+          "
         >
 
-          <span>Explore Feature</span>
+          <span>
+            Explore Feature
+          </span>
 
-          <span>→</span>
+          <span
+            className="
+              transition-transform
+              duration-300
+              group-hover:translate-x-1
+            "
+          >
+            →
+          </span>
 
         </Link>
 
       </div>
 
+
+      {/* =====================================================
+          BOTTOM GLOW
+      ===================================================== */}
+
+      <div
+        className="
+          absolute
+          bottom-0
+          left-1/2
+          -translate-x-1/2
+
+          w-1/2
+          h-px
+
+          bg-cyan-400/0
+          group-hover:bg-cyan-400/50
+
+          blur-sm
+
+          transition-all
+          duration-500
+        "
+      />
 
     </div>
 
@@ -144,6 +294,10 @@ function ServiceCard({ service, index }) {
 }
 
 
+
+// =====================================================
+// FEATURES / SERVICES SECTION
+// =====================================================
 
 function Features() {
 
@@ -159,6 +313,7 @@ function Features() {
       link: "/schemes",
     },
 
+
     {
       icon: <FaGraduationCap className="text-2xl text-cyan-400" />,
       title: "Scholarships & Education",
@@ -167,6 +322,7 @@ function Features() {
       badge: "Students & Youth",
       link: "/schemes",
     },
+
 
     {
       icon: <FaBriefcase className="text-2xl text-cyan-400" />,
@@ -177,6 +333,7 @@ function Features() {
       link: "/schemes",
     },
 
+
     {
       icon: <FaHeartbeat className="text-2xl text-cyan-400" />,
       title: "Healthcare & Insurance",
@@ -186,6 +343,7 @@ function Features() {
       link: "/schemes",
     },
 
+
     {
       icon: <FaUserShield className="text-2xl text-cyan-400" />,
       title: "Eligibility Matcher",
@@ -194,6 +352,7 @@ function Features() {
       badge: "Smart Match",
       link: "/eligibility",
     },
+
 
     {
       icon: <FaRobot className="text-2xl text-cyan-400" />,
@@ -211,41 +370,124 @@ function Features() {
 
     <section
       id="services"
-      className="relative bg-[#0a1628] text-white py-16 lg:py-20 overflow-hidden"
+      className="
+        relative
+        bg-[#0a1628]
+        text-white
+        py-16
+        lg:py-20
+        overflow-hidden
+      "
     >
 
-      {/* BACKGROUND LIGHTS */}
+
+      {/* =====================================================
+          BACKGROUND LIGHTS
+      ===================================================== */}
 
       <div className="absolute inset-0 pointer-events-none">
 
-        <div className="absolute top-20 left-0 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl" />
+        <div
+          className="
+            absolute
+            top-20
+            left-0
+            w-80
+            h-80
+            bg-blue-600/10
+            rounded-full
+            blur-3xl
+          "
+        />
 
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" />
+        <div
+          className="
+            absolute
+            bottom-0
+            right-0
+            w-80
+            h-80
+            bg-cyan-500/10
+            rounded-full
+            blur-3xl
+          "
+        />
 
       </div>
 
 
-      {/* MAIN CONTAINER */}
+      {/* =====================================================
+          MAIN CONTAINER
+      ===================================================== */}
 
       <div className="relative max-w-7xl mx-auto px-6">
 
 
-        {/* SECTION HEADER */}
+        {/* =====================================================
+            SECTION HEADER
+        ===================================================== */}
 
-        <div className="text-center max-w-3xl mx-auto mb-12 lg:mb-16 space-y-4">
+        <div
+          className="
+            text-center
+            max-w-3xl
+            mx-auto
+            mb-12
+            lg:mb-16
+            space-y-4
 
-          <span className="inline-block px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider">
+            opacity-100
+            translate-y-0
+          "
+        >
+
+          <span
+            className="
+              inline-block
+              px-4
+              py-1.5
+              rounded-full
+              bg-cyan-500/10
+              border border-cyan-400/30
+              text-cyan-300
+              text-xs
+              font-semibold
+              uppercase
+              tracking-wider
+            "
+          >
 
             IntelliGov Capabilities
 
           </span>
 
 
-          <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
+          {/* =====================================================
+              MAIN HEADING
+          ===================================================== */}
+
+          <div
+            className="
+              text-3xl
+              sm:text-4xl
+              lg:text-5xl
+              font-black
+              text-white
+              leading-tight
+            "
+          >
 
             Smart Government Services <br />
 
-            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            <span
+              className="
+                bg-gradient-to-r
+                from-cyan-400
+                to-blue-500
+                bg-clip-text
+                text-transparent
+              "
+            >
 
               Tailored For Every Citizen
 
@@ -254,7 +496,17 @@ function Features() {
           </div>
 
 
-          <p className="text-slate-400 text-base leading-relaxed">
+          {/* =====================================================
+              DESCRIPTION
+          ===================================================== */}
+
+          <p
+            className="
+              text-slate-400
+              text-base
+              leading-relaxed
+            "
+          >
 
             Eliminate tedious searching across hundreds of portal sites.
             Our AI consolidates verified government data for instant citizen
@@ -265,9 +517,20 @@ function Features() {
         </div>
 
 
-        {/* SERVICES GRID */}
+        {/* =====================================================
+            SERVICES GRID
+        ===================================================== */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div
+          className="
+            grid
+            grid-cols-1
+            md:grid-cols-2
+            lg:grid-cols-3
+            gap-6
+            lg:gap-8
+          "
+        >
 
           {services.map((service, index) => (
 

@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+
 import {
   FaSearch,
   FaFileAlt,
@@ -7,9 +9,84 @@ import {
 } from "react-icons/fa";
 
 
+// =====================================================
+// REVEAL COMPONENT
+// =====================================================
+
+function Reveal({ children, className = "", delay = 0 }) {
+
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+
+  useEffect(() => {
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+
+        if (entry.isIntersecting) {
+
+          setIsVisible(true);
+
+          observer.unobserve(entry.target);
+
+        }
+
+      },
+      {
+        threshold: 0.15,
+      }
+    );
+
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+
+    return () => observer.disconnect();
+
+  }, []);
+
+
+  return (
+
+    <div
+      ref={ref}
+      className={`
+        ${className}
+        transition-all
+        duration-700
+        ease-out
+        ${
+          isVisible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-14"
+        }
+      `}
+      style={{
+        transitionDelay: `${delay}ms`,
+      }}
+    >
+
+      {children}
+
+    </div>
+
+  );
+}
+
+
+
+// =====================================================
+// ABOUT COMPONENT
+// =====================================================
+
 function About() {
 
+
   const steps = [
+
     {
       num: "01",
       icon: <FaUserCheck className="text-cyan-400 text-xl" />,
@@ -37,12 +114,17 @@ function About() {
       title: "Apply Seamlessly",
       desc: "Follow direct application links and step-by-step guidance to claim the benefits you are eligible for.",
     },
+
   ];
 
 
   return (
 
-    <section className="relative bg-[#0a1628] text-white py-16 lg:py-20 overflow-hidden">
+    <section
+      id="about"
+      className="relative bg-[#0a1628] text-white py-16 lg:py-20 overflow-hidden"
+    >
+
 
       {/* =========================
           BACKGROUND LIGHTS
@@ -70,97 +152,112 @@ function About() {
             ABOUT CARD
         ===================================================== */}
 
-        <div className="glass-panel p-8 sm:p-12 rounded-3xl border border-blue-900/50 relative overflow-hidden mb-16">
+        <Reveal
+          delay={0}
+          className="mb-16"
+        >
 
-          {/* Card Glow */}
-
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
-
-          <div className="grid lg:grid-cols-12 gap-8 items-center">
+          <div className="glass-panel p-8 sm:p-12 rounded-3xl border border-blue-900/50 relative overflow-hidden">
 
 
-            {/* About Content */}
+            {/* Card Glow */}
 
-            <div className="lg:col-span-8 space-y-5 relative z-10">
-
-              {/* Badge */}
-
-              <span className="inline-block px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-semibold uppercase tracking-wider">
-
-                About IntelliGov AI Platform
-
-              </span>
+            <div className="absolute -top-20 -right-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
 
-              {/* Main Heading */}
+            <div className="grid lg:grid-cols-12 gap-8 items-center">
 
-              <div className="text-3xl sm:text-4xl font-black text-white leading-tight">
 
-                Bridging the Gap Between <br />
+              {/* About Content */}
 
-                <span className="bg-gradient-to-r from-cyan-400 via-white to-amber-400 bg-clip-text text-transparent">
+              <div className="lg:col-span-8 space-y-5 relative z-10">
 
-                  Citizens & Welfare Services
+
+                {/* Badge */}
+
+                <span className="inline-block px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-semibold uppercase tracking-wider">
+
+                  About IntelliGov AI Platform
 
                 </span>
 
+
+                {/* Main Heading */}
+
+                <div className="text-3xl sm:text-4xl font-black text-white leading-tight">
+
+                  Bridging the Gap Between <br />
+
+                  <span className="bg-gradient-to-r from-cyan-400 via-white to-amber-400 bg-clip-text text-transparent">
+
+                    Citizens & Welfare Services
+
+                  </span>
+
+                </div>
+
+
+                {/* Description */}
+
+                <p className="text-slate-300 text-base leading-relaxed">
+
+                  Millions of eligible citizens miss out on government schemes
+                  every year due to complex portals and lack of awareness.
+                  IntelliGov AI acts as an intelligent digital bridge—parsing
+                  complex government mandates into clear, personalized answers.
+
+                </p>
+
               </div>
 
 
-              {/* Description */}
+              {/* AI Icon Side */}
 
-              <p className="text-slate-300 text-base leading-relaxed">
+              <div className="lg:col-span-4 flex justify-center lg:justify-end relative z-10">
 
-                Millions of eligible citizens miss out on government schemes
-                every year due to complex portals and lack of awareness.
-                IntelliGov AI acts as an intelligent digital bridge—parsing
-                complex government mandates into clear, personalized answers.
+                <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-br from-blue-600/20 to-cyan-500/10 border border-cyan-400/20 flex items-center justify-center shadow-2xl shadow-cyan-500/10">
 
-              </p>
+                  <FaRobot className="text-6xl sm:text-7xl text-cyan-400" />
 
-            </div>
-
-
-            {/* AI Icon Side */}
-
-            <div className="lg:col-span-4 flex justify-center lg:justify-end relative z-10">
-
-              <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-br from-blue-600/20 to-cyan-500/10 border border-cyan-400/20 flex items-center justify-center shadow-2xl shadow-cyan-500/10">
-
-                <FaRobot className="text-6xl sm:text-7xl text-cyan-400" />
+                </div>
 
               </div>
+
 
             </div>
 
           </div>
 
-        </div>
+        </Reveal>
+
 
 
         {/* =====================================================
             HOW IT WORKS HEADER
         ===================================================== */}
 
-        <div className="text-center mb-12">
+        <Reveal delay={150}>
 
-          {/* Using div instead of h3 */}
+          <div className="text-center mb-12">
 
-          <div className="text-2xl sm:text-3xl font-bold text-white">
 
-            How IntelliGov AI Works
+            <div className="text-2xl sm:text-3xl font-bold text-white">
+
+              How IntelliGov AI Works
+
+            </div>
+
+
+            <p className="text-slate-400 text-sm mt-2">
+
+              Four simple steps from discovery to benefit delivery
+
+            </p>
 
           </div>
 
+        </Reveal>
 
-          <p className="text-slate-400 text-sm mt-2">
-
-            Four simple steps from discovery to benefit delivery
-
-          </p>
-
-        </div>
 
 
         {/* =====================================================
@@ -169,51 +266,61 @@ function About() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
+
           {steps.map((step, idx) => (
 
-            <div
+            <Reveal
               key={idx}
-              className="glass-card p-6 rounded-2xl relative border border-blue-900/30 hover:border-cyan-400/40 hover:-translate-y-1 transition-all duration-300 group"
+              delay={250 + idx * 120}
             >
 
-              {/* Step Number */}
+              <div
+                className="glass-card p-6 rounded-2xl relative border border-blue-900/30 hover:border-cyan-400/40 hover:-translate-y-1 transition-all duration-300 group"
+              >
 
-              <div className="text-4xl font-black text-blue-900/40 absolute top-4 right-4 group-hover:text-cyan-900/40 transition-colors">
 
-                {step.num}
+                {/* Step Number */}
+
+                <div className="text-4xl font-black text-blue-900/40 absolute top-4 right-4 group-hover:text-cyan-900/40 transition-colors">
+
+                  {step.num}
+
+                </div>
+
+
+                {/* Icon */}
+
+                <div className="w-12 h-12 rounded-xl bg-[#0d1b32] border border-blue-900/40 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-300">
+
+                  {step.icon}
+
+                </div>
+
+
+                {/* Title */}
+
+                <div className="text-lg font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors">
+
+                  {step.title}
+
+                </div>
+
+
+                {/* Description */}
+
+                <p className="text-slate-400 text-xs leading-relaxed">
+
+                  {step.desc}
+
+                </p>
+
 
               </div>
 
-
-              {/* Icon */}
-
-              <div className="w-12 h-12 rounded-xl bg-[#0d1b32] border border-blue-900/40 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-300">
-
-                {step.icon}
-
-              </div>
-
-
-              {/* Title */}
-
-              <div className="text-lg font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors">
-
-                {step.title}
-
-              </div>
-
-
-              {/* Description */}
-
-              <p className="text-slate-400 text-xs leading-relaxed">
-
-                {step.desc}
-
-              </p>
-
-            </div>
+            </Reveal>
 
           ))}
+
 
         </div>
 

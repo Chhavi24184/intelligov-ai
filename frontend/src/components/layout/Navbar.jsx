@@ -10,26 +10,142 @@ import {
 import {
   Link,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 
 
 function Navbar() {
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
 
   const navLinks = [
     { name: "Home", path: "/" },
-    { name: "AI Chat", path: "/chat" },
+    { name: "Services", path: "#services" },
     { name: "Schemes", path: "/schemes" },
-    { name: "Eligibility", path: "/eligibility" },
+    { name: "About", path: "#about" },
     { name: "Dashboard", path: "/dashboard" },
   ];
 
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+
+    if (path.startsWith("#")) {
+      return false;
+    }
+
+    return location.pathname === path;
+
+  };
+
+
+  // =========================================
+  // SCROLL TO SERVICES / ABOUT
+  // =========================================
+
+  const handleSectionClick = (sectionId) => {
+
+    setMobileMenuOpen(false);
+
+
+    // Already on Home page
+    if (location.pathname === "/") {
+
+      const section = document.getElementById(sectionId);
+
+      if (section) {
+
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+
+      }
+
+      return;
+    }
+
+
+    // If we are on another page:
+    // Go directly to Home first
+    navigate("/");
+
+
+    // Wait for Home page to render,
+    // then scroll directly to the section
+    setTimeout(() => {
+
+      const section = document.getElementById(sectionId);
+
+      if (section) {
+
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+
+      }
+
+    }, 150);
+
+  };
+
+
+  // =========================================
+  // HOME BUTTON
+  // =========================================
+
+  const handleHomeClick = () => {
+
+    setMobileMenuOpen(false);
+
+
+    if (location.pathname === "/") {
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
+    } else {
+
+      navigate("/");
+
+    }
+
+  };
+
+
+  // =========================================
+  // NAVIGATION CLICK
+  // =========================================
+
+  const handleNavClick = (link) => {
+
+    if (link.path === "#services") {
+
+      handleSectionClick("services");
+
+      return;
+
+    }
+
+
+    if (link.path === "#about") {
+
+      handleSectionClick("about");
+
+      return;
+
+    }
+
+
+    setMobileMenuOpen(false);
+
+  };
 
 
   return (
@@ -93,19 +209,44 @@ function Navbar() {
 
           {navLinks.map((link) => (
 
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                isActive(link.path)
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-semibold"
-                  : "text-slate-300 hover:text-white hover:bg-blue-900/20"
-              }`}
-            >
+            link.path === "#services" || link.path === "#about" ? (
 
-              {link.name}
+              <button
+                key={link.path}
+                onClick={() => handleNavClick(link)}
+                className="px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 text-slate-300 hover:text-white hover:bg-blue-900/20"
+              >
 
-            </Link>
+                {link.name}
+
+              </button>
+
+            ) : (
+
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={() => {
+
+                  if (link.path === "/") {
+                    handleHomeClick();
+                  }
+
+                  setMobileMenuOpen(false);
+
+                }}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  isActive(link.path)
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-semibold"
+                    : "text-slate-300 hover:text-white hover:bg-blue-900/20"
+                }`}
+              >
+
+                {link.name}
+
+              </Link>
+
+            )
 
           ))}
 
@@ -179,25 +320,51 @@ function Navbar() {
 
           {navLinks.map((link) => (
 
-            <Link
-              key={link.path}
-              to={link.path}
-              onClick={() =>
-                setMobileMenuOpen(false)
-              }
-              className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${
-                isActive(link.path)
-                  ? "bg-blue-600 text-white font-semibold"
-                  : "text-slate-300 hover:bg-blue-900/30 hover:text-white"
-              }`}
-            >
+            link.path === "#services" || link.path === "#about" ? (
 
-              {link.name}
+              <button
+                key={link.path}
+                onClick={() => handleNavClick(link)}
+                className="block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-all text-slate-300 hover:bg-blue-900/30 hover:text-white"
+              >
 
-            </Link>
+                {link.name}
+
+              </button>
+
+            ) : (
+
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={() => {
+
+                  setMobileMenuOpen(false);
+
+                  if (link.path === "/") {
+                    handleHomeClick();
+                  }
+
+                }}
+                className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${
+                  isActive(link.path)
+                    ? "bg-blue-600 text-white font-semibold"
+                    : "text-slate-300 hover:bg-blue-900/30 hover:text-white"
+                }`}
+              >
+
+                {link.name}
+
+              </Link>
+
+            )
 
           ))}
 
+
+          {/* =========================
+              MOBILE ASK AI
+          ========================= */}
 
           <div className="pt-2">
 

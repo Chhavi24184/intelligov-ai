@@ -10,8 +10,6 @@ import {
   FaStar,
 } from "react-icons/fa";
 
-import robot from "../../assets/robot.png";
-
 function Hero() {
   const quickPrompts = [
     "PM Kisan Samman Nidhi",
@@ -21,11 +19,43 @@ function Hero() {
   ];
 
   return (
-    <section className="relative min-h-[calc(100vh-80px)] overflow-hidden bg-[#0a1628] text-white">
+    <section
+      className="relative min-h-[calc(100vh-80px)] overflow-hidden bg-[#0a1628] text-white"
+      style={{
+        backgroundImage: "url('/src/assets/hero.jpeg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
 
-      {/* =========================
-          BACKGROUND LIGHTS
-      ========================= */}
+      {/* =====================================================
+          BACKGROUND DARK GLASS LAYER
+      ===================================================== */}
+
+      <div className="absolute inset-0 bg-[#06101f]/65 pointer-events-none" />
+
+      {/* =====================================================
+              SOFT BLEND INTO NEXT SECTION
+          ===================================================== */}
+
+          <div
+            className="
+              absolute
+              bottom-0
+              left-0
+              right-0
+              h-48
+              bg-gradient-to-b
+              from-transparent
+              via-[#0a1628]/70
+              to-[#0a1628]
+              pointer-events-none
+              z-[1]
+            "
+          />
+
+      {/* Soft blue/cyan atmosphere */}
 
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
 
@@ -37,13 +67,15 @@ function Hero() {
 
       </div>
 
-      {/* =========================
-          MAIN CONTAINER
-      ========================= */}
 
-      <div className="relative max-w-7xl mx-auto px-6 py-12 lg:py-16">
+      {/* =====================================================
+          MAIN CONTAINER
+      ===================================================== */}
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 lg:py-16">
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+
 
           {/* =====================================================
               LEFT HERO CONTENT
@@ -51,9 +83,10 @@ function Hero() {
 
           <div className="lg:col-span-7 space-y-7 text-center lg:text-left">
 
+
             {/* AI BADGE */}
 
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-900/30 border border-cyan-500/30 backdrop-blur-md shadow-lg shadow-cyan-500/10">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-950/50 border border-cyan-500/30 backdrop-blur-md shadow-lg shadow-cyan-500/10">
 
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
 
@@ -64,6 +97,7 @@ function Hero() {
               </span>
 
             </div>
+
 
             {/* MAIN HEADLINE */}
 
@@ -79,9 +113,10 @@ function Hero() {
 
             </div>
 
+
             {/* DESCRIPTION */}
 
-            <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+            <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">
 
               Get personalized guidance on government schemes, scholarships,
               healthcare benefits and career opportunities with our
@@ -89,24 +124,30 @@ function Hero() {
 
             </p>
 
+
             {/* BUTTONS */}
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
 
+              {/* GET STARTED */}
+
               <Link
-                to="/chat"
+                to="/login"
                 className="px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 text-white font-bold shadow-xl shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-300 flex items-center gap-3 text-base"
               >
 
-                <span>Talk to AI Assistant</span>
+                <span>Get Started</span>
 
                 <FaArrowRight className="text-sm" />
 
               </Link>
 
+
+              {/* ELIGIBILITY */}
+
               <Link
                 to="/eligibility"
-                className="px-8 py-4 rounded-xl bg-[#0d1b32] border border-blue-800/60 text-slate-200 font-semibold hover:border-cyan-400 hover:text-white hover:bg-blue-900/30 transition-all duration-300 flex items-center gap-2 text-base"
+                className="px-8 py-4 rounded-xl bg-[#0d1b32]/85 backdrop-blur-md border border-blue-800/60 text-slate-200 font-semibold hover:border-cyan-400 hover:text-white hover:bg-blue-900/40 transition-all duration-300 flex items-center gap-2 text-base"
               >
 
                 <FaUserCheck className="text-cyan-400" />
@@ -117,13 +158,17 @@ function Hero() {
 
             </div>
 
+
             {/* POPULAR QUERIES */}
 
             <div className="space-y-3 pt-2">
 
-              <div className="text-xs font-semibold text-slate-400">
+              <div className="text-xs font-semibold text-slate-300">
+
                 🔥 Popular Citizen Queries:
+
               </div>
+
 
               <div className="flex flex-wrap justify-center lg:justify-start gap-2">
 
@@ -132,7 +177,7 @@ function Hero() {
                   <Link
                     key={i}
                     to="/chat"
-                    className="px-3.5 py-1.5 rounded-lg bg-[#0c182d] border border-blue-900/40 text-xs text-slate-300 hover:border-cyan-400/60 hover:text-cyan-300 hover:bg-blue-900/30 transition-all flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-lg bg-[#0c182d]/80 backdrop-blur-md border border-blue-900/40 text-xs text-slate-300 hover:border-cyan-400/60 hover:text-cyan-300 hover:bg-blue-900/40 transition-all flex items-center gap-1.5"
                   >
 
                     <FaSearch className="text-[10px] text-cyan-400" />
@@ -149,39 +194,60 @@ function Hero() {
 
           </div>
 
+
           {/* =====================================================
-              RIGHT ROBOT SECTION
+              RIGHT SIDE — FLOATING INFORMATION UI
           ===================================================== */}
 
-          <div className="lg:col-span-5 flex justify-center">
+          <div className="lg:col-span-5 flex justify-center lg:justify-end">
 
-            <div className="relative w-[380px] max-w-full">
+            <div className="relative w-[400px] max-w-full h-[390px]">
 
-              {/* Robot Glow */}
-
-              <div className="absolute inset-10 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
               {/* =================================================
-                  ROBOT + FLOATING BADGES AREA
+                  CENTRAL AI ORB
+                  Makes the cards feel anchored instead of floating
               ================================================= */}
 
-              <div className="relative h-[330px] flex items-center justify-center">
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
 
-                {/* ROBOT */}
+                {/* Outer glow */}
 
-                <img
-                  src={robot}
-                  alt="IntelliGov AI Assistant"
-                  className="relative z-10 w-48 sm:w-56 lg:w-60 animate-float drop-shadow-[0_0_35px_rgba(34,211,238,0.5)]"
-                />
+                <div className="absolute -inset-16 rounded-full bg-cyan-400/10 blur-3xl" />
 
-                {/* =================================================
-                    VERIFIED SCHEMES BADGE
-                ================================================= */}
+                {/* Orb */}
 
-                <div className="absolute z-20 top-5 left-0 sm:left-[-15px] bg-[#0c182d]/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-cyan-400/30 shadow-xl flex items-center gap-2.5">
+                <div className="relative w-40 h-40 rounded-full bg-gradient-to-br from-cyan-400/20 via-blue-600/20 to-indigo-700/20 border border-cyan-400/20 backdrop-blur-sm flex items-center justify-center shadow-2xl shadow-cyan-500/20">
 
-                  <div className="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+                  <div className="w-28 h-28 rounded-full bg-[#081629]/80 border border-cyan-400/20 flex items-center justify-center">
+
+                    <FaRobot className="text-6xl text-cyan-400 drop-shadow-[0_0_20px_rgba(34,211,238,0.7)]" />
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              {/* =================================================
+                  CONNECTING GLOW LINES
+              ================================================= */}
+
+              <div className="absolute left-[18%] top-[35%] w-[110px] h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-cyan-400/10 rotate-[18deg]" />
+
+              <div className="absolute right-[18%] top-[42%] w-[100px] h-px bg-gradient-to-l from-transparent via-cyan-400/40 to-cyan-400/10 rotate-[-18deg]" />
+
+
+              {/* =================================================
+                  VERIFIED SCHEMES CARD
+              ================================================= */}
+
+              <div className="absolute z-20 top-5 left-0 sm:left-[-10px] animate-float">
+
+                <div className="bg-[#081629]/90 backdrop-blur-xl px-4 py-3 rounded-2xl border border-cyan-400/30 shadow-2xl shadow-cyan-500/10 flex items-center gap-3">
+
+                  <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-400/20 flex items-center justify-center">
 
                     <FaCheckCircle className="text-lg text-cyan-400" />
 
@@ -201,13 +267,18 @@ function Hero() {
 
                 </div>
 
-                {/* =================================================
-                    ACCURACY BADGE
-                ================================================= */}
+              </div>
 
-                <div className="absolute z-20 top-16 right-[-5px] sm:right-[-20px] bg-[#0c182d]/95 backdrop-blur-md px-4 py-3 rounded-2xl border border-amber-400/40 shadow-xl flex items-center gap-3">
 
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+              {/* =================================================
+                  ACCURACY CARD
+              ================================================= */}
+
+              <div className="absolute z-20 top-20 right-0 sm:right-[-10px] animate-float">
+
+                <div className="bg-[#081629]/90 backdrop-blur-xl px-4 py-3 rounded-2xl border border-amber-400/30 shadow-2xl shadow-amber-500/10 flex items-center gap-3">
+
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/20 flex items-center justify-center">
 
                     <FaAward className="text-xl text-amber-400" />
 
@@ -229,27 +300,35 @@ function Hero() {
 
               </div>
 
+
               {/* =================================================
-                  AI AGENT INFORMATION
+                  AI STATUS CARD
               ================================================= */}
 
-              <div className="relative z-10 mt-2 pt-5 border-t border-blue-900/40 text-center">
+              <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
 
-                <div className="flex items-center justify-center gap-2 text-cyan-400 font-bold text-lg">
+                <div className="px-5 py-3 rounded-2xl bg-[#081629]/90 backdrop-blur-xl border border-blue-800/40 shadow-2xl">
 
-                  <FaStar />
+                  <div className="flex items-center justify-center gap-2 text-cyan-400 font-bold text-sm">
 
-                  <span>IntelliGov AI Agent v2.0</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+
+                    <FaStar />
+
+                    <span>IntelliGov AI Agent v2.0</span>
+
+                  </div>
+
+                  <p className="text-[10px] text-slate-400 mt-1 text-center">
+
+                    AI-powered citizen assistance
+
+                  </p>
 
                 </div>
 
-                <p className="text-xs text-slate-400 mt-2 px-4">
-
-                  Powered by advanced NLP & Instant Scheme Matching Engine
-
-                </p>
-
               </div>
+
 
             </div>
 

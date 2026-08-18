@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import {
   FaUser,
   FaUserCheck,
@@ -13,17 +12,11 @@ import {
   FaExclamationTriangle,
   FaArrowRight,
   FaExternalLinkAlt,
-  FaChevronLeft,
-  FaChevronRight,
 } from "react-icons/fa";
 
 import { eligibilityAPI } from "../services/api";
 
 function EligibilityChecker() {
-  // =====================================================
-  // FORM STATE
-  // =====================================================
-
   const [formData, setFormData] = useState({
     age: "",
     occupation: "",
@@ -37,44 +30,6 @@ function EligibilityChecker() {
   const [error, setError] = useState("");
   const [checked, setChecked] = useState(false);
   const [selectedScheme, setSelectedScheme] = useState(null);
-
-  // Current step:
-  // 1 = Personal Details
-  // 2 = Financial Details
-  // 3 = Location
-  // 4 = Results
-  const [currentStep, setCurrentStep] = useState(1);
-
-  // =====================================================
-  // STEP DATA
-  // =====================================================
-
-  const steps = [
-    {
-      number: 1,
-      title: "Personal Details",
-      description: "Basic profile",
-      icon: FaUser,
-    },
-    {
-      number: 2,
-      title: "Financial Details",
-      description: "Income & occupation",
-      icon: FaMoneyBillWave,
-    },
-    {
-      number: 3,
-      title: "Location",
-      description: "State of residence",
-      icon: FaMapMarkerAlt,
-    },
-    {
-      number: 4,
-      title: "Results",
-      description: "Matched schemes",
-      icon: FaAward,
-    },
-  ];
 
   // =====================================================
   // FORM CHANGE
@@ -114,14 +69,6 @@ function EligibilityChecker() {
       return data.data.schemes;
     }
 
-    if (Array.isArray(data?.results)) {
-      return data.results;
-    }
-
-    if (Array.isArray(data?.data?.results)) {
-      return data.data.results;
-    }
-
     return [];
   };
 
@@ -157,7 +104,6 @@ function EligibilityChecker() {
 
       setSchemes(recommendedSchemes);
       setChecked(true);
-      setCurrentStep(4);
 
       if (data?.success === false) {
         setError(
@@ -175,7 +121,6 @@ function EligibilityChecker() {
 
       setSchemes([]);
       setChecked(true);
-      setCurrentStep(4);
     } finally {
       setLoading(false);
     }
@@ -198,17 +143,6 @@ function EligibilityChecker() {
     setError("");
     setChecked(false);
     setSelectedScheme(null);
-    setCurrentStep(1);
-  };
-
-  // =====================================================
-  // STEP NAVIGATION
-  // =====================================================
-
-  const goToStep = (step) => {
-    if (step >= 1 && step <= 4) {
-      setCurrentStep(step);
-    }
   };
 
   // =====================================================
@@ -216,63 +150,40 @@ function EligibilityChecker() {
   // =====================================================
 
   const getSchemeName = (scheme) =>
-    scheme?.name ||
-    scheme?.title ||
-    scheme?.scheme_name ||
-    scheme?.schemeName ||
+    scheme.name ||
+    scheme.title ||
+    scheme.scheme_name ||
     "Government Welfare Scheme";
 
   const getCategory = (scheme) =>
-    scheme?.category ||
-    scheme?.type ||
+    scheme.category ||
+    scheme.type ||
     "Welfare Scheme";
 
   const getDescription = (scheme) =>
-    scheme?.description ||
-    scheme?.details ||
-    scheme?.about ||
+    scheme.description ||
+    scheme.details ||
     "This scheme may provide benefits based on your profile.";
 
   const getEligibility = (scheme) =>
-    scheme?.eligibility ||
-    scheme?.eligibility_criteria ||
-    scheme?.eligibilityCriteria ||
+    scheme.eligibility ||
+    scheme.eligibility_criteria ||
     "Eligibility details are available on the official scheme portal.";
 
-  const getBenefits = (scheme) => {
-    if (Array.isArray(scheme?.benefits)) {
-      return scheme.benefits;
-    }
-
-    if (scheme?.benefits) {
-      return [scheme.benefits];
-    }
-
-    if (scheme?.benefit) {
-      return [scheme.benefit];
-    }
-
-    return ["Benefits are available to eligible citizens under this scheme."];
-  };
-
   const getDocuments = (scheme) => {
-    if (Array.isArray(scheme?.documents)) {
+    if (Array.isArray(scheme.documents)) {
       return scheme.documents;
     }
 
-    if (Array.isArray(scheme?.documents_required)) {
+    if (Array.isArray(scheme.documents_required)) {
       return scheme.documents_required;
     }
 
-    if (Array.isArray(scheme?.documentsRequired)) {
-      return scheme.documentsRequired;
-    }
-
-    if (scheme?.documents) {
+    if (scheme.documents) {
       return [scheme.documents];
     }
 
-    if (scheme?.documents_required) {
+    if (scheme.documents_required) {
       return [scheme.documents_required];
     }
 
@@ -284,23 +195,6 @@ function EligibilityChecker() {
     ];
   };
 
-  const getMinistry = (scheme) =>
-    scheme?.ministry ||
-    scheme?.department ||
-    "Government of India";
-
-  const getApplicationLink = (scheme) =>
-    scheme?.application_link ||
-    scheme?.apply_url ||
-    scheme?.applicationUrl ||
-    scheme?.official_website ||
-    scheme?.officialWebsite ||
-    "https://www.myscheme.gov.in/";
-
-  // =====================================================
-  // RENDER
-  // =====================================================
-
   return (
     <div className="w-full min-h-screen bg-[#060c17] text-white">
 
@@ -310,9 +204,7 @@ function EligibilityChecker() {
 
       <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#060c17] via-[#091528] to-[#060c17] py-12 px-4 sm:px-6">
 
-        {/* =================================================
-            BACKGROUND GLOW
-        ================================================= */}
+        {/* Background Glow */}
 
         <div className="absolute top-10 left-[-120px] w-[450px] h-[450px] bg-blue-600/15 blur-[160px] rounded-full pointer-events-none" />
 
@@ -320,7 +212,7 @@ function EligibilityChecker() {
 
         <div className="absolute top-[45%] left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none" />
 
-        <div className="relative max-w-6xl mx-auto">
+        <div className="relative max-w-5xl mx-auto">
 
           {/* =================================================
               HEADER
@@ -356,93 +248,6 @@ function EligibilityChecker() {
           </div>
 
           {/* =================================================
-              STEP INDICATOR
-          ================================================= */}
-
-          <div className="mb-10">
-
-            <div className="bg-[#081224]/80 backdrop-blur-xl border border-blue-900/40 rounded-3xl p-5 sm:p-7">
-
-              <div className="flex items-center justify-between">
-
-                {steps.map((step, index) => {
-
-                  const Icon = step.icon;
-
-                  const isActive = currentStep === step.number;
-                  const isCompleted = currentStep > step.number;
-
-                  return (
-                    <div
-                      key={step.number}
-                      className="flex items-center flex-1"
-                    >
-
-                      {/* STEP */}
-
-                      <div className="flex flex-col items-center min-w-[65px] sm:min-w-[110px]">
-
-                        <button
-                          type="button"
-                          onClick={() => goToStep(step.number)}
-                          className={`w-11 h-11 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center border transition-all duration-300 ${
-                            isActive
-                              ? "bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-lg shadow-cyan-500/20"
-                              : isCompleted
-                              ? "bg-emerald-500/15 border-emerald-400/40 text-emerald-300"
-                              : "bg-[#0b1528] border-blue-900/50 text-slate-500"
-                          }`}
-                        >
-
-                          {isCompleted ? (
-                            <FaCheckCircle className="text-lg sm:text-xl" />
-                          ) : (
-                            <Icon className="text-base sm:text-lg" />
-                          )}
-
-                        </button>
-
-                        <div
-                          className={`text-[10px] sm:text-xs font-bold mt-2 text-center ${
-                            isActive
-                              ? "text-cyan-300"
-                              : isCompleted
-                              ? "text-emerald-300"
-                              : "text-slate-500"
-                          }`}
-                        >
-                          {step.title}
-                        </div>
-
-                        <div className="hidden sm:block text-[10px] text-slate-600 mt-1">
-                          {step.description}
-                        </div>
-
-                      </div>
-
-                      {/* CONNECTOR */}
-
-                      {index < steps.length - 1 && (
-                        <div
-                          className={`h-[2px] flex-1 mx-1 sm:mx-3 transition-all duration-500 ${
-                            currentStep > step.number
-                              ? "bg-emerald-400/60"
-                              : "bg-blue-900/50"
-                          }`}
-                        />
-                      )}
-
-                    </div>
-                  );
-                })}
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* =================================================
               FORM CARD
           ================================================= */}
 
@@ -450,9 +255,7 @@ function EligibilityChecker() {
 
             <form onSubmit={handleSubmit} className="space-y-7">
 
-              {/* =================================================
-                  FORM GRID
-              ================================================= */}
+              {/* FORM GRID */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -595,34 +398,21 @@ function EligibilityChecker() {
                       Select State
                     </option>
 
-                    <option value="Haryana">
-                      Haryana
-                    </option>
-
-                    <option value="Punjab">
-                      Punjab
-                    </option>
-
-                    <option value="Delhi">
-                      Delhi
-                    </option>
-
+                    <option value="Haryana">Haryana</option>
+                    <option value="Punjab">Punjab</option>
+                    <option value="Delhi">Delhi</option>
                     <option value="Uttar Pradesh">
                       Uttar Pradesh
                     </option>
-
                     <option value="Rajasthan">
                       Rajasthan
                     </option>
-
                     <option value="Maharashtra">
                       Maharashtra
                     </option>
-
                     <option value="Gujarat">
                       Gujarat
                     </option>
-
                     <option value="Other">
                       Other State
                     </option>
@@ -718,7 +508,7 @@ function EligibilityChecker() {
 
             <div className="mt-12">
 
-              {/* RESULTS HEADER */}
+              {/* Results Header */}
 
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
 
@@ -731,10 +521,6 @@ function EligibilityChecker() {
                   <h2 className="text-2xl sm:text-3xl font-black text-white mt-1">
                     Schemes You May Qualify For
                   </h2>
-
-                  <p className="text-sm text-slate-500 mt-2">
-                    Based on the profile information you provided.
-                  </p>
 
                 </div>
 
@@ -749,7 +535,7 @@ function EligibilityChecker() {
 
               </div>
 
-              {/* SCHEME CARDS */}
+              {/* Scheme Cards */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
@@ -757,15 +543,14 @@ function EligibilityChecker() {
 
                   <div
                     key={
-                      scheme?.id ||
-                      scheme?.scheme_id ||
-                      scheme?.schemeId ||
+                      scheme.id ||
+                      scheme.scheme_id ||
                       index
                     }
                     className="group bg-[#081224]/85 backdrop-blur-xl border border-blue-900/40 rounded-3xl p-6 hover:border-cyan-400/40 hover:-translate-y-1 transition-all duration-300"
                   >
 
-                    {/* CARD HEADER */}
+                    {/* Card Header */}
 
                     <div className="flex items-start justify-between gap-4 mb-5">
 
@@ -775,15 +560,19 @@ function EligibilityChecker() {
 
                       </div>
 
-                      <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-300 text-[11px] font-medium border border-blue-400/30">
+                      {scheme.category && (
 
-                        {getCategory(scheme)}
+                        <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-300 text-[11px] font-medium border border-blue-400/30">
 
-                      </span>
+                          {scheme.category}
+
+                        </span>
+
+                      )}
 
                     </div>
 
-                    {/* SCHEME NAME */}
+                    {/* Scheme Name */}
 
                     <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-300 transition-colors">
 
@@ -791,7 +580,7 @@ function EligibilityChecker() {
 
                     </h3>
 
-                    {/* DESCRIPTION */}
+                    {/* Description */}
 
                     <p className="text-sm text-slate-400 leading-relaxed mb-5">
 
@@ -799,7 +588,7 @@ function EligibilityChecker() {
 
                     </p>
 
-                    {/* ELIGIBILITY */}
+                    {/* Eligibility */}
 
                     <div className="p-4 rounded-2xl bg-[#0b1528] border border-blue-900/40 mb-4">
 
@@ -819,40 +608,7 @@ function EligibilityChecker() {
 
                     </div>
 
-                    {/* BENEFITS */}
-
-                    <div className="p-4 rounded-2xl bg-[#0b1528] border border-blue-900/40 mb-4">
-
-                      <div className="text-[11px] uppercase tracking-wider font-bold text-emerald-400 mb-2">
-
-                        Benefits
-
-                      </div>
-
-                      <div className="space-y-1.5">
-
-                        {getBenefits(scheme)
-                          .slice(0, 3)
-                          .map((benefit, benefitIndex) => (
-
-                            <div
-                              key={benefitIndex}
-                              className="flex items-start gap-2 text-xs text-slate-300"
-                            >
-
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-
-                              <span>{benefit}</span>
-
-                            </div>
-
-                          ))}
-
-                      </div>
-
-                    </div>
-
-                    {/* DOCUMENTS */}
+                    {/* Documents */}
 
                     <div className="p-4 rounded-2xl bg-[#0b1528] border border-blue-900/40 mb-5">
 
@@ -877,7 +633,7 @@ function EligibilityChecker() {
 
                               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
 
-                              <span>{document}</span>
+                              {document}
 
                             </div>
 
@@ -887,13 +643,15 @@ function EligibilityChecker() {
 
                     </div>
 
-                    {/* ACTIONS */}
+                    {/* Actions */}
 
                     <div className="flex items-center justify-between gap-3">
 
                       <button
                         type="button"
-                        onClick={() => setSelectedScheme(scheme)}
+                        onClick={() =>
+                          setSelectedScheme(scheme)
+                        }
                         className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-2 transition"
                       >
 
@@ -904,7 +662,11 @@ function EligibilityChecker() {
                       </button>
 
                       <a
-                        href={getApplicationLink(scheme)}
+                        href={
+                          scheme.application_link ||
+                          scheme.apply_url ||
+                          "https://myScheme.gov.in"
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-semibold hover:scale-[1.02] transition flex items-center gap-2"
@@ -952,14 +714,6 @@ function EligibilityChecker() {
                   age, or state and check again.
                 </p>
 
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="mt-5 px-5 py-2.5 rounded-xl bg-[#0b1528] border border-blue-900/50 text-cyan-300 text-xs font-semibold hover:border-cyan-400/40 transition"
-                >
-                  Try Again
-                </button>
-
               </div>
 
             )}
@@ -984,8 +738,6 @@ function EligibilityChecker() {
             onClick={(e) => e.stopPropagation()}
           >
 
-            {/* MODAL HEADER */}
-
             <div className="p-6 border-b border-blue-900/40">
 
               <div className="flex items-start justify-between gap-4">
@@ -993,22 +745,12 @@ function EligibilityChecker() {
                 <div>
 
                   <span className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold">
-
                     {getCategory(selectedScheme)}
-
                   </span>
 
                   <h2 className="text-2xl font-black text-white mt-3">
-
                     {getSchemeName(selectedScheme)}
-
                   </h2>
-
-                  <p className="text-xs text-slate-500 mt-2">
-
-                    {getMinistry(selectedScheme)}
-
-                  </p>
 
                 </div>
 
@@ -1025,16 +767,12 @@ function EligibilityChecker() {
 
             </div>
 
-            {/* MODAL BODY */}
-
             <div className="p-6 space-y-6">
-
-              {/* ABOUT */}
 
               <div>
 
                 <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-2">
-                  About
+                  Description
                 </h4>
 
                 <p className="text-sm text-slate-300 leading-relaxed">
@@ -1042,8 +780,6 @@ function EligibilityChecker() {
                 </p>
 
               </div>
-
-              {/* ELIGIBILITY */}
 
               <div>
 
@@ -1056,41 +792,6 @@ function EligibilityChecker() {
                 </p>
 
               </div>
-
-              {/* BENEFITS */}
-
-              <div>
-
-                <h4 className="text-xs uppercase tracking-wider text-emerald-400 font-semibold mb-3">
-                  Benefits
-                </h4>
-
-                <div className="space-y-2">
-
-                  {getBenefits(selectedScheme).map(
-                    (benefit, index) => (
-
-                      <div
-                        key={index}
-                        className="flex items-start gap-3 p-3 rounded-xl bg-[#0b1528] border border-blue-900/40"
-                      >
-
-                        <FaCheckCircle className="text-emerald-400 mt-0.5 shrink-0" />
-
-                        <span className="text-sm text-slate-300">
-                          {benefit}
-                        </span>
-
-                      </div>
-
-                    )
-                  )}
-
-                </div>
-
-              </div>
-
-              {/* DOCUMENTS */}
 
               <div>
 
@@ -1108,7 +809,7 @@ function EligibilityChecker() {
                         className="flex items-center gap-3 p-3 rounded-xl bg-[#0b1528] border border-blue-900/40"
                       >
 
-                        <FaFileAlt className="text-cyan-400 shrink-0" />
+                        <FaCheckCircle className="text-emerald-400" />
 
                         <span className="text-sm text-slate-300">
                           {document}
@@ -1123,39 +824,17 @@ function EligibilityChecker() {
 
               </div>
 
-              {/* HOW TO APPLY */}
-
-              <div>
-
-                <h4 className="text-xs uppercase tracking-wider text-amber-400 font-semibold mb-2">
-                  How to Apply
-                </h4>
-
-                <p className="text-sm text-slate-300 leading-relaxed p-4 rounded-2xl bg-[#0b1528] border border-blue-900/40">
-                  Visit the official scheme portal using the
-                  Apply Now button below and follow the application
-                  instructions provided by the concerned authority.
-                </p>
-
-              </div>
-
-              {/* ACTION */}
-
-              <div className="pt-4 border-t border-blue-900/40 flex flex-col sm:flex-row justify-end gap-3">
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedScheme(null)}
-                  className="px-6 py-3 rounded-xl bg-[#0b1528] border border-blue-900/50 text-slate-300 text-sm font-semibold hover:text-white transition"
-                >
-                  Close
-                </button>
+              <div className="pt-4 border-t border-blue-900/40 flex justify-end">
 
                 <a
-                  href={getApplicationLink(selectedScheme)}
+                  href={
+                    selectedScheme.application_link ||
+                    selectedScheme.apply_url ||
+                    "https://myScheme.gov.in"
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2"
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold flex items-center gap-2"
                 >
 
                   Apply Now

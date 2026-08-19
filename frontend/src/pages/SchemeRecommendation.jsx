@@ -27,9 +27,9 @@ function SchemeRecommendation() {
   const [bookmarkedIds, setBookmarkedIds] = useState([]);
   const [selectedSchemeModal, setSelectedSchemeModal] = useState(null);
 
-  /* =========================================================
-     GET CURRENT USER
-  ========================================================= */
+  // =========================================================
+  // CURRENT USER
+  // =========================================================
 
   const getCurrentUserKey = () => {
     const email = localStorage.getItem("userEmail");
@@ -41,19 +41,17 @@ function SchemeRecommendation() {
     return "guest";
   };
 
-
-  /* =========================================================
-     GET SAVED STORAGE KEY
-  ========================================================= */
+  // =========================================================
+  // USER-SPECIFIC SAVED KEY
+  // =========================================================
 
   const getSavedSchemesKey = () => {
     return `savedSchemes_${getCurrentUserKey()}`;
   };
 
-
-  /* =========================================================
-     EXTRACT SCHEMES FROM API RESPONSE
-  ========================================================= */
+  // =========================================================
+  // EXTRACT SCHEMES
+  // =========================================================
 
   const extractSchemes = (response) => {
     if (Array.isArray(response)) return response;
@@ -81,66 +79,64 @@ function SchemeRecommendation() {
     return [];
   };
 
-
-  /* =========================================================
-     SCHEME NAME
-  ========================================================= */
+  // =========================================================
+  // GET NAME
+  // =========================================================
 
   const getSchemeName = (scheme) =>
-    scheme.name ||
-    scheme.title ||
-    scheme.scheme_name ||
+    scheme?.name ||
+    scheme?.title ||
+    scheme?.scheme_name ||
+    scheme?._savedName ||
     "Government Welfare Scheme";
 
-
-  /* =========================================================
-     SCHEME CATEGORY
-  ========================================================= */
+  // =========================================================
+  // GET CATEGORY
+  // =========================================================
 
   const getCategory = (scheme) =>
-    scheme.category ||
-    scheme.type ||
+    scheme?.category ||
+    scheme?.type ||
+    scheme?._savedCategory ||
     "Welfare Scheme";
 
-
-  /* =========================================================
-     SCHEME DESCRIPTION
-  ========================================================= */
+  // =========================================================
+  // GET DESCRIPTION
+  // =========================================================
 
   const getDescription = (scheme) =>
-    scheme.description ||
-    scheme.details ||
-    "No description available for this scheme.";
+    scheme?.description ||
+    scheme?.details ||
+    scheme?._savedDescription ||
+    "No description available for this item.";
 
-
-  /* =========================================================
-     SCHEME ELIGIBILITY
-  ========================================================= */
+  // =========================================================
+  // GET ELIGIBILITY
+  // =========================================================
 
   const getEligibility = (scheme) =>
-    scheme.eligibility ||
-    scheme.eligibility_criteria ||
-    "Eligibility details available on the official scheme portal.";
+    scheme?.eligibility ||
+    scheme?.eligibility_criteria ||
+    "Eligibility details are available on the official portal.";
 
-
-  /* =========================================================
-     SCHEME DOCUMENTS
-  ========================================================= */
+  // =========================================================
+  // GET DOCUMENTS
+  // =========================================================
 
   const getDocuments = (scheme) => {
-    if (Array.isArray(scheme.documents_required)) {
+    if (Array.isArray(scheme?.documents_required)) {
       return scheme.documents_required;
     }
 
-    if (Array.isArray(scheme.documents)) {
+    if (Array.isArray(scheme?.documents)) {
       return scheme.documents;
     }
 
-    if (scheme.documents_required) {
+    if (scheme?.documents_required) {
       return [scheme.documents_required];
     }
 
-    if (scheme.documents) {
+    if (scheme?.documents) {
       return [scheme.documents];
     }
 
@@ -152,40 +148,150 @@ function SchemeRecommendation() {
     ];
   };
 
+  // =========================================================
+  // CLASSIFY ITEM
+  //
+  // Returns:
+  // "scheme"
+  // "job"
+  // "scholarship"
+  // =========================================================
 
-  /* =========================================================
-     LOAD SAVED SCHEMES FROM LOCAL STORAGE
-  ========================================================= */
+  const classifySavedItem = (item) => {
+    const text = [
+      item?.name,
+      item?.title,
+      item?.scheme_name,
+      item?.category,
+      item?.description,
+      item?.details,
+      item?.eligibility,
+      item?.eligibility_criteria,
+      item?.type,
+      item?._savedName,
+      item?._savedCategory,
+      item?._savedDescription,
+      item?._savedType,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
-  useEffect(() => {
-    try {
-      const savedData = localStorage.getItem(
-        getSavedSchemesKey()
-      );
+    // ---------------------------------------------------------
+    // SCHOLARSHIP
+    // ---------------------------------------------------------
 
-      if (savedData) {
-        const savedSchemes = JSON.parse(savedData);
+    const scholarshipKeywords = [
+      "scholarship",
+      "scholarships",
+      "fellowship",
+      "fellowships",
+      "student grant",
+      "education grant",
+      "financial assistance for students",
+      "financial support for students",
+      "student financial assistance",
+      "merit scholarship",
+      "education scholarship",
+      "student scholarship",
+      "post matric scholarship",
+      "pre matric scholarship",
+      "post-matric scholarship",
+      "pre-matric scholarship",
+    ];
 
-        if (Array.isArray(savedSchemes)) {
-          const savedIds = savedSchemes.map(
-            (scheme) => scheme._savedId
-          );
-
-          setBookmarkedIds(savedIds);
-        }
-      }
-    } catch (error) {
-      console.error(
-        "Unable to load saved schemes:",
-        error
-      );
+    if (
+      scholarshipKeywords.some((keyword) =>
+        text.includes(keyword)
+      )
+    ) {
+      return "scholarship";
     }
-  }, []);
 
+    // ---------------------------------------------------------
+    // JOBS / INTERNSHIPS
+    // ---------------------------------------------------------
 
-  /* =========================================================
-     LOAD SCHEMES
-  ========================================================= */
+    const jobKeywords = [
+      "job",
+      "jobs",
+      "employment",
+      "employability",
+      "career",
+      "careers",
+      "internship",
+      "internships",
+      "intern",
+      "vacancy",
+      "vacancies",
+      "recruitment",
+      "placement",
+      "placements",
+      "job fair",
+      "career fair",
+      "career counselling",
+      "career counseling",
+      "career guidance",
+      "work opportunity",
+      "work opportunities",
+      "wage employment",
+      "job search",
+      "employment opportunity",
+      "employment opportunities",
+      "employment service",
+      "employment services",
+    ];
+
+    if (
+      jobKeywords.some((keyword) =>
+        text.includes(keyword)
+      )
+    ) {
+      return "job";
+    }
+
+    // ---------------------------------------------------------
+    // DEFAULT
+    // ---------------------------------------------------------
+
+    return "scheme";
+  };
+
+  // =========================================================
+  // LOAD SAVED IDS
+  // =========================================================
+
+  const loadSavedIds = () => {
+    try {
+      const storageKey = getSavedSchemesKey();
+      const savedData = localStorage.getItem(storageKey);
+
+      if (!savedData) {
+        setBookmarkedIds([]);
+        return;
+      }
+
+      const savedItems = JSON.parse(savedData);
+
+      if (!Array.isArray(savedItems)) {
+        setBookmarkedIds([]);
+        return;
+      }
+
+      const ids = savedItems
+        .map((item) => item?._savedId)
+        .filter(Boolean);
+
+      setBookmarkedIds(ids);
+    } catch (error) {
+      console.error("Unable to load saved items:", error);
+      setBookmarkedIds([]);
+    }
+  };
+
+  // =========================================================
+  // LOAD SCHEMES
+  // =========================================================
 
   const loadSchemes = async () => {
     try {
@@ -212,15 +318,14 @@ function SchemeRecommendation() {
     }
   };
 
-
   useEffect(() => {
+    loadSavedIds();
     loadSchemes();
   }, []);
 
-
-  /* =========================================================
-     SEARCH
-  ========================================================= */
+  // =========================================================
+  // SEARCH
+  // =========================================================
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -256,10 +361,9 @@ function SchemeRecommendation() {
     }
   };
 
-
-  /* =========================================================
-     CLEAR SEARCH
-  ========================================================= */
+  // =========================================================
+  // CLEAR SEARCH
+  // =========================================================
 
   const handleClearSearch = async () => {
     setSearch("");
@@ -268,10 +372,9 @@ function SchemeRecommendation() {
     await loadSchemes();
   };
 
-
-  /* =========================================================
-     SAVE / UNSAVE SCHEME
-  ========================================================= */
+  // =========================================================
+  // SAVE / UNSAVE
+  // =========================================================
 
   const toggleBookmark = (scheme, schemeId) => {
     try {
@@ -279,50 +382,57 @@ function SchemeRecommendation() {
 
       const existingData = localStorage.getItem(storageKey);
 
-      let savedSchemes = [];
+      let savedItems = [];
 
       if (existingData) {
-        savedSchemes = JSON.parse(existingData);
+        try {
+          savedItems = JSON.parse(existingData);
 
-        if (!Array.isArray(savedSchemes)) {
-          savedSchemes = [];
+          if (!Array.isArray(savedItems)) {
+            savedItems = [];
+          }
+        } catch {
+          savedItems = [];
         }
       }
 
-
-      /* =========================
-         REMOVE SCHEME
-      ========================= */
+      // =====================================================
+      // REMOVE
+      // =====================================================
 
       if (bookmarkedIds.includes(schemeId)) {
-
-        const updatedSchemes = savedSchemes.filter(
-          (item) => item._savedId !== schemeId
+        const updatedItems = savedItems.filter(
+          (item) => item?._savedId !== schemeId
         );
 
         localStorage.setItem(
           storageKey,
-          JSON.stringify(updatedSchemes)
+          JSON.stringify(updatedItems)
         );
 
         setBookmarkedIds((prev) =>
-          prev.filter((item) => item !== schemeId)
+          prev.filter((id) => id !== schemeId)
         );
 
         return;
       }
 
+      // =====================================================
+      // CLASSIFY BEFORE SAVING
+      // =====================================================
 
-      /* =========================
-         SAVE SCHEME
-      ========================= */
+      const savedType = classifySavedItem(scheme);
 
-      const savedScheme = {
+      // =====================================================
+      // SAVE
+      // =====================================================
+
+      const savedItem = {
         ...scheme,
 
-        _savedId: schemeId,
+        _savedId: String(schemeId),
 
-        _savedType: "scheme",
+        _savedType: savedType,
 
         _savedName: getSchemeName(scheme),
 
@@ -333,87 +443,103 @@ function SchemeRecommendation() {
         _savedAt: new Date().toISOString(),
       };
 
-
-      const alreadySaved = savedSchemes.some(
-        (item) => item._savedId === schemeId
+      const alreadySaved = savedItems.some(
+        (item) =>
+          String(item?._savedId) === String(schemeId)
       );
 
-      if (!alreadySaved) {
-        savedSchemes.push(savedScheme);
-      }
+      let updatedItems;
 
+      if (alreadySaved) {
+        updatedItems = savedItems.map((item) =>
+          String(item?._savedId) === String(schemeId)
+            ? savedItem
+            : item
+        );
+      } else {
+        updatedItems = [
+          ...savedItems,
+          savedItem,
+        ];
+      }
 
       localStorage.setItem(
         storageKey,
-        JSON.stringify(savedSchemes)
+        JSON.stringify(updatedItems)
       );
 
-
-      setBookmarkedIds((prev) => [
-        ...prev,
-        schemeId,
-      ]);
-
+      setBookmarkedIds((prev) =>
+        prev.includes(schemeId)
+          ? prev
+          : [...prev, schemeId]
+      );
     } catch (error) {
       console.error(
-        "Unable to save scheme:",
+        "Unable to save item:",
         error
       );
 
       alert(
-        "Unable to save this scheme. Please try again."
+        "Unable to save this item. Please try again."
       );
     }
   };
 
-
-  /* =========================================================
-     CATEGORIES
-  ========================================================= */
+  // =========================================================
+  // CATEGORIES
+  // =========================================================
 
   const categories = useMemo(() => {
     const categorySet = new Set();
 
     schemes.forEach((scheme) => {
-      const category = scheme.category || scheme.type;
+      const category =
+        scheme?.category ||
+        scheme?.type;
 
       if (category) {
         categorySet.add(category);
       }
     });
 
-    return ["All", ...Array.from(categorySet)];
+    return [
+      "All",
+      ...Array.from(categorySet),
+    ];
   }, [schemes]);
 
+  // =========================================================
+  // FILTER
+  // =========================================================
 
-  /* =========================================================
-     FILTER
-  ========================================================= */
+  const filteredSchemes = schemes.filter(
+    (scheme) => {
+      if (selectedCategory === "All") {
+        return true;
+      }
 
-  const filteredSchemes = schemes.filter((scheme) => {
+      const category = (
+        scheme?.category ||
+        scheme?.type ||
+        ""
+      ).toLowerCase();
 
-    if (selectedCategory === "All") {
-      return true;
+      return category.includes(
+        selectedCategory.toLowerCase()
+      );
     }
+  );
 
-    const category = (
-      scheme.category ||
-      scheme.type ||
-      ""
-    ).toLowerCase();
-
-    return category.includes(
-      selectedCategory.toLowerCase()
-    );
-  });
-
+  // =========================================================
+  // UI
+  // =========================================================
 
   return (
     <div className="min-h-screen bg-[#060c17] text-white">
 
       <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#060c17] via-[#091528] to-[#060c17]">
 
-        {/* ================= BACKGROUND GLOW ================= */}
+        {/* Background Glow */}
 
         <div className="absolute top-10 left-[-120px] w-[420px] h-[420px] rounded-full bg-blue-600/15 blur-[150px] pointer-events-none" />
 
@@ -421,11 +547,9 @@ function SchemeRecommendation() {
 
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[250px] rounded-full bg-blue-600/10 blur-[150px] pointer-events-none" />
 
-
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
 
-
-          {/* ================= HEADER ================= */}
+          {/* Header */}
 
           <div className="text-center max-w-3xl mx-auto mb-10">
 
@@ -437,32 +561,25 @@ function SchemeRecommendation() {
 
             </div>
 
-
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight">
 
               Discover Government{" "}
 
               <span className="bg-gradient-to-r from-cyan-300 via-white to-blue-400 bg-clip-text text-transparent">
-
                 Schemes
-
               </span>
 
             </h1>
 
-
             <p className="text-slate-400 text-sm sm:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
-
-              Find welfare schemes, scholarships, healthcare benefits,
-              agricultural support and career opportunities that match
-              your needs.
-
+              Find welfare schemes, scholarships, healthcare
+              benefits, agricultural support and career
+              opportunities that match your needs.
             </p>
 
           </div>
 
-
-          {/* ================= SEARCH ================= */}
+          {/* Search */}
 
           <form
             onSubmit={handleSearch}
@@ -472,7 +589,6 @@ function SchemeRecommendation() {
             <div className="flex items-center gap-2 bg-[#081224]/90 backdrop-blur-xl border border-blue-900/60 rounded-2xl p-2 shadow-xl shadow-blue-950/20 focus-within:border-cyan-400/50 transition-all">
 
               <FaSearch className="text-slate-400 ml-4 shrink-0" />
-
 
               <input
                 type="text"
@@ -484,9 +600,7 @@ function SchemeRecommendation() {
                 className="flex-1 min-w-0 bg-transparent text-sm text-white placeholder-slate-500 outline-none py-3 px-1"
               />
 
-
               {search && (
-
                 <button
                   type="button"
                   onClick={handleClearSearch}
@@ -495,28 +609,23 @@ function SchemeRecommendation() {
                 >
                   <FaTimes />
                 </button>
-
               )}
-
 
               <button
                 type="submit"
                 disabled={searching}
                 className="px-5 sm:px-7 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold shadow-lg shadow-blue-600/20 hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-
                 {searching
                   ? "Searching..."
                   : "Search"}
-
               </button>
 
             </div>
 
           </form>
 
-
-          {/* ================= CATEGORY FILTER ================= */}
+          {/* Category Filter */}
 
           {!loading &&
             !error &&
@@ -534,26 +643,29 @@ function SchemeRecommendation() {
 
                 </div>
 
-
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
 
-                  {categories.map((category) => (
+                  {categories.map(
+                    (category) => (
 
-                    <button
-                      key={category}
-                      onClick={() =>
-                        setSelectedCategory(category)
-                      }
-                      className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
-                        selectedCategory === category
-                          ? "bg-gradient-to-r from-cyan-500 to-blue-600 border-cyan-400/40 text-white shadow-lg shadow-blue-600/20"
-                          : "bg-[#081224] border-blue-900/50 text-slate-400 hover:text-white hover:border-cyan-400/40"
-                      }`}
-                    >
-                      {category}
-                    </button>
+                      <button
+                        key={category}
+                        onClick={() =>
+                          setSelectedCategory(
+                            category
+                          )
+                        }
+                        className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
+                          selectedCategory === category
+                            ? "bg-gradient-to-r from-cyan-500 to-blue-600 border-cyan-400/40 text-white shadow-lg shadow-blue-600/20"
+                            : "bg-[#081224] border-blue-900/50 text-slate-400 hover:text-white hover:border-cyan-400/40"
+                        }`}
+                      >
+                        {category}
+                      </button>
 
-                  ))}
+                    )
+                  )}
 
                 </div>
 
@@ -561,8 +673,7 @@ function SchemeRecommendation() {
 
             )}
 
-
-          {/* ================= LOADING ================= */}
+          {/* Loading */}
 
           {loading && (
 
@@ -574,11 +685,9 @@ function SchemeRecommendation() {
 
               </div>
 
-
               <h3 className="text-white font-semibold mb-1">
                 Loading schemes...
               </h3>
-
 
               <p className="text-xs text-slate-500">
                 Fetching government scheme records
@@ -588,12 +697,11 @@ function SchemeRecommendation() {
 
           )}
 
-
-          {/* ================= ERROR ================= */}
+          {/* Error */}
 
           {!loading && error && (
 
-            <div className="max-w-xl mx-auto glass-card p-8 rounded-3xl border border-red-500/30 text-center">
+            <div className="max-w-xl mx-auto p-8 rounded-3xl border border-red-500/30 bg-[#081224] text-center">
 
               <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-red-500/10 flex items-center justify-center">
 
@@ -601,16 +709,13 @@ function SchemeRecommendation() {
 
               </div>
 
-
               <h3 className="text-lg font-bold text-white mb-2">
                 Unable to Load Schemes
               </h3>
 
-
               <p className="text-sm text-slate-400 mb-5">
                 {error}
               </p>
-
 
               <button
                 onClick={loadSchemes}
@@ -623,8 +728,7 @@ function SchemeRecommendation() {
 
           )}
 
-
-          {/* ================= SCHEME CARDS ================= */}
+          {/* Cards */}
 
           {!loading &&
             !error &&
@@ -642,13 +746,12 @@ function SchemeRecommendation() {
                       {filteredSchemes.length}
                     </span>{" "}
 
-                    scheme
+                    item
                     {filteredSchemes.length !== 1
                       ? "s"
                       : ""}
 
                   </div>
-
 
                   {bookmarkedIds.length > 0 && (
 
@@ -664,25 +767,23 @@ function SchemeRecommendation() {
 
                 </div>
 
-
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
                   {filteredSchemes.map(
                     (scheme, idx) => {
 
-                      const schemeId =
-                        scheme.id ||
-                        scheme.scheme_id ||
+                      const schemeId = String(
+                        scheme?.id ||
+                        scheme?.scheme_id ||
                         `${getSchemeName(
                           scheme
-                        )}-${idx}`;
-
+                        )}-${idx}`
+                      );
 
                       const isSaved =
                         bookmarkedIds.includes(
                           schemeId
                         );
-
 
                       return (
 
@@ -693,19 +794,15 @@ function SchemeRecommendation() {
 
                           <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent opacity-0 group-hover:opacity-100 transition" />
 
-
-                          {/* CATEGORY + BOOKMARK */}
+                          {/* Category + Save */}
 
                           <div className="flex items-start justify-between gap-3 mb-5">
 
                             <span className="px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/25 text-cyan-300 text-[11px] font-semibold">
 
-                              {getCategory(
-                                scheme
-                              )}
+                              {getCategory(scheme)}
 
                             </span>
-
 
                             <button
                               type="button"
@@ -723,7 +820,7 @@ function SchemeRecommendation() {
                               title={
                                 isSaved
                                   ? "Remove from saved"
-                                  : "Save scheme"
+                                  : "Save item"
                               }
                             >
 
@@ -737,8 +834,7 @@ function SchemeRecommendation() {
 
                           </div>
 
-
-                          {/* ICON */}
+                          {/* Icon */}
 
                           <div className="w-11 h-11 rounded-xl bg-blue-600/15 border border-blue-500/20 flex items-center justify-center mb-4">
 
@@ -746,30 +842,23 @@ function SchemeRecommendation() {
 
                           </div>
 
-
-                          {/* TITLE */}
+                          {/* Title */}
 
                           <h3 className="text-lg font-bold text-white leading-snug mb-3 group-hover:text-cyan-300 transition-colors">
 
-                            {getSchemeName(
-                              scheme
-                            )}
+                            {getSchemeName(scheme)}
 
                           </h3>
 
-
-                          {/* DESCRIPTION */}
+                          {/* Description */}
 
                           <p className="text-sm text-slate-400 leading-relaxed line-clamp-3 flex-1">
 
-                            {getDescription(
-                              scheme
-                            )}
+                            {getDescription(scheme)}
 
                           </p>
 
-
-                          {/* FOOTER */}
+                          {/* Footer */}
 
                           <div className="mt-6 pt-4 border-t border-blue-900/40 flex items-center justify-between">
 
@@ -787,7 +876,6 @@ function SchemeRecommendation() {
                               <FaArrowRight className="text-[10px]" />
 
                             </button>
-
 
                             <span className="text-[10px] text-slate-600">
 
@@ -812,8 +900,7 @@ function SchemeRecommendation() {
 
             )}
 
-
-          {/* ================= EMPTY SEARCH ================= */}
+          {/* Empty */}
 
           {!loading &&
             !error &&
@@ -825,11 +912,9 @@ function SchemeRecommendation() {
                   🔍
                 </div>
 
-
                 <h3 className="text-xl font-bold text-white mb-2">
                   No Schemes Found
                 </h3>
-
 
                 <p className="text-sm text-slate-400 leading-relaxed mb-5">
 
@@ -838,13 +923,11 @@ function SchemeRecommendation() {
 
                   {search
                     ? ` for "${search}"`
-                    : selectedCategory !==
-                      "All"
+                    : selectedCategory !== "All"
                     ? ` in ${selectedCategory}`
                     : ""}.
 
                 </p>
-
 
                 <button
                   onClick={handleClearSearch}
@@ -858,13 +941,9 @@ function SchemeRecommendation() {
             )}
 
         </div>
-
       </section>
 
-
-      {/* =====================================================
-          DETAILS MODAL
-      ===================================================== */}
+      {/* Details Modal */}
 
       {selectedSchemeModal && (
 
@@ -882,8 +961,6 @@ function SchemeRecommendation() {
             }
           >
 
-            {/* MODAL HEADER */}
-
             <div className="sticky top-0 z-10 bg-[#081224]/95 backdrop-blur-xl p-6 border-b border-blue-900/40">
 
               <div className="flex items-start justify-between gap-4">
@@ -898,7 +975,6 @@ function SchemeRecommendation() {
 
                   </span>
 
-
                   <h2 className="text-2xl sm:text-3xl font-black text-white mt-3">
 
                     {getSchemeName(
@@ -908,7 +984,6 @@ function SchemeRecommendation() {
                   </h2>
 
                 </div>
-
 
                 <button
                   onClick={() =>
@@ -924,9 +999,6 @@ function SchemeRecommendation() {
               </div>
 
             </div>
-
-
-            {/* MODAL CONTENT */}
 
             <div className="p-6 space-y-7">
 
@@ -946,13 +1018,11 @@ function SchemeRecommendation() {
 
               </div>
 
-
               <div>
 
                 <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
                   Eligibility Criteria
                 </h4>
-
 
                 <div className="p-4 rounded-2xl bg-[#0b1528] border border-blue-900/40">
 
@@ -968,13 +1038,11 @@ function SchemeRecommendation() {
 
               </div>
 
-
               <div>
 
                 <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
                   Documents Required
                 </h4>
-
 
                 <div className="space-y-2">
 
@@ -1003,9 +1071,6 @@ function SchemeRecommendation() {
 
               </div>
 
-
-              {/* MODAL BUTTONS */}
-
               <div className="pt-5 border-t border-blue-900/40 flex flex-col sm:flex-row justify-end gap-3">
 
                 <button
@@ -1019,18 +1084,15 @@ function SchemeRecommendation() {
                   Close
                 </button>
 
-
                 <a
                   href="https://myScheme.gov.in"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 hover:scale-[1.02] transition"
                 >
-
                   Proceed to Apply
 
                   <FaExternalLinkAlt className="text-xs" />
-
                 </a>
 
               </div>
@@ -1048,4 +1110,3 @@ function SchemeRecommendation() {
 }
 
 export default SchemeRecommendation;
-

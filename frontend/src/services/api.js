@@ -1,8 +1,9 @@
 import axios from "axios";
 
-// ===============================
+// ======================================================
 // BACKEND BASE URL
-// ===============================
+// ======================================================
+
 const API = axios.create({
   baseURL: "http://127.0.0.1:8000",
   headers: {
@@ -10,38 +11,67 @@ const API = axios.create({
   },
 });
 
-// ===============================
-// CHAT API
-// ===============================
-export const chatAPI = async (message) => {
-  const response = await API.post("/chat", {
-    message: message,
+// ======================================================
+// AUTH APIs
+// ======================================================
+
+// REGISTER
+export const registerUser = async (name, email, password) => {
+  const response = await API.post("/auth/register", {
+    name,
+    email,
+    password,
   });
 
   return response.data;
 };
 
-// ===============================
+// LOGIN
+export const loginUser = async (email, password) => {
+  const response = await API.post("/auth/login", {
+    email,
+    password,
+  });
+
+  return response.data;
+};
+
+// ======================================================
+// CHAT API
+// ======================================================
+
+export const chatAPI = async (message) => {
+  const response = await API.post("/chat", {
+    message,
+  });
+
+  return response.data;
+};
+
+// ======================================================
 // ELIGIBILITY API
-// ===============================
+// ======================================================
+
 export const eligibilityAPI = async (userData) => {
   const response = await API.post("/eligibility", userData);
 
   return response.data;
 };
 
-// ===============================
+// ======================================================
 // SCHEMES API
-// ===============================
+// ======================================================
+
 export const schemesAPI = async () => {
   const response = await API.get("/schemes");
 
   return response.data;
 };
 
-// ===============================
+// ======================================================
 // SEARCH SCHEMES API
-// ===============================
+// ======================================================
+
 export const searchSchemesAPI = async (query) => {
   const response = await API.get("/schemes/search", {
     params: {
@@ -52,12 +82,8 @@ export const searchSchemesAPI = async (query) => {
   return response.data;
 };
 
-// ===============================
+// ======================================================
 // DEFAULT EXPORT
-// ===============================
-export default API;
-export const loginUser = async (email, password) => {
-  const response = await API.post('/auth/login', { email, password });
-  return response.data;
-};
+// ======================================================
 
+export default API;

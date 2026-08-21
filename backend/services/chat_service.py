@@ -98,7 +98,7 @@ def generate_reply(message: str, profile: dict | None = None):
     # Step 5: Document Assistance
     # --------------------------------
 
-    if intent == "documents":
+    if intent == "document":
 
         documents = agent_result.get(
             "documents",

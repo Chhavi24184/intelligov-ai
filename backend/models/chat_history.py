@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey
 from sqlalchemy.sql import func
 
 from database import Base
@@ -14,8 +14,9 @@ class ChatHistory(Base):
         index=True
     )
 
-    user_email = Column(
-        String(255),
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
         nullable=False,
         index=True
     )

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { registerUser } from "../services/api";
 
 function Register() {
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ function Register() {
     e.preventDefault();
 
     // Check empty fields
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name.trim() || !email.trim() || !password || !confirmPassword) {
       alert("Please fill all fields");
       return;
     }
@@ -29,17 +29,14 @@ function Register() {
     try {
       setLoading(true);
 
-      // Send registration data to FastAPI backend
-      const response = await axios.post(
-        "http://127.0.0.1:8000/auth/register",
-        {
-          name: name,
-          email: email,
-          password: password,
-        }
+      // Send registration data through api.js
+      const data = await registerUser(
+        name.trim(),
+        email.trim(),
+        password
       );
 
-      console.log("Register response:", response.data);
+      console.log("Register response:", data);
 
       alert("Account created successfully!");
 
@@ -85,7 +82,7 @@ function Register() {
           boxSizing: "border-box",
         }}
       >
-
+        {/* Heading */}
         <h2
           style={{
             textAlign: "center",

@@ -150,7 +150,7 @@ function Navbar() {
 
   return (
 
-    <header className="relative z-50 w-full bg-[#0a1628] border-b border-blue-900/40">
+    <header className="relative z-50 w-full bg-white border-b border-sky-200">
 
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
 
@@ -175,13 +175,13 @@ function Navbar() {
 
             <span className="text-2xl font-black tracking-tight">
 
-              <span className="bg-gradient-to-r from-sky-400 via-white to-cyan-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-sky-500 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
 
                 IntelliGov
 
               </span>{" "}
 
-              <span className="text-amber-400 font-extrabold">
+              <span className="text-amber-500 font-extrabold">
 
                 AI
 
@@ -190,7 +190,7 @@ function Navbar() {
             </span>
 
 
-            <span className="text-[10px] uppercase tracking-widest text-cyan-400/80 font-semibold -mt-1">
+            <span className="text-[10px] uppercase tracking-widest text-cyan-600 font-semibold -mt-1">
 
               Smart Gov Assistant
 
@@ -205,7 +205,7 @@ function Navbar() {
             DESKTOP NAVIGATION
         ========================= */}
 
-        <nav className="hidden md:flex items-center gap-1 bg-[#0b1528]/60 p-1.5 rounded-full border border-blue-900/40">
+        <nav className="hidden md:flex items-center gap-1 bg-sky-50/80 p-1.5 rounded-full border border-sky-200">
 
           {navLinks.map((link) => (
 
@@ -214,7 +214,7 @@ function Navbar() {
               <button
                 key={link.path}
                 onClick={() => handleNavClick(link)}
-                className="px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 text-slate-300 hover:text-white hover:bg-blue-900/20"
+                className="px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 text-slate-600 hover:text-blue-700 hover:bg-sky-100"
               >
 
                 {link.name}
@@ -238,7 +238,7 @@ function Navbar() {
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   isActive(link.path)
                     ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-semibold"
-                    : "text-slate-300 hover:text-white hover:bg-blue-900/20"
+                    : "text-slate-600 hover:text-blue-700 hover:bg-sky-100"
                 }`}
               >
 
@@ -273,7 +273,7 @@ function Navbar() {
 
           <Link
             to="/dashboard"
-            className="p-2 text-slate-400 hover:text-white transition-colors"
+            className="p-2 text-slate-500 hover:text-blue-600 transition-colors"
             title="Dashboard"
           >
 
@@ -294,7 +294,7 @@ function Navbar() {
             onClick={() =>
               setMobileMenuOpen(!mobileMenuOpen)
             }
-            className="p-2.5 rounded-xl bg-[#0b1528] text-slate-300 hover:text-white border border-blue-900/50 focus:outline-none"
+            className="p-2.5 rounded-xl bg-sky-50 text-slate-600 hover:text-blue-700 border border-sky-200 focus:outline-none"
           >
 
             {mobileMenuOpen ? (
@@ -316,7 +316,7 @@ function Navbar() {
 
       {mobileMenuOpen && (
 
-        <div className="md:hidden bg-[#0a1424] border-b border-blue-900/40 px-4 pt-3 pb-6 space-y-2">
+        <div className="md:hidden bg-white border-b border-sky-200 px-4 pt-3 pb-6 space-y-2">
 
           {navLinks.map((link) => (
 
@@ -325,7 +325,7 @@ function Navbar() {
               <button
                 key={link.path}
                 onClick={() => handleNavClick(link)}
-                className="block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-all text-slate-300 hover:bg-blue-900/30 hover:text-white"
+                className="block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-all text-slate-600 hover:bg-sky-100 hover:text-blue-700"
               >
 
                 {link.name}
@@ -349,7 +349,7 @@ function Navbar() {
                 className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${
                   isActive(link.path)
                     ? "bg-blue-600 text-white font-semibold"
-                    : "text-slate-300 hover:bg-blue-900/30 hover:text-white"
+                    : "text-slate-600 hover:bg-sky-100 hover:text-blue-700"
                 }`}
               >
 

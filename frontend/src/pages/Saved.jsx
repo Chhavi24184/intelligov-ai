@@ -18,9 +18,9 @@ function Saved() {
   const [activeTab, setActiveTab] = useState("schemes");
   const [selectedItem, setSelectedItem] = useState(null);
 
-  /* =========================================================
-     CURRENT USER
-  ========================================================= */
+  // =========================================================
+  // CURRENT USER
+  // =========================================================
 
   const getCurrentUserKey = () => {
     const email = localStorage.getItem("userEmail");
@@ -32,9 +32,9 @@ function Saved() {
     return "guest";
   };
 
-  /* =========================================================
-     STORAGE KEYS
-  ========================================================= */
+  // =========================================================
+  // STORAGE KEYS
+  // =========================================================
 
   const getStorageKeys = () => {
     const userKey = getCurrentUserKey();
@@ -48,12 +48,9 @@ function Saved() {
     ];
   };
 
-  /* =========================================================
-     NORMALIZE TYPE
-     
-     This is the important part.
-     It allows old and new saved records to be classified.
-  ========================================================= */
+  // =========================================================
+  // NORMALIZE TYPE
+  // =========================================================
 
   const getItemType = (item) => {
     const explicitType = String(
@@ -67,7 +64,7 @@ function Saved() {
       .toLowerCase()
       .trim();
 
-    /* Scholarship */
+    // Scholarship
     if (
       explicitType.includes("scholar") ||
       explicitType.includes("fellowship") ||
@@ -76,7 +73,7 @@ function Saved() {
       return "scholarships";
     }
 
-    /* Internship */
+    // Internship
     if (
       explicitType.includes("intern") ||
       item?._savedType === "internship"
@@ -84,7 +81,7 @@ function Saved() {
       return "jobs";
     }
 
-    /* Job */
+    // Job
     if (
       explicitType === "job" ||
       explicitType.includes("jobs") ||
@@ -96,7 +93,7 @@ function Saved() {
       return "jobs";
     }
 
-    /* Scheme */
+    // Scheme
     if (
       explicitType.includes("scheme") ||
       explicitType.includes("welfare") ||
@@ -107,12 +104,7 @@ function Saved() {
       return "schemes";
     }
 
-    /*
-      Additional fallback based on saved name/title.
-      This helps classify older records which don't have
-      _savedType.
-    */
-
+    // Fallback using name/title
     const text = String(
       item?._savedName ||
         item?.name ||
@@ -132,12 +124,7 @@ function Saved() {
 
     if (
       text.includes("internship") ||
-      text.includes("intern")
-    ) {
-      return "jobs";
-    }
-
-    if (
+      text.includes("intern") ||
       text.includes("job") ||
       text.includes("developer") ||
       text.includes("engineer") ||
@@ -148,16 +135,12 @@ function Saved() {
       return "jobs";
     }
 
-    /*
-      For the current project, anything without another
-      identifiable type is treated as a government scheme.
-    */
     return "schemes";
   };
 
-  /* =========================================================
-     GET NAME
-  ========================================================= */
+  // =========================================================
+  // GET NAME
+  // =========================================================
 
   const getName = (item) =>
     item?._savedName ||
@@ -168,9 +151,9 @@ function Saved() {
     item?.jobTitle ||
     "Saved Item";
 
-  /* =========================================================
-     GET DESCRIPTION
-  ========================================================= */
+  // =========================================================
+  // GET DESCRIPTION
+  // =========================================================
 
   const getDescription = (item) =>
     item?._savedDescription ||
@@ -179,9 +162,9 @@ function Saved() {
     item?.summary ||
     "No description available.";
 
-  /* =========================================================
-     GET CATEGORY
-  ========================================================= */
+  // =========================================================
+  // GET CATEGORY
+  // =========================================================
 
   const getCategory = (item) => {
     const type = getItemType(item);
@@ -211,9 +194,9 @@ function Saved() {
     );
   };
 
-  /* =========================================================
-     GET ELIGIBILITY
-  ========================================================= */
+  // =========================================================
+  // GET ELIGIBILITY
+  // =========================================================
 
   const getEligibility = (item) =>
     item?.eligibility ||
@@ -221,9 +204,9 @@ function Saved() {
     item?.requirements ||
     "Eligibility details are available on the official portal.";
 
-  /* =========================================================
-     GET DOCUMENTS
-  ========================================================= */
+  // =========================================================
+  // GET DOCUMENTS
+  // =========================================================
 
   const getDocuments = (item) => {
     if (Array.isArray(item?.documents_required)) {
@@ -250,9 +233,9 @@ function Saved() {
     ];
   };
 
-  /* =========================================================
-     GET APPLY URL
-  ========================================================= */
+  // =========================================================
+  // GET APPLY URL
+  // =========================================================
 
   const getApplyUrl = (item) => {
     return (
@@ -266,9 +249,9 @@ function Saved() {
     );
   };
 
-  /* =========================================================
-     LOAD ALL SAVED ITEMS
-  ========================================================= */
+  // =========================================================
+  // LOAD ALL SAVED ITEMS
+  // =========================================================
 
   const loadSavedItems = () => {
     const keys = getStorageKeys();
@@ -295,12 +278,7 @@ function Saved() {
       }
     });
 
-    /*
-      Remove duplicates.
-      This prevents the same item from appearing twice if it
-      exists in more than one storage array.
-    */
-
+    // Remove duplicates
     const uniqueItems = [];
     const seen = new Set();
 
@@ -326,6 +304,10 @@ function Saved() {
     setSavedItems(uniqueItems);
   };
 
+  // =========================================================
+  // LOAD + LISTEN
+  // =========================================================
+
   useEffect(() => {
     loadSavedItems();
 
@@ -333,19 +315,33 @@ function Saved() {
       loadSavedItems();
     };
 
+    const handleSavedItemsChanged = () => {
+      loadSavedItems();
+    };
+
     window.addEventListener("storage", handleStorageChange);
+
+    window.addEventListener(
+      "savedItemsChanged",
+      handleSavedItemsChanged
+    );
 
     return () => {
       window.removeEventListener(
         "storage",
         handleStorageChange
       );
+
+      window.removeEventListener(
+        "savedItemsChanged",
+        handleSavedItemsChanged
+      );
     };
   }, []);
 
-  /* =========================================================
-     FILTER ITEMS
-  ========================================================= */
+  // =========================================================
+  // FILTER
+  // =========================================================
 
   const filteredItems = useMemo(() => {
     return savedItems.filter(
@@ -353,9 +349,9 @@ function Saved() {
     );
   }, [savedItems, activeTab]);
 
-  /* =========================================================
-     COUNTS
-  ========================================================= */
+  // =========================================================
+  // COUNTS
+  // =========================================================
 
   const schemeCount = savedItems.filter(
     (item) => getItemType(item) === "schemes"
@@ -369,9 +365,9 @@ function Saved() {
     (item) => getItemType(item) === "scholarships"
   ).length;
 
-  /* =========================================================
-     REMOVE ITEM
-  ========================================================= */
+  // =========================================================
+  // REMOVE ITEM
+  // =========================================================
 
   const removeItem = (itemToRemove) => {
     const itemId =
@@ -416,7 +412,10 @@ function Saved() {
           JSON.stringify(updated)
         );
       } catch (error) {
-        console.error("Unable to remove saved item:", error);
+        console.error(
+          "Unable to remove saved item:",
+          error
+        );
       }
     });
 
@@ -437,11 +436,15 @@ function Saved() {
     );
 
     setSelectedItem(null);
+
+    window.dispatchEvent(
+      new Event("savedItemsChanged")
+    );
   };
 
-  /* =========================================================
-     TAB CONFIG
-  ========================================================= */
+  // =========================================================
+  // TAB CONFIG
+  // =========================================================
 
   const tabs = [
     {
@@ -464,9 +467,9 @@ function Saved() {
     },
   ];
 
-  /* =========================================================
-     EMPTY MESSAGE
-  ========================================================= */
+  // =========================================================
+  // EMPTY MESSAGES
+  // =========================================================
 
   const emptyMessages = {
     schemes:
@@ -477,79 +480,253 @@ function Saved() {
       "You haven't saved any scholarships yet.",
   };
 
-  /* =========================================================
-     UI
-  ========================================================= */
+  // =========================================================
+  // UI
+  // =========================================================
 
   return (
-    <div className="min-h-screen bg-[#060c17] text-white">
-      <section className="relative min-h-screen bg-gradient-to-b from-[#060c17] via-[#091528] to-[#060c17] overflow-hidden">
+    <div className="min-h-screen bg-white text-slate-900">
 
-        {/* Background glow */}
-        <div className="absolute top-10 left-[-150px] w-[420px] h-[420px] rounded-full bg-blue-600/10 blur-[150px] pointer-events-none" />
+      <section className="relative min-h-screen bg-gradient-to-b from-white via-sky-50/40 to-white overflow-hidden">
 
-        <div className="absolute top-[400px] right-[-150px] w-[420px] h-[420px] rounded-full bg-cyan-500/10 blur-[150px] pointer-events-none" />
+        {/* =====================================================
+            BACKGROUND LIGHTS
+        ===================================================== */}
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="absolute inset-0 pointer-events-none">
 
-          {/* Back button */}
+          <div
+            className="
+              absolute
+              top-10
+              left-[-150px]
+              w-[420px]
+              h-[420px]
+              bg-sky-400/10
+              rounded-full
+              blur-3xl
+            "
+          />
+
+          <div
+            className="
+              absolute
+              top-[420px]
+              right-[-150px]
+              w-[420px]
+              h-[420px]
+              bg-blue-400/10
+              rounded-full
+              blur-3xl
+            "
+          />
+
+          <div
+            className="
+              absolute
+              bottom-0
+              left-1/2
+              -translate-x-1/2
+              w-[500px]
+              h-[220px]
+              bg-sky-300/10
+              rounded-full
+              blur-3xl
+            "
+          />
+
+        </div>
+
+        {/* =====================================================
+            MAIN CONTAINER
+        ===================================================== */}
+
+        <div className="relative max-w-7xl mx-auto px-6 py-8 lg:py-12">
+
+          {/* ===================================================
+              BACK BUTTON
+          =================================================== */}
+
           <button
             type="button"
             onClick={() => navigate("/dashboard")}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-[#0b1528] border border-blue-900/50 text-slate-400 hover:text-white hover:border-blue-700/60 transition text-xs font-medium"
+            className="
+              inline-flex
+              items-center
+              gap-2
+              px-4
+              py-2
+              rounded-xl
+
+              bg-white
+              border border-sky-200
+              text-slate-500
+
+              hover:text-sky-600
+              hover:border-sky-400
+              hover:-translate-x-1
+
+              shadow-sm
+              transition-all
+              duration-300
+
+              text-xs
+              font-semibold
+            "
           >
             <FaArrowLeft className="text-[10px]" />
-            Back
+
+            Back to Dashboard
           </button>
 
-          {/* Heading */}
-          <div className="text-center mt-5 mb-7">
+          {/* ===================================================
+              HEADER
+          =================================================== */}
 
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-400/20 text-cyan-300 text-xs font-semibold uppercase tracking-wider mb-4">
+          <div className="text-center max-w-3xl mx-auto mt-8 mb-10">
+
+            <div
+              className="
+                inline-flex
+                items-center
+                gap-2
+                px-4
+                py-1.5
+                rounded-full
+
+                bg-sky-50
+                border border-sky-200
+
+                text-sky-600
+                text-xs
+                font-semibold
+                uppercase
+                tracking-wider
+
+                shadow-sm
+              "
+            >
               <FaBookmark />
+
               Your Saved Items
             </div>
 
-            <h1 className="block w-full text-center text-3xl sm:text-4xl font-black tracking-tight mt-2">
+            <h1
+              className="
+                text-3xl
+                sm:text-4xl
+                lg:text-5xl
+
+                font-black
+                tracking-tight
+
+                text-slate-900
+
+                mt-5
+              "
+            >
+              Your Saved{" "}
+
               <span
-                style={{
-                  background: "linear-gradient(90deg, #22d3ee, #ffffff, #3b82f6)",
-                  backgroundSize: "100% 100%",
-                  backgroundRepeat: "no-repeat",
-                  color: "transparent",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
+                className="
+                  bg-gradient-to-r
+                  from-sky-500
+                  to-blue-600
+                  bg-clip-text
+                  text-transparent
+                "
               >
-                {tabs.find((tab) => tab.id === activeTab)?.label}
+                Opportunities
               </span>
             </h1>
 
-            <p className="text-slate-400 text-sm mt-2">
-              Access the opportunities you saved for later.
+            <p
+              className="
+                text-slate-600
+                text-sm
+                sm:text-base
+                mt-4
+                max-w-2xl
+                mx-auto
+                leading-relaxed
+              "
+            >
+              Keep track of government schemes, jobs,
+              internships, and scholarships you want to
+              explore later.
             </p>
 
           </div>
 
-          {/* =================================================
-              SLIDER / TABS
-          ================================================= */}
+          {/* ===================================================
+              TABS
+          =================================================== */}
 
-          <div className="max-w-4xl mx-auto mb-8">
+          <div className="max-w-4xl mx-auto mb-10">
 
-            <div className="grid grid-cols-3 bg-[#081224]/90 border border-blue-900/50 rounded-2xl p-1.5">
+            <div
+              className="
+                grid
+                grid-cols-3
+                gap-1
+
+                bg-white
+                border border-sky-200
+
+                rounded-2xl
+                p-1.5
+
+                shadow-sm
+              "
+            >
 
               {tabs.map((tab) => (
+
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                    activeTab === tab.id
-                      ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-blue-600/20"
-                      : "text-slate-500 hover:text-slate-200"
-                  }`}
+                  onClick={() =>
+                    setActiveTab(tab.id)
+                  }
+                  className={`
+                    relative
+
+                    flex
+                    items-center
+                    justify-center
+                    gap-2
+
+                    px-3
+                    py-3
+
+                    rounded-xl
+
+                    text-xs
+                    sm:text-sm
+                    font-semibold
+
+                    transition-all
+                    duration-300
+
+                    ${
+                      activeTab === tab.id
+                        ? `
+                          bg-gradient-to-r
+                          from-sky-500
+                          to-blue-600
+                          text-white
+                          shadow-md
+                          shadow-sky-200
+                        `
+                        : `
+                          text-slate-500
+                          hover:text-sky-600
+                          hover:bg-sky-50
+                        `
+                    }
+                  `}
                 >
+
                   <span className="hidden sm:inline">
                     {tab.icon}
                   </span>
@@ -559,98 +736,372 @@ function Saved() {
                   </span>
 
                   <span
-                    className={`min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center text-[10px] ${
-                      activeTab === tab.id
-                        ? "bg-white/15 text-white"
-                        : "bg-white/5 text-slate-500"
-                    }`}
+                    className={`
+                      min-w-[21px]
+                      h-5
+                      px-1.5
+                      rounded-full
+                      flex
+                      items-center
+                      justify-center
+                      text-[10px]
+
+                      ${
+                        activeTab === tab.id
+                          ? "bg-white/20 text-white"
+                          : "bg-sky-50 text-slate-500"
+                      }
+                    `}
                   >
                     {tab.count}
                   </span>
+
                 </button>
+
               ))}
 
             </div>
 
           </div>
 
-          {/* =================================================
-              CONTENT
-          ================================================= */}
+          {/* ===================================================
+              SAVED CARDS
+          =================================================== */}
 
           {filteredItems.length > 0 ? (
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div
+              className="
+                grid
+                grid-cols-1
+                md:grid-cols-2
+                lg:grid-cols-3
+                gap-6
+                lg:gap-8
+              "
+            >
 
               {filteredItems.map((item, index) => {
 
                 const type = getItemType(item);
 
                 return (
+
                   <div
                     key={`${type}-${item?._savedId || index}`}
-                    className="group relative flex flex-col bg-[#081224]/85 border border-blue-900/40 rounded-3xl p-6 hover:border-cyan-400/30 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-950/30 transition-all duration-300"
+                    className="
+                      glass-card
+
+                      p-7
+
+                      rounded-3xl
+                      relative
+
+                      flex
+                      flex-col
+                      justify-between
+
+                      group
+
+                      border
+                      border-sky-200/70
+
+                      transition-all
+                      duration-500
+                      ease-[cubic-bezier(0.22,1,0.36,1)]
+
+                      hover:border-sky-400/60
+                      hover:-translate-y-2
+                    "
                   >
 
-                    {/* Top line */}
-                    <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent opacity-0 group-hover:opacity-100 transition" />
+                    {/* =================================================
+                        HOVER GLOW
+                    ================================================= */}
 
-                    <div className="flex items-start justify-between gap-3 mb-5">
+                    <div
+                      className="
+                        absolute
+                        inset-0
+                        rounded-3xl
 
-                      <span className="px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/20 text-cyan-300 text-[11px] font-semibold">
-                        {getCategory(item)}
-                      </span>
+                        bg-gradient-to-br
+                        from-sky-400/[0.08]
+                        via-transparent
+                        to-blue-500/[0.06]
 
-                      <button
-                        type="button"
-                        onClick={() => removeItem(item)}
-                        className="w-9 h-9 rounded-xl bg-[#0b1528] border border-blue-900/40 flex items-center justify-center text-amber-400 hover:text-red-400 hover:border-red-400/30 transition"
-                        title="Remove from saved"
+                        opacity-0
+                        group-hover:opacity-100
+
+                        transition-opacity
+                        duration-500
+
+                        pointer-events-none
+                      "
+                    />
+
+                    <div className="relative z-10">
+
+                      {/* =================================================
+                          CATEGORY + REMOVE
+                      ================================================= */}
+
+                      <div
+                        className="
+                          flex
+                          items-start
+                          justify-between
+                          gap-3
+                          mb-6
+                        "
                       >
-                        <FaBookmark />
-                      </button>
+
+                        <span
+                          className="
+                            px-3
+                            py-1.5
+
+                            rounded-full
+
+                            bg-sky-50
+                            border border-sky-200
+
+                            text-slate-600
+
+                            text-[11px]
+                            font-medium
+
+                            group-hover:border-sky-400/60
+                            group-hover:text-sky-600
+
+                            transition-all
+                            duration-300
+                          "
+                        >
+                          {getCategory(item)}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeItem(item)
+                          }
+                          className="
+                            w-9
+                            h-9
+                            rounded-xl
+
+                            bg-sky-50
+                            border border-sky-200
+
+                            flex
+                            items-center
+                            justify-center
+
+                            text-sky-500
+
+                            hover:text-red-500
+                            hover:border-red-300
+                            hover:bg-red-50
+                            hover:scale-110
+
+                            transition-all
+                            duration-300
+                          "
+                          title="Remove from saved"
+                        >
+                          <FaBookmark />
+                        </button>
+
+                      </div>
+
+                      {/* =================================================
+                          ICON
+                      ================================================= */}
+
+                      <div
+                        className="
+                          w-12
+                          h-12
+
+                          rounded-2xl
+
+                          bg-sky-50
+                          border border-sky-200
+
+                          flex
+                          items-center
+                          justify-center
+
+                          mb-5
+
+                          group-hover:border-sky-400/60
+                          group-hover:scale-110
+                          group-hover:-rotate-2
+
+                          transition-all
+                          duration-500
+                        "
+                      >
+
+                        {type === "scholarships" ? (
+
+                          <FaGraduationCap
+                            className="text-xl text-sky-500"
+                          />
+
+                        ) : type === "jobs" ? (
+
+                          <FaBriefcase
+                            className="text-xl text-sky-500"
+                          />
+
+                        ) : (
+
+                          <FaFileAlt
+                            className="text-xl text-sky-500"
+                          />
+
+                        )}
+
+                      </div>
+
+                      {/* =================================================
+                          TITLE
+                      ================================================= */}
+
+                      <h3
+                        className="
+                          text-xl
+                          font-bold
+                          text-slate-900
+
+                          leading-snug
+
+                          mb-3
+
+                          group-hover:text-sky-600
+
+                          transition-colors
+                          duration-300
+                        "
+                      >
+                        {getName(item)}
+                      </h3>
+
+                      {/* =================================================
+                          DESCRIPTION
+                      ================================================= */}
+
+                      <p
+                        className="
+                          text-sm
+                          text-slate-600
+                          leading-relaxed
+
+                          line-clamp-3
+                        "
+                      >
+                        {getDescription(item)}
+                      </p>
 
                     </div>
 
-                    {/* Icon */}
-                    <div className="w-11 h-11 rounded-xl bg-blue-600/15 border border-blue-500/20 flex items-center justify-center mb-4">
+                    {/* =================================================
+                        FOOTER
+                    ================================================= */}
 
-                      {type === "scholarships" ? (
-                        <FaGraduationCap className="text-cyan-400" />
-                      ) : type === "jobs" ? (
-                        <FaBriefcase className="text-cyan-400" />
-                      ) : (
-                        <FaFileAlt className="text-cyan-400" />
-                      )}
+                    <div
+                      className="
+                        relative
+                        z-10
 
-                    </div>
+                        mt-6
+                        pt-5
 
-                    <h3 className="text-lg font-bold text-white leading-snug mb-3">
-                      {getName(item)}
-                    </h3>
+                        border-t
+                        border-sky-100
 
-                    <p className="text-sm text-slate-400 leading-relaxed line-clamp-3 flex-1">
-                      {getDescription(item)}
-                    </p>
-
-                    <div className="mt-6 pt-4 border-t border-blue-900/40 flex items-center justify-between">
+                        flex
+                        items-center
+                        justify-between
+                      "
+                    >
 
                       <button
                         type="button"
-                        onClick={() => setSelectedItem(item)}
-                        className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-2 transition"
+                        onClick={() =>
+                          setSelectedItem(item)
+                        }
+                        className="
+                          inline-flex
+                          items-center
+                          gap-2
+
+                          text-sm
+                          font-semibold
+
+                          text-sky-600
+
+                          hover:text-blue-600
+                          hover:translate-x-1
+
+                          transition-all
+                          duration-300
+                        "
                       >
                         View Details
-                        <FaExternalLinkAlt className="text-[9px]" />
+
+                        <span
+                          className="
+                            transition-transform
+                            duration-300
+
+                            group-hover:translate-x-1
+                          "
+                        >
+                          →
+                        </span>
                       </button>
 
-                      <span className="text-[10px] text-slate-600">
+                      <span
+                        className="
+                          text-[10px]
+                          text-slate-400
+                          font-medium
+                        "
+                      >
                         #{String(index + 1).padStart(2, "0")}
                       </span>
 
                     </div>
 
+                    {/* =================================================
+                        BOTTOM GLOW
+                    ================================================= */}
+
+                    <div
+                      className="
+                        absolute
+                        bottom-0
+                        left-1/2
+                        -translate-x-1/2
+
+                        w-1/2
+                        h-px
+
+                        bg-sky-400/0
+                        group-hover:bg-sky-400/50
+
+                        blur-sm
+
+                        transition-all
+                        duration-500
+                      "
+                    />
+
                   </div>
+
                 );
               })}
 
@@ -658,17 +1109,67 @@ function Saved() {
 
           ) : (
 
-            <div className="max-w-md mx-auto py-16 text-center">
+            /* =================================================
+               EMPTY STATE
+            ================================================= */
 
-              <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
-                <FaBookmark className="text-2xl text-slate-600" />
+            <div
+              className="
+                max-w-md
+                mx-auto
+                py-16
+                text-center
+              "
+            >
+
+              <div
+                className="
+                  w-16
+                  h-16
+                  mx-auto
+                  mb-5
+
+                  rounded-2xl
+
+                  bg-sky-50
+                  border border-sky-200
+
+                  flex
+                  items-center
+                  justify-center
+
+                  shadow-sm
+                "
+              >
+
+                <FaBookmark
+                  className="
+                    text-2xl
+                    text-sky-300
+                  "
+                />
+
               </div>
 
-              <h3 className="text-xl font-bold text-white mb-2">
+              <h3
+                className="
+                  text-xl
+                  font-bold
+                  text-slate-900
+                  mb-2
+                "
+              >
                 Nothing Saved Yet
               </h3>
 
-              <p className="text-sm text-slate-500 leading-relaxed mb-6">
+              <p
+                className="
+                  text-sm
+                  text-slate-500
+                  leading-relaxed
+                  mb-6
+                "
+              >
                 {emptyMessages[activeTab]}
               </p>
 
@@ -681,7 +1182,29 @@ function Saved() {
                     navigate("/dashboard");
                   }
                 }}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-semibold hover:scale-[1.02] transition"
+                className="
+                  px-6
+                  py-3
+                  rounded-xl
+
+                  bg-gradient-to-r
+                  from-sky-500
+                  to-blue-600
+
+                  text-white
+                  text-sm
+                  font-semibold
+
+                  shadow-md
+                  shadow-sky-200
+
+                  hover:scale-[1.03]
+                  hover:shadow-lg
+                  hover:shadow-sky-200
+
+                  transition-all
+                  duration-300
+                "
               >
                 Explore Now
               </button>
@@ -691,36 +1214,122 @@ function Saved() {
           )}
 
         </div>
+
       </section>
 
-      {/* =====================================================
+      {/* =========================================================
           DETAILS MODAL
-      ===================================================== */}
+      ========================================================= */}
 
       {selectedItem && (
 
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-          onClick={() => setSelectedItem(null)}
+          className="
+            fixed
+            inset-0
+            z-50
+
+            bg-slate-900/30
+            backdrop-blur-md
+
+            flex
+            items-center
+            justify-center
+
+            p-4
+          "
+          onClick={() =>
+            setSelectedItem(null)
+          }
         >
 
           <div
-            className="w-full max-w-2xl max-h-[88vh] overflow-y-auto bg-[#081224] border border-cyan-400/30 rounded-3xl shadow-2xl shadow-black/50"
-            onClick={(e) => e.stopPropagation()}
+            className="
+              w-full
+              max-w-2xl
+              max-h-[88vh]
+
+              overflow-y-auto
+
+              bg-white
+
+              border
+              border-sky-200
+
+              rounded-3xl
+
+              shadow-2xl
+              shadow-sky-900/10
+            "
+            onClick={(e) =>
+              e.stopPropagation()
+            }
           >
 
-            {/* Modal header */}
-            <div className="sticky top-0 z-10 bg-[#081224]/95 backdrop-blur-xl p-6 border-b border-blue-900/40">
+            {/* =================================================
+                MODAL HEADER
+            ================================================= */}
 
-              <div className="flex items-start justify-between gap-4">
+            <div
+              className="
+                sticky
+                top-0
+                z-10
+
+                bg-white/95
+                backdrop-blur-xl
+
+                p-6
+
+                border-b
+                border-sky-100
+              "
+            >
+
+              <div
+                className="
+                  flex
+                  items-start
+                  justify-between
+                  gap-4
+                "
+              >
 
                 <div>
 
-                  <span className="inline-block px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold">
+                  <span
+                    className="
+                      inline-block
+
+                      px-3
+                      py-1
+
+                      rounded-full
+
+                      bg-sky-50
+                      border border-sky-200
+
+                      text-sky-600
+
+                      text-xs
+                      font-semibold
+                    "
+                  >
                     {getCategory(selectedItem)}
                   </span>
 
-                  <h2 className="text-2xl sm:text-3xl font-black text-white mt-3">
+                  <h2
+                    className="
+                      text-2xl
+                      sm:text-3xl
+
+                      font-black
+
+                      text-slate-900
+
+                      mt-3
+                    "
+                  >
                     {getName(selectedItem)}
                   </h2>
 
@@ -728,8 +1337,31 @@ function Saved() {
 
                 <button
                   type="button"
-                  onClick={() => setSelectedItem(null)}
-                  className="w-10 h-10 rounded-xl bg-[#0b1528] border border-blue-900/40 text-slate-400 hover:text-white flex items-center justify-center shrink-0"
+                  onClick={() =>
+                    setSelectedItem(null)
+                  }
+                  className="
+                    w-10
+                    h-10
+                    rounded-xl
+
+                    bg-sky-50
+                    border border-sky-200
+
+                    text-slate-400
+
+                    hover:text-sky-600
+                    hover:border-sky-400
+
+                    flex
+                    items-center
+                    justify-center
+
+                    shrink-0
+
+                    transition-all
+                    duration-300
+                  "
                 >
                   <FaTimes />
                 </button>
@@ -738,30 +1370,81 @@ function Saved() {
 
             </div>
 
-            {/* Modal content */}
+            {/* =================================================
+                MODAL CONTENT
+            ================================================= */}
+
             <div className="p-6 space-y-7">
+
+              {/* Overview */}
 
               <div>
 
-                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
+                <h4
+                  className="
+                    text-xs
+                    uppercase
+                    tracking-wider
+
+                    text-sky-600
+
+                    font-semibold
+
+                    mb-3
+                  "
+                >
                   Overview & Benefits
                 </h4>
 
-                <p className="text-sm text-slate-300 leading-relaxed">
+                <p
+                  className="
+                    text-sm
+                    text-slate-600
+                    leading-relaxed
+                  "
+                >
                   {getDescription(selectedItem)}
                 </p>
 
               </div>
 
+              {/* Eligibility */}
+
               <div>
 
-                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
+                <h4
+                  className="
+                    text-xs
+                    uppercase
+                    tracking-wider
+
+                    text-sky-600
+
+                    font-semibold
+
+                    mb-3
+                  "
+                >
                   Eligibility / Requirements
                 </h4>
 
-                <div className="p-4 rounded-2xl bg-[#0b1528] border border-blue-900/40">
+                <div
+                  className="
+                    p-4
+                    rounded-2xl
 
-                  <p className="text-sm text-slate-300 leading-relaxed">
+                    bg-sky-50/60
+                    border border-sky-100
+                  "
+                >
+
+                  <p
+                    className="
+                      text-sm
+                      text-slate-600
+                      leading-relaxed
+                    "
+                  >
                     {getEligibility(selectedItem)}
                   </p>
 
@@ -769,9 +1452,23 @@ function Saved() {
 
               </div>
 
+              {/* Documents */}
+
               <div>
 
-                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
+                <h4
+                  className="
+                    text-xs
+                    uppercase
+                    tracking-wider
+
+                    text-sky-600
+
+                    font-semibold
+
+                    mb-3
+                  "
+                >
                   Documents / Requirements
                 </h4>
 
@@ -779,16 +1476,41 @@ function Saved() {
 
                   {getDocuments(selectedItem).map(
                     (document, index) => (
+
                       <div
                         key={index}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-[#0b1528] border border-blue-900/40"
-                      >
-                        <FaCheckCircle className="text-emerald-400 shrink-0" />
+                        className="
+                          flex
+                          items-center
+                          gap-3
 
-                        <span className="text-sm text-slate-300">
+                          p-3
+
+                          rounded-xl
+
+                          bg-slate-50
+                          border border-sky-100
+                        "
+                      >
+
+                        <FaCheckCircle
+                          className="
+                            text-emerald-500
+                            shrink-0
+                          "
+                        />
+
+                        <span
+                          className="
+                            text-sm
+                            text-slate-600
+                          "
+                        >
                           {document}
                         </span>
+
                       </div>
+
                     )
                   )}
 
@@ -796,21 +1518,80 @@ function Saved() {
 
               </div>
 
-              {/* Buttons */}
-              <div className="pt-5 border-t border-blue-900/40 flex flex-col sm:flex-row justify-end gap-3">
+              {/* =================================================
+                  BUTTONS
+              ================================================= */}
+
+              <div
+                className="
+                  pt-5
+
+                  border-t
+                  border-sky-100
+
+                  flex
+                  flex-col
+                  sm:flex-row
+
+                  justify-end
+                  gap-3
+                "
+              >
 
                 <button
                   type="button"
-                  onClick={() => removeItem(selectedItem)}
-                  className="px-5 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-sm font-semibold hover:bg-red-500/20 transition"
+                  onClick={() =>
+                    removeItem(selectedItem)
+                  }
+                  className="
+                    px-5
+                    py-3
+
+                    rounded-xl
+
+                    bg-red-50
+                    border border-red-200
+
+                    text-red-500
+
+                    text-sm
+                    font-semibold
+
+                    hover:bg-red-100
+                    hover:border-red-300
+
+                    transition-all
+                    duration-300
+                  "
                 >
                   Remove Saved
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => setSelectedItem(null)}
-                  className="px-5 py-3 rounded-xl bg-[#0b1528] border border-blue-900/40 text-slate-300 text-sm font-semibold hover:text-white transition"
+                  onClick={() =>
+                    setSelectedItem(null)
+                  }
+                  className="
+                    px-5
+                    py-3
+
+                    rounded-xl
+
+                    bg-white
+                    border border-sky-200
+
+                    text-slate-600
+
+                    text-sm
+                    font-semibold
+
+                    hover:text-sky-600
+                    hover:border-sky-400
+
+                    transition-all
+                    duration-300
+                  "
                 >
                   Close
                 </button>
@@ -819,10 +1600,41 @@ function Saved() {
                   href={getApplyUrl(selectedItem)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 hover:scale-[1.02] transition"
+                  className="
+                    px-6
+                    py-3
+
+                    rounded-xl
+
+                    bg-gradient-to-r
+                    from-sky-500
+                    to-blue-600
+
+                    text-white
+
+                    text-sm
+                    font-semibold
+
+                    flex
+                    items-center
+                    justify-center
+                    gap-2
+
+                    shadow-md
+                    shadow-sky-200
+
+                    hover:scale-[1.02]
+                    hover:shadow-lg
+
+                    transition-all
+                    duration-300
+                  "
                 >
                   Proceed to Apply
-                  <FaExternalLinkAlt className="text-xs" />
+
+                  <FaExternalLinkAlt
+                    className="text-xs"
+                  />
                 </a>
 
               </div>
@@ -832,6 +1644,7 @@ function Saved() {
           </div>
 
         </div>
+
       )}
 
     </div>
@@ -839,4 +1652,3 @@ function Saved() {
 }
 
 export default Saved;
-

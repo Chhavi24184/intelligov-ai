@@ -24,25 +24,25 @@ function Dashboard() {
       title: "Explore Schemes",
       desc: "View government welfare initiatives and scholarships.",
       link: "/schemes",
-      icon: <FaListAlt className="text-cyan-400 text-xl" />,
+      icon: <FaListAlt className="text-cyan-500 text-xl" />,
     },
 
     {
       title: "Check Eligibility",
       desc: "Check your eligibility for available government schemes.",
       link: "/eligibility",
-      icon: <FaUserCheck className="text-emerald-400 text-xl" />,
+      icon: <FaUserCheck className="text-emerald-500 text-xl" />,
     },
   ];
 
 
   return (
 
-    <div className="min-h-screen bg-[#060c17] text-white">
+    <div className="min-h-screen bg-[#f5f9ff] text-slate-800">
 
 
       {/* =====================================================
-          FIXED RESPONSIVE SIDEBAR
+          RESPONSIVE SIDEBAR
       ===================================================== */}
 
       <Sidebar />
@@ -50,14 +50,6 @@ function Dashboard() {
 
       {/* =====================================================
           MAIN DASHBOARD
-          
-          Desktop:
-          ml-50 → reserves sidebar width
-
-          Mobile:
-          ml-0 → full screen
-          
-          pt-16 → reserves mobile top bar
       ===================================================== */}
 
       <main
@@ -70,30 +62,25 @@ function Dashboard() {
         "
       >
 
-        {/* =================================================
-            DASHBOARD SCROLL AREA
-        ================================================= */}
-
         <div className="min-h-screen overflow-y-auto">
 
-
           {/* =================================================
-              BACKGROUND
+              LIGHT BACKGROUND
           ================================================= */}
 
-          <div className="relative min-h-screen overflow-hidden">
+          <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#f8fbff] via-[#eef7ff] to-[#f5f9ff]">
 
 
-            {/* Blue Glow */}
+            {/* Soft Blue Glow */}
 
             <div
               className="
                 absolute
                 top-0
                 left-1/4
-                w-[400px]
-                h-[400px]
-                bg-blue-600/10
+                w-[450px]
+                h-[450px]
+                bg-blue-400/15
                 blur-[150px]
                 rounded-full
                 pointer-events-none
@@ -101,17 +88,34 @@ function Dashboard() {
             />
 
 
-            {/* Cyan Glow */}
+            {/* Soft Cyan Glow */}
 
             <div
               className="
                 absolute
                 top-1/2
                 right-0
+                w-[400px]
+                h-[400px]
+                bg-cyan-400/15
+                blur-[140px]
+                rounded-full
+                pointer-events-none
+              "
+            />
+
+
+            {/* Bottom Glow */}
+
+            <div
+              className="
+                absolute
+                bottom-0
+                left-1/3
                 w-[350px]
                 h-[350px]
-                bg-cyan-500/10
-                blur-[140px]
+                bg-indigo-400/10
+                blur-[130px]
                 rounded-full
                 pointer-events-none
               "
@@ -145,7 +149,6 @@ function Dashboard() {
                 "
               >
 
-
                 {/* Back Button */}
 
                 <button
@@ -158,15 +161,17 @@ function Dashboard() {
                     px-4
                     py-2
                     rounded-xl
-                    bg-[#081224]
+                    bg-white/80
+                    backdrop-blur-md
                     border
-                    border-blue-900/40
-                    text-slate-300
+                    border-blue-100
+                    text-slate-600
                     text-sm
                     font-medium
-                    hover:text-white
-                    hover:border-blue-700/60
-                    hover:bg-[#0d1a2e]
+                    shadow-sm
+                    hover:text-blue-600
+                    hover:border-blue-300
+                    hover:bg-white
                     transition-all
                     duration-300
                   "
@@ -188,16 +193,18 @@ function Dashboard() {
                     w-10
                     h-10
                     rounded-xl
-                    bg-[#081224]
+                    bg-white/80
+                    backdrop-blur-md
                     border
-                    border-blue-900/40
+                    border-blue-100
                     flex
                     items-center
                     justify-center
-                    text-slate-400
-                    hover:text-white
-                    hover:border-blue-700/60
-                    hover:bg-[#0d1a2e]
+                    text-slate-500
+                    shadow-sm
+                    hover:text-blue-600
+                    hover:border-blue-300
+                    hover:bg-white
                     transition-all
                     duration-300
                   "
@@ -209,8 +216,6 @@ function Dashboard() {
                   </span>
 
 
-                  {/* Notification Dot */}
-
                   <span
                     className="
                       absolute
@@ -219,8 +224,8 @@ function Dashboard() {
                       w-2
                       h-2
                       rounded-full
-                      bg-cyan-400
-                      shadow-[0_0_8px_rgba(34,211,238,0.8)]
+                      bg-cyan-500
+                      shadow-[0_0_8px_rgba(6,182,212,0.7)]
                     "
                   />
 
@@ -237,28 +242,19 @@ function Dashboard() {
               <div className="space-y-8">
 
 
-                {/* =================================================
-                    WELCOME
-                ================================================= */}
+                {/* WELCOME */}
 
                 <WelcomeSection />
 
 
-
-                {/* =================================================
-                    STATISTICS
-                ================================================= */}
+                {/* STATISTICS */}
 
                 <StatsCards />
 
 
-
-                {/* =================================================
-                    AI ASSISTANT
-                ================================================= */}
+                {/* AI ASSISTANT */}
 
                 <AIAssistantCard />
-
 
 
                 {/* =================================================
@@ -267,22 +263,18 @@ function Dashboard() {
 
                 <section className="space-y-4">
 
-
                   <div>
 
-                    <h3 className="text-lg sm:text-xl font-bold text-white">
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-800">
                       Quick Portal Actions
                     </h3>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-slate-500 mt-1">
                       Quickly access important citizen services.
                     </p>
 
                   </div>
 
-
-
-                  {/* Responsive Cards */}
 
                   <div
                     className="
@@ -299,26 +291,51 @@ function Dashboard() {
                         key={index}
                         to={action.link}
                         className="
-                          glass-card
+                          relative
+                          overflow-hidden
+                          bg-white/80
+                          backdrop-blur-xl
                           p-6
                           rounded-3xl
                           border
-                          border-blue-900/40
+                          border-blue-100
+                          shadow-[0_10px_35px_rgba(37,99,235,0.07)]
                           flex
                           items-center
                           justify-between
                           group
-                          hover:border-blue-700/60
-                          hover:bg-[#0b172b]
+                          hover:border-cyan-300
+                          hover:-translate-y-1
+                          hover:shadow-[0_15px_40px_rgba(6,182,212,0.12)]
                           transition-all
                           duration-300
                         "
                       >
 
+                        {/* Card Glow */}
+
+                        <div
+                          className="
+                            absolute
+                            -right-16
+                            -top-16
+                            w-40
+                            h-40
+                            rounded-full
+                            bg-cyan-400/10
+                            blur-3xl
+                            opacity-0
+                            group-hover:opacity-100
+                            transition-opacity
+                            duration-500
+                            pointer-events-none
+                          "
+                        />
+
 
                         {/* Left Content */}
 
-                        <div className="flex items-center gap-4 min-w-0">
+                        <div className="relative z-10 flex items-center gap-4 min-w-0">
 
 
                           {/* Icon */}
@@ -327,10 +344,12 @@ function Dashboard() {
                             className="
                               p-3.5
                               rounded-2xl
-                              bg-[#081224]
+                              bg-gradient-to-br
+                              from-cyan-50
+                              to-blue-50
                               border
-                              border-blue-900/40
-                              group-hover:border-blue-700/60
+                              border-blue-100
+                              group-hover:border-cyan-300
                               group-hover:scale-105
                               transition-all
                               duration-300
@@ -351,8 +370,8 @@ function Dashboard() {
                               className="
                                 text-base
                                 font-bold
-                                text-white
-                                group-hover:text-slate-100
+                                text-slate-800
+                                group-hover:text-blue-600
                                 transition-colors
                               "
                             >
@@ -363,7 +382,7 @@ function Dashboard() {
                             <p
                               className="
                                 text-xs
-                                text-slate-400
+                                text-slate-500
                                 mt-1
                               "
                             >
@@ -375,13 +394,14 @@ function Dashboard() {
                         </div>
 
 
-
                         {/* Arrow */}
 
                         <FaArrowRight
                           className="
-                            text-slate-500
-                            group-hover:text-slate-300
+                            relative
+                            z-10
+                            text-slate-400
+                            group-hover:text-cyan-500
                             group-hover:translate-x-1
                             transition-all
                             shrink-0
@@ -405,17 +425,40 @@ function Dashboard() {
 
                 <section
                   className="
-                    glass-panel
+                    relative
+                    overflow-hidden
+                    bg-white/80
+                    backdrop-blur-xl
                     rounded-3xl
                     border
-                    border-cyan-500/20
+                    border-cyan-200
                     p-5
                     sm:p-8
+                    shadow-[0_10px_40px_rgba(6,182,212,0.08)]
                   "
                 >
 
+                  {/* Background Glow */}
+
                   <div
                     className="
+                      absolute
+                      -right-20
+                      -top-20
+                      w-64
+                      h-64
+                      rounded-full
+                      bg-cyan-400/10
+                      blur-3xl
+                      pointer-events-none
+                    "
+                  />
+
+
+                  <div
+                    className="
+                      relative
+                      z-10
                       flex
                       flex-col
                       sm:flex-row
@@ -442,24 +485,27 @@ function Dashboard() {
                           w-12
                           h-12
                           rounded-2xl
-                          bg-cyan-500/10
+                          bg-gradient-to-br
+                          from-cyan-50
+                          to-blue-50
                           border
-                          border-cyan-400/30
+                          border-cyan-200
                           flex
                           items-center
                           justify-center
                           shrink-0
+                          shadow-sm
                         "
                       >
 
-                        <FaRobot className="text-cyan-400 text-xl" />
+                        <FaRobot className="text-cyan-500 text-xl" />
 
                       </div>
 
 
                       <div>
 
-                        <h3 className="text-base sm:text-lg font-bold text-white">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-800">
 
                           Need Help Finding a Scheme?
 
@@ -470,7 +516,7 @@ function Dashboard() {
                           className="
                             text-xs
                             sm:text-sm
-                            text-slate-400
+                            text-slate-500
                             mt-1
                           "
                         >
@@ -494,14 +540,17 @@ function Dashboard() {
                         rounded-xl
                         bg-gradient-to-r
                         from-cyan-500
-                        to-blue-600
+                        via-blue-600
+                        to-indigo-600
                         text-white
                         text-sm
                         font-semibold
                         shadow-lg
-                        shadow-cyan-500/20
+                        shadow-blue-500/20
                         hover:scale-105
+                        hover:shadow-cyan-500/30
                         transition-all
+                        duration-300
                         flex
                         items-center
                         justify-center

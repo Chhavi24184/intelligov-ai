@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+
 import {
   FaSearch,
   FaTimes,
@@ -17,21 +18,30 @@ import {
   searchSchemesAPI,
 } from "../services/api";
 
+
 function SchemeRecommendation() {
+
   const [schemes, setSchemes] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
+
   const [error, setError] = useState("");
+
   const [bookmarkedIds, setBookmarkedIds] = useState([]);
-  const [selectedSchemeModal, setSelectedSchemeModal] = useState(null);
+
+  const [selectedSchemeModal, setSelectedSchemeModal] =
+    useState(null);
+
 
   // =========================================================
   // CURRENT USER
   // =========================================================
 
   const getCurrentUserKey = () => {
+
     const email = localStorage.getItem("userEmail");
 
     if (email) {
@@ -41,20 +51,27 @@ function SchemeRecommendation() {
     return "guest";
   };
 
+
   // =========================================================
-  // USER-SPECIFIC SAVED KEY
+  // SAVED SCHEMES STORAGE KEY
   // =========================================================
 
   const getSavedSchemesKey = () => {
+
     return `savedSchemes_${getCurrentUserKey()}`;
+
   };
+
 
   // =========================================================
   // EXTRACT SCHEMES
   // =========================================================
 
   const extractSchemes = (response) => {
-    if (Array.isArray(response)) return response;
+
+    if (Array.isArray(response)) {
+      return response;
+    }
 
     if (Array.isArray(response?.schemes)) {
       return response.schemes;
@@ -72,58 +89,72 @@ function SchemeRecommendation() {
       return response.recommended_schemes;
     }
 
-    if (Array.isArray(response?.data?.recommended_schemes)) {
+    if (
+      Array.isArray(
+        response?.data?.recommended_schemes
+      )
+    ) {
       return response.data.recommended_schemes;
     }
 
     return [];
   };
 
+
   // =========================================================
   // GET NAME
   // =========================================================
 
   const getSchemeName = (scheme) =>
+
     scheme?.name ||
     scheme?.title ||
     scheme?.scheme_name ||
     scheme?._savedName ||
     "Government Welfare Scheme";
 
+
   // =========================================================
   // GET CATEGORY
   // =========================================================
 
   const getCategory = (scheme) =>
+
     scheme?.category ||
     scheme?.type ||
     scheme?._savedCategory ||
     "Welfare Scheme";
+
 
   // =========================================================
   // GET DESCRIPTION
   // =========================================================
 
   const getDescription = (scheme) =>
+
     scheme?.description ||
     scheme?.details ||
     scheme?._savedDescription ||
     "No description available for this item.";
+
 
   // =========================================================
   // GET ELIGIBILITY
   // =========================================================
 
   const getEligibility = (scheme) =>
+
     scheme?.eligibility ||
     scheme?.eligibility_criteria ||
     "Eligibility details are available on the official portal.";
+
 
   // =========================================================
   // GET DOCUMENTS
   // =========================================================
 
   const getDocuments = (scheme) => {
+
     if (Array.isArray(scheme?.documents_required)) {
       return scheme.documents_required;
     }
@@ -148,17 +179,15 @@ function SchemeRecommendation() {
     ];
   };
 
+
   // =========================================================
-  // CLASSIFY ITEM
-  //
-  // Returns:
-  // "scheme"
-  // "job"
-  // "scholarship"
+  // CLASSIFY SAVED ITEM
   // =========================================================
 
   const classifySavedItem = (item) => {
+
     const text = [
+
       item?.name,
       item?.title,
       item?.scheme_name,
@@ -172,16 +201,17 @@ function SchemeRecommendation() {
       item?._savedCategory,
       item?._savedDescription,
       item?._savedType,
+
     ]
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
 
-    // ---------------------------------------------------------
-    // SCHOLARSHIP
-    // ---------------------------------------------------------
+
+    // SCHOLARSHIPS
 
     const scholarshipKeywords = [
+
       "scholarship",
       "scholarships",
       "fellowship",
@@ -198,21 +228,26 @@ function SchemeRecommendation() {
       "pre matric scholarship",
       "post-matric scholarship",
       "pre-matric scholarship",
+
     ];
 
+
     if (
-      scholarshipKeywords.some((keyword) =>
-        text.includes(keyword)
+      scholarshipKeywords.some(
+        (keyword) =>
+          text.includes(keyword)
       )
     ) {
+
       return "scholarship";
+
     }
 
-    // ---------------------------------------------------------
+
     // JOBS / INTERNSHIPS
-    // ---------------------------------------------------------
 
     const jobKeywords = [
+
       "job",
       "jobs",
       "employment",
@@ -240,410 +275,863 @@ function SchemeRecommendation() {
       "employment opportunities",
       "employment service",
       "employment services",
+
     ];
 
+
     if (
-      jobKeywords.some((keyword) =>
-        text.includes(keyword)
+      jobKeywords.some(
+        (keyword) =>
+          text.includes(keyword)
       )
     ) {
+
       return "job";
+
     }
 
-    // ---------------------------------------------------------
-    // DEFAULT
-    // ---------------------------------------------------------
 
     return "scheme";
   };
+
 
   // =========================================================
   // LOAD SAVED IDS
   // =========================================================
 
   const loadSavedIds = () => {
+
     try {
-      const storageKey = getSavedSchemesKey();
-      const savedData = localStorage.getItem(storageKey);
+
+      const storageKey =
+        getSavedSchemesKey();
+
+      const savedData =
+        localStorage.getItem(storageKey);
+
 
       if (!savedData) {
+
         setBookmarkedIds([]);
+
         return;
       }
 
-      const savedItems = JSON.parse(savedData);
+
+      const savedItems =
+        JSON.parse(savedData);
+
 
       if (!Array.isArray(savedItems)) {
+
         setBookmarkedIds([]);
+
         return;
       }
 
+
       const ids = savedItems
-        .map((item) => item?._savedId)
+
+        .map(
+          (item) =>
+            String(item?._savedId || "")
+        )
+
         .filter(Boolean);
 
+
       setBookmarkedIds(ids);
-    } catch (error) {
-      console.error("Unable to load saved items:", error);
-      setBookmarkedIds([]);
+
     }
+
+    catch (error) {
+
+      console.error(
+        "Unable to load saved items:",
+        error
+      );
+
+      setBookmarkedIds([]);
+
+    }
+
   };
+
 
   // =========================================================
   // LOAD SCHEMES
   // =========================================================
 
   const loadSchemes = async () => {
+
     try {
+
       setLoading(true);
+
       setError("");
 
-      const response = await schemesAPI();
 
-      console.log("Schemes API Response:", response);
+      const response =
+        await schemesAPI();
 
-      const schemeList = extractSchemes(response);
+
+      console.log(
+        "Schemes API Response:",
+        response
+      );
+
+
+      const schemeList =
+        extractSchemes(response);
+
 
       setSchemes(schemeList);
-    } catch (err) {
-      console.error("Schemes API Error:", err);
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "Schemes API Error:",
+        err
+      );
+
 
       setError(
         "Unable to connect to server. Please make sure the backend is running."
       );
 
+
       setSchemes([]);
-    } finally {
-      setLoading(false);
+
     }
+
+    finally {
+
+      setLoading(false);
+
+    }
+
   };
 
+
   useEffect(() => {
+
     loadSavedIds();
+
     loadSchemes();
+
   }, []);
+
 
   // =========================================================
   // SEARCH
   // =========================================================
 
   const handleSearch = async (e) => {
+
     e.preventDefault();
 
-    const query = search.trim();
+
+    const query =
+      search.trim();
+
 
     if (!query) {
+
       await loadSchemes();
+
       return;
     }
 
+
     try {
+
       setSearching(true);
+
       setError("");
 
-      const response = await searchSchemesAPI(query);
 
-      console.log("Search API Response:", response);
+      const response =
+        await searchSchemesAPI(query);
 
-      const searchResults = extractSchemes(response);
+
+      console.log(
+        "Search API Response:",
+        response
+      );
+
+
+      const searchResults =
+        extractSchemes(response);
+
 
       setSchemes(searchResults);
-    } catch (err) {
-      console.error("Search API Error:", err);
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "Search API Error:",
+        err
+      );
+
 
       setError(
         "Unable to search schemes. Please check if the backend is running."
       );
 
+
       setSchemes([]);
-    } finally {
-      setSearching(false);
+
     }
+
+    finally {
+
+      setSearching(false);
+
+    }
+
   };
+
 
   // =========================================================
   // CLEAR SEARCH
   // =========================================================
 
   const handleClearSearch = async () => {
+
     setSearch("");
+
     setSelectedCategory("All");
 
     await loadSchemes();
+
   };
+
 
   // =========================================================
   // SAVE / UNSAVE
   // =========================================================
 
-  const toggleBookmark = (scheme, schemeId) => {
-    try {
-      const storageKey = getSavedSchemesKey();
+  const toggleBookmark = (
+    scheme,
+    schemeId
+  ) => {
 
-      const existingData = localStorage.getItem(storageKey);
+    try {
+
+      const storageKey =
+        getSavedSchemesKey();
+
+
+      const existingData =
+        localStorage.getItem(storageKey);
+
 
       let savedItems = [];
 
+
       if (existingData) {
+
         try {
-          savedItems = JSON.parse(existingData);
+
+          savedItems =
+            JSON.parse(existingData);
+
 
           if (!Array.isArray(savedItems)) {
             savedItems = [];
           }
-        } catch {
-          savedItems = [];
+
         }
+
+        catch {
+
+          savedItems = [];
+
+        }
+
       }
 
-      // =====================================================
-      // REMOVE
-      // =====================================================
 
-      if (bookmarkedIds.includes(schemeId)) {
-        const updatedItems = savedItems.filter(
-          (item) => item?._savedId !== schemeId
-        );
+      // REMOVE
+
+      if (
+        bookmarkedIds.includes(
+          schemeId
+        )
+      ) {
+
+        const updatedItems =
+          savedItems.filter(
+            (item) =>
+              String(item?._savedId) !==
+              String(schemeId)
+          );
+
 
         localStorage.setItem(
           storageKey,
           JSON.stringify(updatedItems)
         );
 
-        setBookmarkedIds((prev) =>
-          prev.filter((id) => id !== schemeId)
+
+        setBookmarkedIds(
+          (prev) =>
+            prev.filter(
+              (id) =>
+                String(id) !==
+                String(schemeId)
+            )
         );
+
+
+        window.dispatchEvent(
+          new Event("savedItemsChanged")
+        );
+
 
         return;
       }
 
-      // =====================================================
-      // CLASSIFY BEFORE SAVING
-      // =====================================================
 
-      const savedType = classifySavedItem(scheme);
+      // CLASSIFY
 
-      // =====================================================
+      const savedType =
+        classifySavedItem(scheme);
+
+
       // SAVE
-      // =====================================================
 
       const savedItem = {
+
         ...scheme,
 
-        _savedId: String(schemeId),
+        _savedId:
+          String(schemeId),
 
-        _savedType: savedType,
+        _savedType:
+          savedType,
 
-        _savedName: getSchemeName(scheme),
+        _savedName:
+          getSchemeName(scheme),
 
-        _savedCategory: getCategory(scheme),
+        _savedCategory:
+          getCategory(scheme),
 
-        _savedDescription: getDescription(scheme),
+        _savedDescription:
+          getDescription(scheme),
 
-        _savedAt: new Date().toISOString(),
+        _savedAt:
+          new Date().toISOString(),
+
       };
 
-      const alreadySaved = savedItems.some(
-        (item) =>
-          String(item?._savedId) === String(schemeId)
-      );
+
+      const alreadySaved =
+        savedItems.some(
+          (item) =>
+            String(item?._savedId) ===
+            String(schemeId)
+        );
+
 
       let updatedItems;
 
+
       if (alreadySaved) {
-        updatedItems = savedItems.map((item) =>
-          String(item?._savedId) === String(schemeId)
-            ? savedItem
-            : item
-        );
-      } else {
+
+        updatedItems =
+          savedItems.map(
+            (item) =>
+              String(item?._savedId) ===
+              String(schemeId)
+                ? savedItem
+                : item
+          );
+
+      }
+
+      else {
+
         updatedItems = [
           ...savedItems,
           savedItem,
         ];
+
       }
+
 
       localStorage.setItem(
         storageKey,
-        JSON.stringify(updatedItems)
+        JSON.stringify(
+          updatedItems
+        )
       );
 
-      setBookmarkedIds((prev) =>
-        prev.includes(schemeId)
-          ? prev
-          : [...prev, schemeId]
+
+      setBookmarkedIds(
+        (prev) =>
+          prev.includes(schemeId)
+            ? prev
+            : [...prev, schemeId]
       );
-    } catch (error) {
+
+
+      window.dispatchEvent(
+        new Event("savedItemsChanged")
+      );
+
+    }
+
+    catch (error) {
+
       console.error(
         "Unable to save item:",
         error
       );
 
+
       alert(
         "Unable to save this item. Please try again."
       );
+
     }
+
   };
+
 
   // =========================================================
   // CATEGORIES
   // =========================================================
 
   const categories = useMemo(() => {
-    const categorySet = new Set();
 
-    schemes.forEach((scheme) => {
-      const category =
-        scheme?.category ||
-        scheme?.type;
+    const categorySet =
+      new Set();
 
-      if (category) {
-        categorySet.add(category);
+
+    schemes.forEach(
+      (scheme) => {
+
+        const category =
+          scheme?.category ||
+          scheme?.type;
+
+
+        if (category) {
+
+          categorySet.add(
+            category
+          );
+
+        }
+
       }
-    });
+    );
+
 
     return [
       "All",
-      ...Array.from(categorySet),
+      ...Array.from(
+        categorySet
+      ),
     ];
+
   }, [schemes]);
+
 
   // =========================================================
   // FILTER
   // =========================================================
 
-  const filteredSchemes = schemes.filter(
-    (scheme) => {
-      if (selectedCategory === "All") {
-        return true;
+  const filteredSchemes =
+    schemes.filter(
+      (scheme) => {
+
+        if (
+          selectedCategory ===
+          "All"
+        ) {
+
+          return true;
+
+        }
+
+
+        const category = (
+
+          scheme?.category ||
+          scheme?.type ||
+          ""
+
+        )
+          .toLowerCase();
+
+
+        return category.includes(
+          selectedCategory.toLowerCase()
+        );
+
       }
+    );
 
-      const category = (
-        scheme?.category ||
-        scheme?.type ||
-        ""
-      ).toLowerCase();
-
-      return category.includes(
-        selectedCategory.toLowerCase()
-      );
-    }
-  );
 
   // =========================================================
   // UI
   // =========================================================
 
   return (
-    <div className="min-h-screen bg-[#060c17] text-white">
 
-      <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#060c17] via-[#091528] to-[#060c17]">
+    <div
+      className="
+        min-h-screen
+        bg-white
+        text-slate-900
+      "
+    >
 
-        {/* Background Glow */}
+      <section
+        className="
+          relative
+          min-h-screen
+          overflow-hidden
+          bg-white
+        "
+      >
 
-        <div className="absolute top-10 left-[-120px] w-[420px] h-[420px] rounded-full bg-blue-600/15 blur-[150px] pointer-events-none" />
+        {/* =================================================
+            BACKGROUND LIGHTS
+        ================================================= */}
 
-        <div className="absolute top-[420px] right-[-120px] w-[420px] h-[420px] rounded-full bg-cyan-500/10 blur-[150px] pointer-events-none" />
+        <div
+          className="
+            absolute
+            inset-0
+            pointer-events-none
+          "
+        >
 
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[250px] rounded-full bg-blue-600/10 blur-[150px] pointer-events-none" />
+          <div
+            className="
+              absolute
+              top-20
+              left-0
+              w-96
+              h-96
+              bg-sky-400/10
+              rounded-full
+              blur-3xl
+            "
+          />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+          <div
+            className="
+              absolute
+              top-[450px]
+              right-0
+              w-96
+              h-96
+              bg-blue-400/10
+              rounded-full
+              blur-3xl
+            "
+          />
 
-          {/* Header */}
+          <div
+            className="
+              absolute
+              bottom-0
+              left-1/2
+              -translate-x-1/2
+              w-[600px]
+              h-[250px]
+              bg-sky-400/10
+              rounded-full
+              blur-3xl
+            "
+          />
 
-          <div className="text-center max-w-3xl mx-auto mb-10">
+        </div>
 
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider mb-5">
 
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+        {/* =================================================
+            MAIN CONTAINER
+        ================================================= */}
+
+        <div
+          className="
+            relative
+            max-w-7xl
+            mx-auto
+            px-6
+            py-12
+            lg:py-16
+          "
+        >
+
+
+          {/* =================================================
+              HEADER
+          ================================================= */}
+
+          <div
+            className="
+              text-center
+              max-w-3xl
+              mx-auto
+              mb-10
+              lg:mb-14
+            "
+          >
+
+            <span
+              className="
+                inline-block
+                px-4
+                py-1.5
+                rounded-full
+                bg-sky-50
+                border
+                border-sky-200
+                text-sky-600
+                text-xs
+                font-semibold
+                uppercase
+                tracking-wider
+                mb-5
+              "
+            >
 
               Smart Scheme Discovery
 
-            </div>
+            </span>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight">
+
+            <h1
+              className="
+                text-3xl
+                sm:text-4xl
+                lg:text-5xl
+                font-black
+                text-slate-900
+                leading-tight
+              "
+            >
 
               Discover Government{" "}
 
-              <span className="bg-gradient-to-r from-cyan-300 via-white to-blue-400 bg-clip-text text-transparent">
+              <span
+                className="
+                  bg-gradient-to-r
+                  from-sky-500
+                  to-blue-600
+                  bg-clip-text
+                  text-transparent
+                "
+              >
                 Schemes
               </span>
 
             </h1>
 
-            <p className="text-slate-400 text-sm sm:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
-              Find welfare schemes, scholarships, healthcare
-              benefits, agricultural support and career
-              opportunities that match your needs.
+
+            <p
+              className="
+                text-slate-600
+                text-sm
+                sm:text-base
+                mt-4
+                max-w-2xl
+                mx-auto
+                leading-relaxed
+              "
+            >
+
+              Find welfare schemes, scholarships,
+              healthcare benefits, agricultural
+              support and career opportunities
+              that match your needs.
+
             </p>
 
           </div>
 
-          {/* Search */}
+
+          {/* =================================================
+              SEARCH
+          ================================================= */}
 
           <form
             onSubmit={handleSearch}
-            className="max-w-4xl mx-auto mb-8"
+            className="
+              max-w-4xl
+              mx-auto
+              mb-8
+            "
           >
 
-            <div className="flex items-center gap-2 bg-[#081224]/90 backdrop-blur-xl border border-blue-900/60 rounded-2xl p-2 shadow-xl shadow-blue-950/20 focus-within:border-cyan-400/50 transition-all">
+            <div
+              className="
+                flex
+                items-center
+                gap-2
+                bg-white
+                border
+                border-sky-200
+                rounded-2xl
+                p-2
+                shadow-lg
+                shadow-sky-100
+                focus-within:border-sky-400
+                transition-all
+              "
+            >
 
-              <FaSearch className="text-slate-400 ml-4 shrink-0" />
+              <FaSearch
+                className="
+                  text-sky-500
+                  ml-4
+                  shrink-0
+                "
+              />
+
 
               <input
                 type="text"
                 value={search}
                 onChange={(e) =>
-                  setSearch(e.target.value)
+                  setSearch(
+                    e.target.value
+                  )
                 }
                 placeholder="Search schemes... e.g. farmer, student, health"
-                className="flex-1 min-w-0 bg-transparent text-sm text-white placeholder-slate-500 outline-none py-3 px-1"
+                className="
+                  flex-1
+                  min-w-0
+                  bg-transparent
+                  text-sm
+                  text-slate-900
+                  placeholder-slate-400
+                  outline-none
+                  py-3
+                  px-1
+                "
               />
 
+
               {search && (
+
                 <button
                   type="button"
-                  onClick={handleClearSearch}
-                  className="p-2 text-slate-400 hover:text-white transition"
+                  onClick={
+                    handleClearSearch
+                  }
+                  className="
+                    p-2
+                    text-slate-400
+                    hover:text-slate-700
+                    transition
+                  "
                   title="Clear search"
                 >
+
                   <FaTimes />
+
                 </button>
+
               )}
+
 
               <button
                 type="submit"
                 disabled={searching}
-                className="px-5 sm:px-7 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold shadow-lg shadow-blue-600/20 hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="
+                  px-5
+                  sm:px-7
+                  py-3
+                  rounded-xl
+                  bg-gradient-to-r
+                  from-sky-500
+                  to-blue-600
+                  text-white
+                  text-sm
+                  font-semibold
+                  shadow-lg
+                  shadow-blue-200
+                  hover:scale-[1.02]
+                  transition-all
+                  duration-300
+                  disabled:opacity-50
+                  disabled:cursor-not-allowed
+                "
               >
+
                 {searching
                   ? "Searching..."
                   : "Search"}
+
               </button>
 
             </div>
 
           </form>
 
-          {/* Category Filter */}
+
+          {/* =================================================
+              CATEGORY FILTER
+          ================================================= */}
 
           {!loading &&
             !error &&
             schemes.length > 0 && (
 
-              <div className="max-w-6xl mx-auto mb-8">
+              <div
+                className="
+                  max-w-6xl
+                  mx-auto
+                  mb-10
+                "
+              >
 
-                <div className="flex items-center gap-2 mb-3 text-xs text-slate-400">
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                    mb-3
+                    text-xs
+                    text-slate-500
+                  "
+                >
 
-                  <FaFilter className="text-cyan-400" />
+                  <FaFilter
+                    className="
+                      text-sky-500
+                    "
+                  />
 
-                  <span className="font-semibold">
+                  <span
+                    className="
+                      font-semibold
+                    "
+                  >
                     Filter by category
                   </span>
 
                 </div>
 
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+
+                <div
+                  className="
+                    flex
+                    gap-2
+                    overflow-x-auto
+                    pb-2
+                  "
+                >
 
                   {categories.map(
                     (category) => (
@@ -655,13 +1143,46 @@ function SchemeRecommendation() {
                             category
                           )
                         }
-                        className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
-                          selectedCategory === category
-                            ? "bg-gradient-to-r from-cyan-500 to-blue-600 border-cyan-400/40 text-white shadow-lg shadow-blue-600/20"
-                            : "bg-[#081224] border-blue-900/50 text-slate-400 hover:text-white hover:border-cyan-400/40"
-                        }`}
+                        className={`
+
+                          whitespace-nowrap
+                          px-4
+                          py-2
+                          rounded-full
+                          text-xs
+                          font-semibold
+                          border
+                          transition-all
+                          duration-300
+
+                          ${
+                            selectedCategory ===
+                            category
+
+                              ? `
+                                bg-gradient-to-r
+                                from-sky-500
+                                to-blue-600
+                                border-sky-400
+                                text-white
+                                shadow-lg
+                                shadow-sky-200
+                              `
+
+                              : `
+                                bg-sky-50
+                                border-sky-200
+                                text-slate-600
+                                hover:text-sky-600
+                                hover:border-sky-400
+                              `
+                          }
+
+                        `}
                       >
+
                         {category}
+
                       </button>
 
                     )
@@ -673,23 +1194,66 @@ function SchemeRecommendation() {
 
             )}
 
-          {/* Loading */}
+
+          {/* =================================================
+              LOADING
+          ================================================= */}
 
           {loading && (
 
-            <div className="max-w-xl mx-auto py-16 text-center">
+            <div
+              className="
+                max-w-xl
+                mx-auto
+                py-16
+                text-center
+              "
+            >
 
-              <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center">
+              <div
+                className="
+                  w-14
+                  h-14
+                  mx-auto
+                  mb-5
+                  rounded-2xl
+                  bg-sky-50
+                  border
+                  border-sky-200
+                  flex
+                  items-center
+                  justify-center
+                "
+              >
 
-                <FaSearch className="text-cyan-400 text-xl animate-pulse" />
+                <FaSearch
+                  className="
+                    text-sky-500
+                    text-xl
+                    animate-pulse
+                  "
+                />
 
               </div>
 
-              <h3 className="text-white font-semibold mb-1">
+
+              <h3
+                className="
+                  text-slate-900
+                  font-semibold
+                  mb-1
+                "
+              >
                 Loading schemes...
               </h3>
 
-              <p className="text-xs text-slate-500">
+
+              <p
+                className="
+                  text-xs
+                  text-slate-500
+                "
+              >
                 Fetching government scheme records
               </p>
 
@@ -697,38 +1261,103 @@ function SchemeRecommendation() {
 
           )}
 
-          {/* Error */}
 
-          {!loading && error && (
+          {/* =================================================
+              ERROR
+          ================================================= */}
 
-            <div className="max-w-xl mx-auto p-8 rounded-3xl border border-red-500/30 bg-[#081224] text-center">
+          {!loading &&
+            error && (
 
-              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-red-500/10 flex items-center justify-center">
+              <div
+                className="
+                  max-w-xl
+                  mx-auto
+                  p-8
+                  rounded-3xl
+                  border
+                  border-red-200
+                  bg-white
+                  text-center
+                  shadow-lg
+                  shadow-red-100
+                "
+              >
 
-                <FaExclamationTriangle className="text-red-400 text-xl" />
+                <div
+                  className="
+                    w-14
+                    h-14
+                    mx-auto
+                    mb-4
+                    rounded-2xl
+                    bg-red-50
+                    flex
+                    items-center
+                    justify-center
+                  "
+                >
+
+                  <FaExclamationTriangle
+                    className="
+                      text-red-500
+                      text-xl
+                    "
+                  />
+
+                </div>
+
+
+                <h3
+                  className="
+                    text-lg
+                    font-bold
+                    text-slate-900
+                    mb-2
+                  "
+                >
+                  Unable to Load Schemes
+                </h3>
+
+
+                <p
+                  className="
+                    text-sm
+                    text-slate-500
+                    mb-5
+                  "
+                >
+                  {error}
+                </p>
+
+
+                <button
+                  onClick={loadSchemes}
+                  className="
+                    px-5
+                    py-2.5
+                    rounded-xl
+                    bg-red-50
+                    border
+                    border-red-200
+                    text-red-600
+                    text-xs
+                    font-semibold
+                    hover:bg-red-100
+                    transition
+                  "
+                >
+                  Retry
+                </button>
 
               </div>
 
-              <h3 className="text-lg font-bold text-white mb-2">
-                Unable to Load Schemes
-              </h3>
+            )}
 
-              <p className="text-sm text-slate-400 mb-5">
-                {error}
-              </p>
 
-              <button
-                onClick={loadSchemes}
-                className="px-5 py-2.5 rounded-xl bg-red-500/15 border border-red-400/30 text-red-300 text-xs font-semibold hover:bg-red-500/25 transition"
-              >
-                Retry
-              </button>
-
-            </div>
-
-          )}
-
-          {/* Cards */}
+          {/* =================================================
+              CARDS
+          ================================================= */}
 
           {!loading &&
             !error &&
@@ -736,30 +1365,63 @@ function SchemeRecommendation() {
 
               <div>
 
-                <div className="flex items-center justify-between mb-5 px-1">
 
-                  <div className="text-xs sm:text-sm text-slate-400">
+                <div
+                  className="
+                    flex
+                    items-center
+                    justify-between
+                    mb-6
+                    px-1
+                  "
+                >
+
+                  <div
+                    className="
+                      text-xs
+                      sm:text-sm
+                      text-slate-500
+                    "
+                  >
 
                     Showing{" "}
 
-                    <span className="text-white font-semibold">
+                    <span
+                      className="
+                        text-slate-900
+                        font-semibold
+                      "
+                    >
                       {filteredSchemes.length}
                     </span>{" "}
 
                     item
-                    {filteredSchemes.length !== 1
+                    {filteredSchemes.length !==
+                    1
                       ? "s"
                       : ""}
 
                   </div>
 
-                  {bookmarkedIds.length > 0 && (
 
-                    <div className="flex items-center gap-1.5 text-xs text-amber-400">
+                  {bookmarkedIds.length >
+                    0 && (
+
+                    <div
+                      className="
+                        flex
+                        items-center
+                        gap-1.5
+                        text-xs
+                        text-amber-500
+                      "
+                    >
 
                       <FaBookmark />
 
-                      {bookmarkedIds.length} saved
+                      {bookmarkedIds.length}
+                      {" "}
+                      saved
 
                     </div>
 
@@ -767,100 +1429,299 @@ function SchemeRecommendation() {
 
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                {/* =================================================
+                    GRID
+                ================================================= */}
+
+                <div
+                  className="
+                    grid
+                    grid-cols-1
+                    md:grid-cols-2
+                    lg:grid-cols-3
+                    gap-6
+                    lg:gap-8
+                  "
+                >
 
                   {filteredSchemes.map(
                     (scheme, idx) => {
 
-                      const schemeId = String(
-                        scheme?.id ||
-                        scheme?.scheme_id ||
-                        `${getSchemeName(
-                          scheme
-                        )}-${idx}`
-                      );
+                      const schemeId =
+                        String(
+                          scheme?.id ||
+                          scheme?.scheme_id ||
+                          `${getSchemeName(
+                            scheme
+                          )}-${idx}`
+                        );
+
 
                       const isSaved =
                         bookmarkedIds.includes(
                           schemeId
                         );
 
+
                       return (
 
                         <div
                           key={schemeId}
-                          className="group relative flex flex-col bg-[#081224]/80 backdrop-blur-xl border border-blue-900/40 rounded-3xl p-6 hover:border-cyan-400/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-950/30 transition-all duration-300"
+                          className="
+                            glass-card
+                            p-7
+                            rounded-3xl
+                            relative
+                            flex
+                            flex-col
+                            justify-between
+                            group
+
+                            border
+                            border-sky-200/70
+
+                            transition-all
+                            duration-700
+                            ease-[cubic-bezier(0.22,1,0.36,1)]
+
+                            hover:border-sky-400/60
+                            hover:-translate-y-2
+                          "
                         >
 
-                          <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent opacity-0 group-hover:opacity-100 transition" />
 
-                          {/* Category + Save */}
+                          {/* =================================================
+                              SUBTLE HOVER GLOW
+                          ================================================= */}
 
-                          <div className="flex items-start justify-between gap-3 mb-5">
+                          <div
+                            className="
+                              absolute
+                              inset-0
+                              rounded-3xl
+                              bg-gradient-to-br
+                              from-sky-400/[0.08]
+                              via-transparent
+                              to-blue-500/[0.06]
+                              opacity-0
+                              group-hover:opacity-100
+                              transition-opacity
+                              duration-500
+                              pointer-events-none
+                            "
+                          />
 
-                            <span className="px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/25 text-cyan-300 text-[11px] font-semibold">
 
-                              {getCategory(scheme)}
+                          {/* =================================================
+                              CARD CONTENT
+                          ================================================= */}
 
-                            </span>
+                          <div
+                            className="
+                              relative
+                              z-10
+                            "
+                          >
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                toggleBookmark(
-                                  scheme,
-                                  schemeId
-                                )
-                              }
-                              className={`w-9 h-9 rounded-xl bg-[#0b1528] border flex items-center justify-center transition ${
-                                isSaved
-                                  ? "border-amber-400/40 text-amber-400"
-                                  : "border-blue-900/40 text-slate-400 hover:text-amber-400 hover:border-amber-400/30"
-                              }`}
-                              title={
-                                isSaved
-                                  ? "Remove from saved"
-                                  : "Save item"
-                              }
+
+                            {/* CATEGORY + BOOKMARK */}
+
+                            <div
+                              className="
+                                flex
+                                items-center
+                                justify-between
+                                gap-3
+                                mb-6
+                              "
                             >
 
-                              {isSaved ? (
-                                <FaBookmark />
-                              ) : (
-                                <FaRegBookmark />
+                              <span
+                                className="
+                                  px-3
+                                  py-1.5
+                                  rounded-full
+                                  bg-sky-50
+                                  border
+                                  border-sky-200
+                                  text-slate-600
+                                  text-[11px]
+                                  font-medium
+
+                                  group-hover:border-sky-400/60
+                                  group-hover:text-sky-600
+
+                                  transition-all
+                                  duration-300
+                                "
+                              >
+
+                                {getCategory(
+                                  scheme
+                                )}
+
+                              </span>
+
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  toggleBookmark(
+                                    scheme,
+                                    schemeId
+                                  )
+                                }
+                                className={`
+
+                                  w-10
+                                  h-10
+                                  rounded-xl
+                                  bg-sky-50
+                                  border
+                                  flex
+                                  items-center
+                                  justify-center
+
+                                  transition-all
+                                  duration-500
+
+                                  ${
+                                    isSaved
+
+                                      ? `
+                                        border-amber-300
+                                        text-amber-500
+                                      `
+
+                                      : `
+                                        border-sky-200
+                                        text-slate-400
+                                        hover:text-amber-500
+                                        hover:border-amber-300
+                                      `
+                                  }
+
+                                `}
+                                title={
+                                  isSaved
+                                    ? "Remove from saved"
+                                    : "Save item"
+                                }
+                              >
+
+                                {isSaved ? (
+                                  <FaBookmark />
+                                ) : (
+                                  <FaRegBookmark />
+                                )}
+
+                              </button>
+
+                            </div>
+
+
+                            {/* =================================================
+                                ICON
+                            ================================================= */}
+
+                            <div
+                              className="
+                                w-12
+                                h-12
+                                rounded-2xl
+                                bg-sky-50
+                                border
+                                border-sky-200
+                                flex
+                                items-center
+                                justify-center
+                                mb-5
+
+                                group-hover:border-sky-400/60
+                                group-hover:scale-110
+                                group-hover:-rotate-2
+
+                                transition-all
+                                duration-500
+                              "
+                            >
+
+                              <FaFileAlt
+                                className="
+                                  text-sky-500
+                                  text-xl
+                                "
+                              />
+
+                            </div>
+
+
+                            {/* =================================================
+                                TITLE
+                            ================================================= */}
+
+                            <h3
+                              className="
+                                text-xl
+                                font-bold
+                                text-slate-900
+                                mb-3
+                                leading-snug
+
+                                group-hover:text-sky-600
+
+                                transition-colors
+                                duration-300
+                              "
+                            >
+
+                              {getSchemeName(
+                                scheme
                               )}
 
-                            </button>
+                            </h3>
+
+
+                            {/* =================================================
+                                DESCRIPTION
+                            ================================================= */}
+
+                            <p
+                              className="
+                                text-slate-600
+                                text-sm
+                                leading-relaxed
+                                mb-6
+                                line-clamp-4
+                              "
+                            >
+
+                              {getDescription(
+                                scheme
+                              )}
+
+                            </p>
 
                           </div>
 
-                          {/* Icon */}
 
-                          <div className="w-11 h-11 rounded-xl bg-blue-600/15 border border-blue-500/20 flex items-center justify-center mb-4">
+                          {/* =================================================
+                              FOOTER
+                          ================================================= */}
 
-                            <FaFileAlt className="text-cyan-400" />
-
-                          </div>
-
-                          {/* Title */}
-
-                          <h3 className="text-lg font-bold text-white leading-snug mb-3 group-hover:text-cyan-300 transition-colors">
-
-                            {getSchemeName(scheme)}
-
-                          </h3>
-
-                          {/* Description */}
-
-                          <p className="text-sm text-slate-400 leading-relaxed line-clamp-3 flex-1">
-
-                            {getDescription(scheme)}
-
-                          </p>
-
-                          {/* Footer */}
-
-                          <div className="mt-6 pt-4 border-t border-blue-900/40 flex items-center justify-between">
+                          <div
+                            className="
+                              relative
+                              z-10
+                              pt-4
+                              border-t
+                              border-sky-100
+                              flex
+                              items-center
+                              justify-between
+                            "
+                          >
 
                             <button
                               onClick={() =>
@@ -868,24 +1729,76 @@ function SchemeRecommendation() {
                                   scheme
                                 )
                               }
-                              className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-2 transition"
+                              className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                text-sm
+                                font-semibold
+                                text-sky-600
+                                hover:text-blue-600
+                                transition-all
+                                duration-300
+                                group-hover:translate-x-1
+                              "
                             >
 
-                              View Details
+                              <span>
+                                View Details
+                              </span>
 
-                              <FaArrowRight className="text-[10px]" />
+                              <span
+                                className="
+                                  transition-transform
+                                  duration-300
+                                  group-hover:translate-x-1
+                                "
+                              >
+                                →
+                              </span>
 
                             </button>
 
-                            <span className="text-[10px] text-slate-600">
 
-                              #{String(
+                            <span
+                              className="
+                                text-[10px]
+                                text-slate-400
+                              "
+                            >
+
+                              #
+                              {String(
                                 idx + 1
-                              ).padStart(2, "0")}
+                              ).padStart(
+                                2,
+                                "0"
+                              )}
 
                             </span>
 
                           </div>
+
+
+                          {/* =================================================
+                              BOTTOM GLOW
+                          ================================================= */}
+
+                          <div
+                            className="
+                              absolute
+                              bottom-0
+                              left-1/2
+                              -translate-x-1/2
+                              w-1/2
+                              h-px
+                              bg-sky-400/0
+                              group-hover:bg-sky-400/50
+                              blur-sm
+                              transition-all
+                              duration-500
+                            "
+                          />
 
                         </div>
 
@@ -900,38 +1813,88 @@ function SchemeRecommendation() {
 
             )}
 
-          {/* Empty */}
+
+          {/* =================================================
+              EMPTY
+          ================================================= */}
 
           {!loading &&
             !error &&
             filteredSchemes.length === 0 && (
 
-              <div className="max-w-md mx-auto py-16 text-center">
+              <div
+                className="
+                  max-w-md
+                  mx-auto
+                  py-16
+                  text-center
+                "
+              >
 
-                <div className="text-5xl mb-5">
+                <div
+                  className="
+                    text-5xl
+                    mb-5
+                  "
+                >
                   🔍
                 </div>
 
-                <h3 className="text-xl font-bold text-white mb-2">
+
+                <h3
+                  className="
+                    text-xl
+                    font-bold
+                    text-slate-900
+                    mb-2
+                  "
+                >
                   No Schemes Found
                 </h3>
 
-                <p className="text-sm text-slate-400 leading-relaxed mb-5">
+
+                <p
+                  className="
+                    text-sm
+                    text-slate-500
+                    leading-relaxed
+                    mb-5
+                  "
+                >
 
                   No matching government schemes
                   were found
 
                   {search
                     ? ` for "${search}"`
-                    : selectedCategory !== "All"
+                    : selectedCategory !==
+                      "All"
                     ? ` in ${selectedCategory}`
                     : ""}.
 
                 </p>
 
+
                 <button
-                  onClick={handleClearSearch}
-                  className="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-500 transition"
+                  onClick={
+                    handleClearSearch
+                  }
+                  className="
+                    px-5
+                    py-2.5
+                    rounded-xl
+                    bg-gradient-to-r
+                    from-sky-500
+                    to-blue-600
+                    text-white
+                    text-xs
+                    font-semibold
+                    shadow-lg
+                    shadow-sky-200
+                    hover:scale-105
+                    transition-all
+                    duration-300
+                  "
                 >
                   Reset Filters
                 </button>
@@ -941,33 +1904,101 @@ function SchemeRecommendation() {
             )}
 
         </div>
+
       </section>
 
-      {/* Details Modal */}
+
+      {/* =====================================================
+          DETAILS MODAL
+      ===================================================== */}
 
       {selectedSchemeModal && (
 
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          className="
+            fixed
+            inset-0
+            z-50
+            bg-slate-900/40
+            backdrop-blur-md
+            flex
+            items-center
+            justify-center
+            p-4
+          "
           onClick={() =>
-            setSelectedSchemeModal(null)
+            setSelectedSchemeModal(
+              null
+            )
           }
         >
 
           <div
-            className="w-full max-w-2xl max-h-[88vh] overflow-y-auto bg-[#081224] border border-cyan-400/30 rounded-3xl shadow-2xl shadow-black/50"
+            className="
+              w-full
+              max-w-2xl
+              max-h-[88vh]
+              overflow-y-auto
+
+              bg-white
+
+              border
+              border-sky-200
+
+              rounded-3xl
+
+              shadow-2xl
+              shadow-sky-200/40
+            "
             onClick={(e) =>
               e.stopPropagation()
             }
           >
 
-            <div className="sticky top-0 z-10 bg-[#081224]/95 backdrop-blur-xl p-6 border-b border-blue-900/40">
 
-              <div className="flex items-start justify-between gap-4">
+            {/* MODAL HEADER */}
+
+            <div
+              className="
+                sticky
+                top-0
+                z-10
+
+                bg-white/95
+                backdrop-blur-xl
+
+                p-6
+
+                border-b
+                border-sky-100
+              "
+            >
+
+              <div
+                className="
+                  flex
+                  items-start
+                  justify-between
+                  gap-4
+                "
+              >
 
                 <div>
 
-                  <span className="inline-block px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold">
+                  <span
+                    className="
+                      inline-block
+                      px-3
+                      py-1
+                      rounded-full
+                      bg-sky-50
+                      border
+                      border-sky-200
+                      text-sky-600
+                      text-xs
+                      font-semibold
+                    "
+                  >
 
                     {getCategory(
                       selectedSchemeModal
@@ -975,7 +2006,16 @@ function SchemeRecommendation() {
 
                   </span>
 
-                  <h2 className="text-2xl sm:text-3xl font-black text-white mt-3">
+
+                  <h2
+                    className="
+                      text-2xl
+                      sm:text-3xl
+                      font-black
+                      text-slate-900
+                      mt-3
+                    "
+                  >
 
                     {getSchemeName(
                       selectedSchemeModal
@@ -985,30 +2025,75 @@ function SchemeRecommendation() {
 
                 </div>
 
+
                 <button
                   onClick={() =>
                     setSelectedSchemeModal(
                       null
                     )
                   }
-                  className="w-10 h-10 rounded-xl bg-[#0b1528] border border-blue-900/40 text-slate-400 hover:text-white flex items-center justify-center shrink-0"
+                  className="
+                    w-10
+                    h-10
+                    rounded-xl
+                    bg-sky-50
+                    border
+                    border-sky-200
+                    text-slate-400
+                    hover:text-slate-800
+                    hover:border-sky-400
+                    flex
+                    items-center
+                    justify-center
+                    shrink-0
+                    transition
+                  "
                 >
+
                   <FaTimes />
+
                 </button>
 
               </div>
 
             </div>
 
-            <div className="p-6 space-y-7">
+
+            {/* MODAL CONTENT */}
+
+            <div
+              className="
+                p-6
+                space-y-7
+              "
+            >
+
+
+              {/* OVERVIEW */}
 
               <div>
 
-                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
+                <h4
+                  className="
+                    text-xs
+                    uppercase
+                    tracking-wider
+                    text-sky-600
+                    font-semibold
+                    mb-3
+                  "
+                >
                   Overview & Benefits
                 </h4>
 
-                <p className="text-sm text-slate-300 leading-relaxed">
+
+                <p
+                  className="
+                    text-sm
+                    text-slate-600
+                    leading-relaxed
+                  "
+                >
 
                   {getDescription(
                     selectedSchemeModal
@@ -1018,15 +2103,42 @@ function SchemeRecommendation() {
 
               </div>
 
+
+              {/* ELIGIBILITY */}
+
               <div>
 
-                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
+                <h4
+                  className="
+                    text-xs
+                    uppercase
+                    tracking-wider
+                    text-sky-600
+                    font-semibold
+                    mb-3
+                  "
+                >
                   Eligibility Criteria
                 </h4>
 
-                <div className="p-4 rounded-2xl bg-[#0b1528] border border-blue-900/40">
 
-                  <p className="text-sm text-slate-300 leading-relaxed">
+                <div
+                  className="
+                    p-4
+                    rounded-2xl
+                    bg-sky-50
+                    border
+                    border-sky-100
+                  "
+                >
+
+                  <p
+                    className="
+                      text-sm
+                      text-slate-600
+                      leading-relaxed
+                    "
+                  >
 
                     {getEligibility(
                       selectedSchemeModal
@@ -1038,27 +2150,66 @@ function SchemeRecommendation() {
 
               </div>
 
+
+              {/* DOCUMENTS */}
+
               <div>
 
-                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
+                <h4
+                  className="
+                    text-xs
+                    uppercase
+                    tracking-wider
+                    text-sky-600
+                    font-semibold
+                    mb-3
+                  "
+                >
                   Documents Required
                 </h4>
 
-                <div className="space-y-2">
+
+                <div
+                  className="
+                    space-y-2
+                  "
+                >
 
                   {getDocuments(
                     selectedSchemeModal
                   ).map(
-                    (document, index) => (
+                    (
+                      document,
+                      index
+                    ) => (
 
                       <div
                         key={index}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-[#0b1528] border border-blue-900/40"
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          p-3
+                          rounded-xl
+                          bg-sky-50
+                          border
+                          border-sky-100
+                        "
                       >
 
-                        <FaCheckCircle className="text-emerald-400 shrink-0" />
+                        <FaCheckCircle
+                          className="
+                            text-emerald-500
+                            shrink-0
+                          "
+                        />
 
-                        <span className="text-sm text-slate-300">
+                        <span
+                          className="
+                            text-sm
+                            text-slate-600
+                          "
+                        >
                           {document}
                         </span>
 
@@ -1071,7 +2222,22 @@ function SchemeRecommendation() {
 
               </div>
 
-              <div className="pt-5 border-t border-blue-900/40 flex flex-col sm:flex-row justify-end gap-3">
+
+              {/* ACTIONS */}
+
+              <div
+                className="
+                  pt-5
+                  border-t
+                  border-sky-100
+
+                  flex
+                  flex-col
+                  sm:flex-row
+                  justify-end
+                  gap-3
+                "
+              >
 
                 <button
                   onClick={() =>
@@ -1079,20 +2245,61 @@ function SchemeRecommendation() {
                       null
                     )
                   }
-                  className="px-5 py-3 rounded-xl bg-[#0b1528] border border-blue-900/40 text-slate-300 text-sm font-semibold hover:text-white transition"
+                  className="
+                    px-5
+                    py-3
+                    rounded-xl
+                    bg-sky-50
+                    border
+                    border-sky-200
+                    text-slate-600
+                    text-sm
+                    font-semibold
+                    hover:text-slate-900
+                    hover:border-sky-400
+                    transition
+                  "
                 >
                   Close
                 </button>
+
 
                 <a
                   href="https://myScheme.gov.in"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 hover:scale-[1.02] transition"
+                  className="
+                    px-6
+                    py-3
+                    rounded-xl
+                    bg-gradient-to-r
+                    from-sky-500
+                    to-blue-600
+                    text-white
+                    text-sm
+                    font-semibold
+
+                    flex
+                    items-center
+                    justify-center
+                    gap-2
+
+                    shadow-lg
+                    shadow-sky-200
+
+                    hover:scale-[1.02]
+
+                    transition-all
+                    duration-300
+                  "
                 >
+
                   Proceed to Apply
 
-                  <FaExternalLinkAlt className="text-xs" />
+                  <FaExternalLinkAlt
+                    className="text-xs"
+                  />
+
                 </a>
 
               </div>
@@ -1106,7 +2313,10 @@ function SchemeRecommendation() {
       )}
 
     </div>
+
   );
+
 }
+
 
 export default SchemeRecommendation;

@@ -89,28 +89,28 @@ function About() {
 
     {
       num: "01",
-      icon: <FaUserCheck className="text-cyan-400 text-xl" />,
+      icon: <FaUserCheck className="text-sky-500 text-xl" />,
       title: "Tell Us About Yourself",
       desc: "Share your basic details, needs, and preferences so IntelliGov AI can understand your requirements.",
     },
 
     {
       num: "02",
-      icon: <FaSearch className="text-blue-400 text-xl" />,
+      icon: <FaSearch className="text-blue-500 text-xl" />,
       title: "AI Semantic Search",
       desc: "IntelliGov AI searches and analyzes government scheme information to match your eligibility criteria.",
     },
 
     {
       num: "03",
-      icon: <FaFileAlt className="text-amber-400 text-xl" />,
+      icon: <FaFileAlt className="text-amber-500 text-xl" />,
       title: "Get Tailored Results",
       desc: "Receive customized scheme recommendations with complete document checklists and eligibility details.",
     },
 
     {
       num: "04",
-      icon: <FaCheckCircle className="text-emerald-400 text-xl" />,
+      icon: <FaCheckCircle className="text-emerald-500 text-xl" />,
       title: "Apply Seamlessly",
       desc: "Follow direct application links and step-by-step guidance to claim the benefits you are eligible for.",
     },
@@ -122,7 +122,17 @@ function About() {
 
     <section
       id="about"
-      className="relative bg-[#0a1628] text-white py-16 lg:py-20 overflow-hidden"
+      className="
+        relative
+        bg-gradient-to-br
+        from-white
+        via-sky-50
+        to-blue-100
+        text-slate-900
+        py-16
+        lg:py-20
+        overflow-hidden
+      "
     >
 
 
@@ -132,11 +142,11 @@ function About() {
 
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
 
-        <div className="absolute top-20 left-0 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl" />
+        <div className="absolute top-20 left-0 w-80 h-80 bg-sky-400/15 rounded-full blur-3xl" />
 
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-blue-400/15 rounded-full blur-3xl" />
 
-        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-cyan-400/10 rounded-full blur-3xl" />
 
       </div>
 
@@ -157,12 +167,23 @@ function About() {
           className="mb-16"
         >
 
-          <div className="glass-panel p-8 sm:p-12 rounded-3xl border border-blue-900/50 relative overflow-hidden">
+          <div
+            className="
+              glass-panel
+              p-8
+              sm:p-12
+              rounded-3xl
+              border
+              border-sky-200/70
+              relative
+              overflow-hidden
+            "
+          >
 
 
             {/* Card Glow */}
 
-            <div className="absolute -top-20 -right-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-20 -right-20 w-64 h-64 bg-sky-400/15 rounded-full blur-3xl pointer-events-none" />
 
 
             <div className="grid lg:grid-cols-12 gap-8 items-center">
@@ -175,7 +196,22 @@ function About() {
 
                 {/* Badge */}
 
-                <span className="inline-block px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-semibold uppercase tracking-wider">
+                <span
+                  className="
+                    inline-block
+                    px-4
+                    py-1.5
+                    rounded-full
+                    bg-sky-500/10
+                    border
+                    border-sky-400/30
+                    text-sky-600
+                    text-xs
+                    font-semibold
+                    uppercase
+                    tracking-wider
+                  "
+                >
 
                   About IntelliGov AI Platform
 
@@ -184,11 +220,28 @@ function About() {
 
                 {/* Main Heading */}
 
-                <div className="text-3xl sm:text-4xl font-black text-white leading-tight">
+                <div
+                  className="
+                    text-3xl
+                    sm:text-4xl
+                    font-black
+                    text-slate-900
+                    leading-tight
+                  "
+                >
 
                   Bridging the Gap Between <br />
 
-                  <span className="bg-gradient-to-r from-cyan-400 via-white to-amber-400 bg-clip-text text-transparent">
+                  <span
+                    className="
+                      bg-gradient-to-r
+                      from-sky-500
+                      via-blue-600
+                      to-amber-500
+                      bg-clip-text
+                      text-transparent
+                    "
+                  >
 
                     Citizens & Welfare Services
 
@@ -199,7 +252,7 @@ function About() {
 
                 {/* Description */}
 
-                <p className="text-slate-300 text-base leading-relaxed">
+                <p className="text-slate-600 text-base leading-relaxed">
 
                   Millions of eligible citizens miss out on government schemes
                   every year due to complex portals and lack of awareness.
@@ -215,9 +268,27 @@ function About() {
 
               <div className="lg:col-span-4 flex justify-center lg:justify-end relative z-10">
 
-                <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-br from-blue-600/20 to-cyan-500/10 border border-cyan-400/20 flex items-center justify-center shadow-2xl shadow-cyan-500/10">
+                <div
+                  className="
+                    w-32
+                    h-32
+                    sm:w-36
+                    sm:h-36
+                    rounded-3xl
+                    bg-gradient-to-br
+                    from-sky-500/15
+                    to-blue-500/10
+                    border
+                    border-sky-300/40
+                    flex
+                    items-center
+                    justify-center
+                    shadow-2xl
+                    shadow-sky-500/10
+                  "
+                >
 
-                  <FaRobot className="text-6xl sm:text-7xl text-cyan-400" />
+                  <FaRobot className="text-6xl sm:text-7xl text-sky-500" />
 
                 </div>
 
@@ -241,14 +312,14 @@ function About() {
           <div className="text-center mb-12">
 
 
-            <div className="text-2xl sm:text-3xl font-bold text-white">
+            <div className="text-2xl sm:text-3xl font-bold text-slate-900">
 
               How IntelliGov AI Works
 
             </div>
 
 
-            <p className="text-slate-400 text-sm mt-2">
+            <p className="text-slate-500 text-sm mt-2">
 
               Four simple steps from discovery to benefit delivery
 
@@ -275,13 +346,36 @@ function About() {
             >
 
               <div
-                className="glass-card p-6 rounded-2xl relative border border-blue-900/30 hover:border-cyan-400/40 hover:-translate-y-1 transition-all duration-300 group"
+                className="
+                  glass-card
+                  p-6
+                  rounded-2xl
+                  relative
+                  border
+                  border-sky-200/60
+                  hover:border-sky-400/60
+                  hover:-translate-y-1
+                  transition-all
+                  duration-300
+                  group
+                "
               >
 
 
                 {/* Step Number */}
 
-                <div className="text-4xl font-black text-blue-900/40 absolute top-4 right-4 group-hover:text-cyan-900/40 transition-colors">
+                <div
+                  className="
+                    text-4xl
+                    font-black
+                    text-sky-200/70
+                    absolute
+                    top-4
+                    right-4
+                    group-hover:text-sky-300/80
+                    transition-colors
+                  "
+                >
 
                   {step.num}
 
@@ -290,7 +384,23 @@ function About() {
 
                 {/* Icon */}
 
-                <div className="w-12 h-12 rounded-xl bg-[#0d1b32] border border-blue-900/40 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-300">
+                <div
+                  className="
+                    w-12
+                    h-12
+                    rounded-xl
+                    bg-sky-50
+                    border
+                    border-sky-200
+                    flex
+                    items-center
+                    justify-center
+                    mb-5
+                    group-hover:scale-105
+                    transition-transform
+                    duration-300
+                  "
+                >
 
                   {step.icon}
 
@@ -299,7 +409,16 @@ function About() {
 
                 {/* Title */}
 
-                <div className="text-lg font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors">
+                <div
+                  className="
+                    text-lg
+                    font-bold
+                    text-slate-900
+                    mb-2
+                    group-hover:text-sky-600
+                    transition-colors
+                  "
+                >
 
                   {step.title}
 
@@ -308,7 +427,7 @@ function About() {
 
                 {/* Description */}
 
-                <p className="text-slate-400 text-xs leading-relaxed">
+                <p className="text-slate-500 text-xs leading-relaxed">
 
                   {step.desc}
 
@@ -326,6 +445,7 @@ function About() {
 
 
       </div>
+
 
     </section>
 

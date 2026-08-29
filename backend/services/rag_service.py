@@ -176,15 +176,27 @@ def search_schemes(
 # RETURN COMPLETE SCHEME OBJECTS
 # ============================================================
 
+# Maximum ChromaDB L2 distance to consider a scheme relevant.
+# Distances are squared-Euclidean in cosine-normalised space,
+# so 1.0 ≈ cos-similarity 0.5. Values above this threshold
+# indicate the scheme is semantically unrelated to the query.
+_MAX_RELEVANT_DISTANCE = 0.9
+
+
 def search_full_schemes(
     query: str,
-    top_k: int = 5
+    top_k: int = 8,
+    distance_threshold: float = _MAX_RELEVANT_DISTANCE
 ):
 
     """
     Performs semantic search using ChromaDB
     and returns complete scheme objects
     from schemes.json.
+
+    Schemes whose ChromaDB distance exceeds *distance_threshold*
+    are dropped so that only genuinely relevant results reach
+    IBM Granite.
 
     Additional internal fields:
 
@@ -207,7 +219,8 @@ def search_full_schemes(
         return []
 
     # --------------------------------------------------------
-    # Semantic search
+    # Semantic search — fetch more than needed so the
+    # distance filter still leaves enough candidates.
     # --------------------------------------------------------
 
     results = search_schemes(
@@ -282,6 +295,19 @@ def search_full_schemes(
         if index < len(distances):
 
             distance = distances[index]
+
+        # ----------------------------------------------------
+        # Distance threshold filter:
+        # Drop schemes that are semantically too far from the
+        # query so that irrelevant results never reach Granite.
+        # ----------------------------------------------------
+
+        if (
+            distance is not None
+            and distance_threshold is not None
+            and distance > distance_threshold
+        ):
+            continue
 
         # ----------------------------------------------------
         # Convert distance to relevance score

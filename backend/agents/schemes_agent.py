@@ -79,7 +79,7 @@ class SchemeRecommendationAgent:
 
             rag_schemes = search_full_schemes(
                 query=query,
-                top_k=5
+                top_k=8
             )
 
         except Exception as e:

@@ -45,7 +45,7 @@ function EligibilityChecker() {
   };
 
   // =====================================================
-  // EXTRACT SCHEMES FROM API RESPONSE
+  // EXTRACT SCHEMES
   // =====================================================
 
   const extractSchemes = (data) => {
@@ -73,7 +73,7 @@ function EligibilityChecker() {
   };
 
   // =====================================================
-  // SUBMIT ELIGIBILITY
+  // SUBMIT
   // =====================================================
 
   const handleSubmit = async (e) => {
@@ -195,24 +195,71 @@ function EligibilityChecker() {
     ];
   };
 
+  const getApplyUrl = (scheme) =>
+    scheme.application_link ||
+    scheme.apply_url ||
+    scheme.application_url ||
+    scheme.url ||
+    "https://www.myscheme.gov.in/";
+
   return (
-    <div className="w-full min-h-screen bg-[#060c17] text-white">
+    <div className="w-full min-h-screen bg-white text-slate-900">
 
       {/* =====================================================
           MAIN SECTION
       ===================================================== */}
 
-      <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#060c17] via-[#091528] to-[#060c17] py-12 px-4 sm:px-6">
+      <section className="relative min-h-screen overflow-hidden bg-white py-12 px-4 sm:px-6">
 
-        {/* Background Glow */}
+        {/* =================================================
+            BACKGROUND LIGHTS
+        ================================================= */}
 
-        <div className="absolute top-10 left-[-120px] w-[450px] h-[450px] bg-blue-600/15 blur-[160px] rounded-full pointer-events-none" />
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
 
-        <div className="absolute bottom-10 right-[-120px] w-[400px] h-[400px] bg-cyan-500/15 blur-[150px] rounded-full pointer-events-none" />
+          <div
+            className="
+              absolute
+              top-10
+              left-[-150px]
+              w-[420px]
+              h-[420px]
+              bg-sky-400/10
+              rounded-full
+              blur-3xl
+            "
+          />
 
-        <div className="absolute top-[45%] left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none" />
+          <div
+            className="
+              absolute
+              bottom-0
+              right-[-150px]
+              w-[420px]
+              h-[420px]
+              bg-blue-400/10
+              rounded-full
+              blur-3xl
+            "
+          />
 
-        <div className="relative max-w-5xl mx-auto">
+          <div
+            className="
+              absolute
+              top-[45%]
+              left-1/2
+              -translate-x-1/2
+              w-[500px]
+              h-[300px]
+              bg-cyan-300/5
+              rounded-full
+              blur-3xl
+            "
+          />
+
+        </div>
+
+        <div className="relative max-w-6xl mx-auto">
 
           {/* =================================================
               HEADER
@@ -220,40 +267,90 @@ function EligibilityChecker() {
 
           <div className="text-center max-w-3xl mx-auto mb-10">
 
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider mb-5">
-
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-
+            <span
+              className="
+                inline-block
+                px-4
+                py-1.5
+                rounded-full
+                bg-sky-50
+                border border-sky-200
+                text-sky-600
+                text-xs
+                font-semibold
+                uppercase
+                tracking-wider
+                mb-5
+              "
+            >
               Smart Citizen Matcher
+            </span>
 
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight">
-
+            <h1
+              className="
+                text-4xl
+                sm:text-5xl
+                lg:text-6xl
+                font-black
+                tracking-tight
+                text-slate-900
+              "
+            >
               Check Scheme{" "}
 
-              <span className="bg-gradient-to-r from-cyan-300 via-white to-amber-400 bg-clip-text text-transparent">
+              <span
+                className="
+                  bg-gradient-to-r
+                  from-sky-500
+                  to-blue-600
+                  bg-clip-text
+                  text-transparent
+                "
+              >
                 Eligibility
               </span>
-
             </h1>
 
-            <p className="text-slate-400 text-sm sm:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
-
+            <p
+              className="
+                text-slate-600
+                text-sm
+                sm:text-base
+                mt-4
+                max-w-2xl
+                mx-auto
+                leading-relaxed
+              "
+            >
               Enter your basic profile details and let IntelliGov AI
               identify government schemes that may be suitable for you.
-
             </p>
 
           </div>
+
 
           {/* =================================================
               FORM CARD
           ================================================= */}
 
-          <div className="bg-[#081224]/80 backdrop-blur-xl p-6 sm:p-10 rounded-3xl border border-blue-900/50 shadow-2xl shadow-blue-950/20">
+          <div
+            className="
+              bg-white
+              p-6
+              sm:p-10
+              rounded-3xl
+              border border-sky-200/70
+              shadow-xl
+              shadow-sky-100/50
+              transition-all
+              duration-500
+            "
+          >
 
-            <form onSubmit={handleSubmit} className="space-y-7">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-7"
+            >
 
               {/* FORM GRID */}
 
@@ -263,12 +360,20 @@ function EligibilityChecker() {
 
                 <div className="space-y-2">
 
-                  <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-
-                    <FaUser className="text-cyan-400" />
-
+                  <label
+                    className="
+                      text-xs
+                      font-semibold
+                      text-slate-700
+                      uppercase
+                      tracking-wider
+                      flex
+                      items-center
+                      gap-2
+                    "
+                  >
+                    <FaUser className="text-sky-500" />
                     Age
-
                   </label>
 
                   <input
@@ -280,21 +385,44 @@ function EligibilityChecker() {
                     min="1"
                     max="120"
                     required
-                    className="w-full bg-[#0b1528] border border-blue-900/50 focus:border-cyan-400/60 outline-none p-3.5 rounded-xl text-sm text-white placeholder-slate-500 transition"
+                    className="
+                      w-full
+                      bg-sky-50/50
+                      border border-sky-200
+                      focus:border-sky-400
+                      focus:ring-2
+                      focus:ring-sky-100
+                      outline-none
+                      p-3.5
+                      rounded-xl
+                      text-sm
+                      text-slate-900
+                      placeholder-slate-400
+                      transition-all
+                    "
                   />
 
                 </div>
+
 
                 {/* OCCUPATION */}
 
                 <div className="space-y-2">
 
-                  <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-
-                    <FaBriefcase className="text-blue-400" />
-
+                  <label
+                    className="
+                      text-xs
+                      font-semibold
+                      text-slate-700
+                      uppercase
+                      tracking-wider
+                      flex
+                      items-center
+                      gap-2
+                    "
+                  >
+                    <FaBriefcase className="text-blue-500" />
                     Occupation
-
                   </label>
 
                   <input
@@ -304,21 +432,44 @@ function EligibilityChecker() {
                     onChange={handleChange}
                     placeholder="e.g. Farmer, Student, Artisan"
                     required
-                    className="w-full bg-[#0b1528] border border-blue-900/50 focus:border-cyan-400/60 outline-none p-3.5 rounded-xl text-sm text-white placeholder-slate-500 transition"
+                    className="
+                      w-full
+                      bg-sky-50/50
+                      border border-sky-200
+                      focus:border-sky-400
+                      focus:ring-2
+                      focus:ring-sky-100
+                      outline-none
+                      p-3.5
+                      rounded-xl
+                      text-sm
+                      text-slate-900
+                      placeholder-slate-400
+                      transition-all
+                    "
                   />
 
                 </div>
+
 
                 {/* GENDER */}
 
                 <div className="space-y-2">
 
-                  <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-
-                    <FaUserCheck className="text-amber-400" />
-
+                  <label
+                    className="
+                      text-xs
+                      font-semibold
+                      text-slate-700
+                      uppercase
+                      tracking-wider
+                      flex
+                      items-center
+                      gap-2
+                    "
+                  >
+                    <FaUserCheck className="text-amber-500" />
                     Gender
-
                   </label>
 
                   <select
@@ -326,39 +477,48 @@ function EligibilityChecker() {
                     value={formData.gender}
                     onChange={handleChange}
                     required
-                    className="w-full bg-[#0b1528] border border-blue-900/50 focus:border-cyan-400/60 outline-none p-3.5 rounded-xl text-sm text-white transition"
+                    className="
+                      w-full
+                      bg-sky-50/50
+                      border border-sky-200
+                      focus:border-sky-400
+                      focus:ring-2
+                      focus:ring-sky-100
+                      outline-none
+                      p-3.5
+                      rounded-xl
+                      text-sm
+                      text-slate-900
+                      transition-all
+                    "
                   >
-
-                    <option value="" className="bg-[#081224]">
-                      Select Gender
-                    </option>
-
-                    <option value="Male" className="bg-[#081224]">
-                      Male
-                    </option>
-
-                    <option value="Female" className="bg-[#081224]">
-                      Female
-                    </option>
-
-                    <option value="Other" className="bg-[#081224]">
-                      Other
-                    </option>
-
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                   </select>
 
                 </div>
+
 
                 {/* INCOME */}
 
                 <div className="space-y-2">
 
-                  <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-
-                    <FaMoneyBillWave className="text-emerald-400" />
-
+                  <label
+                    className="
+                      text-xs
+                      font-semibold
+                      text-slate-700
+                      uppercase
+                      tracking-wider
+                      flex
+                      items-center
+                      gap-2
+                    "
+                  >
+                    <FaMoneyBillWave className="text-emerald-500" />
                     Annual Income
-
                   </label>
 
                   <input
@@ -369,21 +529,44 @@ function EligibilityChecker() {
                     placeholder="e.g. 250000"
                     min="0"
                     required
-                    className="w-full bg-[#0b1528] border border-blue-900/50 focus:border-cyan-400/60 outline-none p-3.5 rounded-xl text-sm text-white placeholder-slate-500 transition"
+                    className="
+                      w-full
+                      bg-sky-50/50
+                      border border-sky-200
+                      focus:border-sky-400
+                      focus:ring-2
+                      focus:ring-sky-100
+                      outline-none
+                      p-3.5
+                      rounded-xl
+                      text-sm
+                      text-slate-900
+                      placeholder-slate-400
+                      transition-all
+                    "
                   />
 
                 </div>
+
 
                 {/* STATE */}
 
                 <div className="md:col-span-2 space-y-2">
 
-                  <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-
-                    <FaMapMarkerAlt className="text-rose-400" />
-
+                  <label
+                    className="
+                      text-xs
+                      font-semibold
+                      text-slate-700
+                      uppercase
+                      tracking-wider
+                      flex
+                      items-center
+                      gap-2
+                    "
+                  >
+                    <FaMapMarkerAlt className="text-rose-500" />
                     State of Residence
-
                   </label>
 
                   <select
@@ -391,12 +574,22 @@ function EligibilityChecker() {
                     value={formData.state}
                     onChange={handleChange}
                     required
-                    className="w-full bg-[#0b1528] border border-blue-900/50 focus:border-cyan-400/60 outline-none p-3.5 rounded-xl text-sm text-white transition"
+                    className="
+                      w-full
+                      bg-sky-50/50
+                      border border-sky-200
+                      focus:border-sky-400
+                      focus:ring-2
+                      focus:ring-sky-100
+                      outline-none
+                      p-3.5
+                      rounded-xl
+                      text-sm
+                      text-slate-900
+                      transition-all
+                    "
                   >
-
-                    <option value="" className="bg-[#081224]">
-                      Select State
-                    </option>
+                    <option value="">Select State</option>
 
                     <option value="Haryana">Haryana</option>
                     <option value="Punjab">Punjab</option>
@@ -423,45 +616,108 @@ function EligibilityChecker() {
 
               </div>
 
+
               {/* =================================================
                   BUTTONS
               ================================================= */}
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6 border-t border-blue-900/40">
+              <div
+                className="
+                  flex
+                  flex-col
+                  sm:flex-row
+                  items-center
+                  justify-center
+                  gap-3
+                  pt-6
+                  border-t
+                  border-sky-100
+                "
+              >
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-sm shadow-xl shadow-cyan-500/20 hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="
+                    w-full
+                    sm:w-auto
+                    px-8
+                    py-3.5
+                    rounded-xl
+                    bg-gradient-to-r
+                    from-sky-500
+                    to-blue-600
+                    text-white
+                    font-bold
+                    text-sm
+                    shadow-lg
+                    shadow-sky-200/60
+                    hover:scale-[1.02]
+                    hover:shadow-xl
+                    transition-all
+                    disabled:opacity-50
+                    disabled:cursor-not-allowed
+                    flex
+                    items-center
+                    justify-center
+                    gap-2
+                  "
                 >
 
                   {loading ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span
+                        className="
+                          w-4
+                          h-4
+                          border-2
+                          border-white
+                          border-t-transparent
+                          rounded-full
+                          animate-spin
+                        "
+                      />
 
                       Evaluating Profile...
                     </>
                   ) : (
                     <>
                       <FaAward />
-
                       Check Schemes
                     </>
                   )}
 
                 </button>
 
+
                 <button
                   type="button"
                   onClick={handleReset}
                   disabled={loading}
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#0b1528] border border-blue-900/50 text-slate-300 text-sm font-semibold hover:text-white hover:border-cyan-400/40 transition flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="
+                    w-full
+                    sm:w-auto
+                    px-7
+                    py-3.5
+                    rounded-xl
+                    bg-white
+                    border border-sky-200
+                    text-slate-600
+                    text-sm
+                    font-semibold
+                    hover:text-sky-600
+                    hover:border-sky-400
+                    hover:bg-sky-50
+                    transition-all
+                    flex
+                    items-center
+                    justify-center
+                    gap-2
+                    disabled:opacity-50
+                  "
                 >
-
                   <FaRedo className="text-xs" />
-
                   Reset
-
                 </button>
 
               </div>
@@ -470,27 +726,48 @@ function EligibilityChecker() {
 
           </div>
 
+
           {/* =================================================
               ERROR
           ================================================= */}
 
           {error && (
 
-            <div className="mt-7 bg-red-500/10 border border-red-500/30 rounded-2xl p-5 flex items-start gap-4">
+            <div
+              className="
+                mt-7
+                bg-red-50
+                border border-red-200
+                rounded-2xl
+                p-5
+                flex
+                items-start
+                gap-4
+              "
+            >
 
-              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
-
-                <FaExclamationTriangle className="text-red-400" />
-
+              <div
+                className="
+                  w-10
+                  h-10
+                  rounded-xl
+                  bg-red-100
+                  flex
+                  items-center
+                  justify-center
+                  shrink-0
+                "
+              >
+                <FaExclamationTriangle className="text-red-500" />
               </div>
 
               <div>
 
-                <h3 className="text-sm font-bold text-red-300 mb-1">
+                <h3 className="text-sm font-bold text-red-600 mb-1">
                   Unable to Check Eligibility
                 </h3>
 
-                <p className="text-xs text-red-300/70 leading-relaxed">
+                <p className="text-xs text-red-500/80 leading-relaxed">
                   {error}
                 </p>
 
@@ -499,6 +776,7 @@ function EligibilityChecker() {
             </div>
 
           )}
+
 
           {/* =================================================
               RESULTS
@@ -510,34 +788,74 @@ function EligibilityChecker() {
 
               {/* Results Header */}
 
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+              <div
+                className="
+                  flex
+                  flex-col
+                  sm:flex-row
+                  sm:items-end
+                  justify-between
+                  gap-3
+                  mb-6
+                "
+              >
 
                 <div>
 
-                  <span className="text-xs uppercase tracking-wider text-cyan-400 font-semibold">
+                  <span
+                    className="
+                      text-xs
+                      uppercase
+                      tracking-wider
+                      text-sky-600
+                      font-semibold
+                    "
+                  >
                     AI Recommendation Results
                   </span>
 
-                  <h2 className="text-2xl sm:text-3xl font-black text-white mt-1">
+                  <h2
+                    className="
+                      text-2xl
+                      sm:text-3xl
+                      font-black
+                      text-slate-900
+                      mt-1
+                    "
+                  >
                     Schemes You May Qualify For
                   </h2>
 
                 </div>
 
-                <div className="px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 text-xs font-semibold flex items-center gap-2 w-fit">
-
+                <div
+                  className="
+                    px-4
+                    py-2
+                    rounded-full
+                    bg-emerald-50
+                    border border-emerald-200
+                    text-emerald-600
+                    text-xs
+                    font-semibold
+                    flex
+                    items-center
+                    gap-2
+                    w-fit
+                  "
+                >
                   <FaCheckCircle />
 
                   {schemes.length} Match
                   {schemes.length !== 1 ? "es" : ""}
-
                 </div>
 
               </div>
 
+
               {/* Scheme Cards */}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 {schemes.map((scheme, index) => (
 
@@ -547,138 +865,320 @@ function EligibilityChecker() {
                       scheme.scheme_id ||
                       index
                     }
-                    className="group bg-[#081224]/85 backdrop-blur-xl border border-blue-900/40 rounded-3xl p-6 hover:border-cyan-400/40 hover:-translate-y-1 transition-all duration-300"
+                    className="
+                      group
+                      relative
+                      bg-white
+                      border border-sky-200/70
+                      rounded-3xl
+                      p-6
+                      flex
+                      flex-col
+                      shadow-sm
+
+                      transition-all
+                      duration-500
+                      ease-[cubic-bezier(0.22,1,0.36,1)]
+
+                      hover:border-sky-400/60
+                      hover:-translate-y-2
+                      hover:shadow-xl
+                      hover:shadow-sky-100/70
+                    "
                   >
 
-                    {/* Card Header */}
+                    {/* Hover Glow */}
 
-                    <div className="flex items-start justify-between gap-4 mb-5">
+                    <div
+                      className="
+                        absolute
+                        inset-0
+                        rounded-3xl
+                        bg-gradient-to-br
+                        from-sky-400/[0.08]
+                        via-transparent
+                        to-blue-500/[0.06]
+                        opacity-0
+                        group-hover:opacity-100
+                        transition-opacity
+                        duration-500
+                        pointer-events-none
+                      "
+                    />
 
-                      <div className="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center shrink-0">
+                    <div className="relative z-10">
 
-                        <FaAward className="text-cyan-400" />
+                      {/* Card Header */}
+
+                      <div
+                        className="
+                          flex
+                          items-start
+                          justify-between
+                          gap-4
+                          mb-5
+                        "
+                      >
+
+                        <div
+                          className="
+                            w-11
+                            h-11
+                            rounded-xl
+                            bg-sky-50
+                            border border-sky-200
+                            flex
+                            items-center
+                            justify-center
+                            shrink-0
+
+                            group-hover:border-sky-400/60
+                            group-hover:scale-110
+                            group-hover:-rotate-2
+                            transition-all
+                            duration-500
+                          "
+                        >
+                          <FaAward className="text-sky-500" />
+                        </div>
+
+                        {scheme.category && (
+
+                          <span
+                            className="
+                              px-3
+                              py-1.5
+                              rounded-full
+                              bg-sky-50
+                              border border-sky-200
+                              text-sky-600
+                              text-[11px]
+                              font-medium
+                            "
+                          >
+                            {scheme.category}
+                          </span>
+
+                        )}
 
                       </div>
 
-                      {scheme.category && (
 
-                        <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-300 text-[11px] font-medium border border-blue-400/30">
+                      {/* Name */}
 
-                          {scheme.category}
+                      <h3
+                        className="
+                          text-xl
+                          font-bold
+                          text-slate-900
+                          mb-3
+                          group-hover:text-sky-600
+                          transition-colors
+                          duration-300
+                        "
+                      >
+                        {getSchemeName(scheme)}
+                      </h3>
 
-                        </span>
 
-                      )}
+                      {/* Description */}
 
-                    </div>
-
-                    {/* Scheme Name */}
-
-                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-300 transition-colors">
-
-                      {getSchemeName(scheme)}
-
-                    </h3>
-
-                    {/* Description */}
-
-                    <p className="text-sm text-slate-400 leading-relaxed mb-5">
-
-                      {getDescription(scheme)}
-
-                    </p>
-
-                    {/* Eligibility */}
-
-                    <div className="p-4 rounded-2xl bg-[#0b1528] border border-blue-900/40 mb-4">
-
-                      <div className="text-[11px] uppercase tracking-wider font-bold text-cyan-400 mb-2 flex items-center gap-2">
-
-                        <FaCheckCircle />
-
-                        Eligibility
-
-                      </div>
-
-                      <p className="text-xs text-slate-300 leading-relaxed">
-
-                        {getEligibility(scheme)}
-
+                      <p
+                        className="
+                          text-sm
+                          text-slate-600
+                          leading-relaxed
+                          mb-5
+                        "
+                      >
+                        {getDescription(scheme)}
                       </p>
 
-                    </div>
 
-                    {/* Documents */}
+                      {/* Eligibility */}
 
-                    <div className="p-4 rounded-2xl bg-[#0b1528] border border-blue-900/40 mb-5">
+                      <div
+                        className="
+                          p-4
+                          rounded-2xl
+                          bg-sky-50/70
+                          border border-sky-100
+                          mb-4
+                        "
+                      >
 
-                      <div className="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-2 flex items-center gap-2">
+                        <div
+                          className="
+                            text-[11px]
+                            uppercase
+                            tracking-wider
+                            font-bold
+                            text-sky-600
+                            mb-2
+                            flex
+                            items-center
+                            gap-2
+                          "
+                        >
+                          <FaCheckCircle />
+                          Eligibility
+                        </div>
 
-                        <FaFileAlt className="text-cyan-400" />
-
-                        Documents Required
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          {getEligibility(scheme)}
+                        </p>
 
                       </div>
 
-                      <div className="space-y-1.5">
 
-                        {getDocuments(scheme)
-                          .slice(0, 5)
-                          .map((document, docIndex) => (
+                      {/* Documents */}
 
-                            <div
-                              key={docIndex}
-                              className="flex items-center gap-2 text-xs text-slate-300"
-                            >
+                      <div
+                        className="
+                          p-4
+                          rounded-2xl
+                          bg-slate-50
+                          border border-slate-200
+                          mb-5
+                        "
+                      >
 
-                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                        <div
+                          className="
+                            text-[11px]
+                            uppercase
+                            tracking-wider
+                            font-bold
+                            text-slate-500
+                            mb-2
+                            flex
+                            items-center
+                            gap-2
+                          "
+                        >
+                          <FaFileAlt className="text-sky-500" />
+                          Documents Required
+                        </div>
 
-                              {document}
+                        <div className="space-y-1.5">
 
-                            </div>
+                          {getDocuments(scheme)
+                            .slice(0, 5)
+                            .map((document, docIndex) => (
 
-                          ))}
+                              <div
+                                key={docIndex}
+                                className="
+                                  flex
+                                  items-center
+                                  gap-2
+                                  text-xs
+                                  text-slate-600
+                                "
+                              >
+
+                                <span
+                                  className="
+                                    w-1.5
+                                    h-1.5
+                                    rounded-full
+                                    bg-sky-400
+                                    shrink-0
+                                  "
+                                />
+
+                                {document}
+
+                              </div>
+
+                            ))}
+
+                        </div>
+
+                      </div>
+
+
+                      {/* Actions */}
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          justify-between
+                          gap-3
+                          pt-2
+                        "
+                      >
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedScheme(scheme)
+                          }
+                          className="
+                            text-xs
+                            font-semibold
+                            text-sky-600
+                            hover:text-blue-600
+                            flex
+                            items-center
+                            gap-2
+                            transition-all
+                            group-hover:translate-x-1
+                          "
+                        >
+                          View Details
+                          <FaArrowRight className="text-[10px]" />
+                        </button>
+
+                        <a
+                          href={getApplyUrl(scheme)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="
+                            px-4
+                            py-2
+                            rounded-xl
+                            bg-gradient-to-r
+                            from-sky-500
+                            to-blue-600
+                            text-white
+                            text-xs
+                            font-semibold
+                            hover:scale-[1.02]
+                            transition-all
+                            flex
+                            items-center
+                            gap-2
+                            shadow-md
+                            shadow-sky-200/50
+                          "
+                        >
+                          Apply Now
+                          <FaExternalLinkAlt className="text-[9px]" />
+                        </a>
 
                       </div>
 
                     </div>
 
-                    {/* Actions */}
+                    {/* Bottom Glow */}
 
-                    <div className="flex items-center justify-between gap-3">
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSelectedScheme(scheme)
-                        }
-                        className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-2 transition"
-                      >
-
-                        View Details
-
-                        <FaArrowRight className="text-[10px]" />
-
-                      </button>
-
-                      <a
-                        href={
-                          scheme.application_link ||
-                          scheme.apply_url ||
-                          "https://myScheme.gov.in"
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-semibold hover:scale-[1.02] transition flex items-center gap-2"
-                      >
-
-                        Apply Now
-
-                        <FaExternalLinkAlt className="text-[9px]" />
-
-                      </a>
-
-                    </div>
+                    <div
+                      className="
+                        absolute
+                        bottom-0
+                        left-1/2
+                        -translate-x-1/2
+                        w-1/2
+                        h-px
+                        bg-sky-400/0
+                        group-hover:bg-sky-400/50
+                        blur-sm
+                        transition-all
+                        duration-500
+                      "
+                    />
 
                   </div>
 
@@ -690,6 +1190,7 @@ function EligibilityChecker() {
 
           )}
 
+
           {/* =================================================
               EMPTY RESULTS
           ================================================= */}
@@ -698,17 +1199,41 @@ function EligibilityChecker() {
             !error &&
             schemes.length === 0 && (
 
-              <div className="mt-10 bg-[#081224]/80 backdrop-blur-xl border border-blue-900/40 p-8 rounded-3xl text-center">
+              <div
+                className="
+                  mt-10
+                  bg-white
+                  border border-sky-200
+                  p-8
+                  rounded-3xl
+                  text-center
+                  shadow-sm
+                "
+              >
 
-                <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-blue-500/10 flex items-center justify-center text-2xl">
+                <div
+                  className="
+                    w-14
+                    h-14
+                    mx-auto
+                    mb-4
+                    rounded-2xl
+                    bg-sky-50
+                    border border-sky-200
+                    flex
+                    items-center
+                    justify-center
+                    text-2xl
+                  "
+                >
                   🔍
                 </div>
 
-                <h3 className="text-lg font-bold text-white mb-2">
+                <h3 className="text-lg font-bold text-slate-900 mb-2">
                   No Schemes Matched
                 </h3>
 
-                <p className="text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+                <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
                   No schemes were returned for the profile you
                   provided. Try changing your occupation, income,
                   age, or state and check again.
@@ -722,6 +1247,7 @@ function EligibilityChecker() {
 
       </section>
 
+
       {/* =====================================================
           DETAILS MODAL
       ===================================================== */}
@@ -729,26 +1255,77 @@ function EligibilityChecker() {
       {selectedScheme && (
 
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          className="
+            fixed
+            inset-0
+            z-50
+            bg-slate-900/40
+            backdrop-blur-md
+            flex
+            items-center
+            justify-center
+            p-4
+          "
           onClick={() => setSelectedScheme(null)}
         >
 
           <div
-            className="w-full max-w-2xl max-h-[88vh] overflow-y-auto bg-[#081224] border border-cyan-400/30 rounded-3xl shadow-2xl"
+            className="
+              w-full
+              max-w-2xl
+              max-h-[88vh]
+              overflow-y-auto
+              bg-white
+              border border-sky-200
+              rounded-3xl
+              shadow-2xl
+            "
             onClick={(e) => e.stopPropagation()}
           >
 
-            <div className="p-6 border-b border-blue-900/40">
+            {/* Modal Header */}
+
+            <div
+              className="
+                sticky
+                top-0
+                z-10
+                bg-white/95
+                backdrop-blur-xl
+                p-6
+                border-b
+                border-sky-100
+              "
+            >
 
               <div className="flex items-start justify-between gap-4">
 
                 <div>
 
-                  <span className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold">
+                  <span
+                    className="
+                      inline-block
+                      px-3
+                      py-1
+                      rounded-full
+                      bg-sky-50
+                      border border-sky-200
+                      text-sky-600
+                      text-xs
+                      font-semibold
+                    "
+                  >
                     {getCategory(selectedScheme)}
                   </span>
 
-                  <h2 className="text-2xl font-black text-white mt-3">
+                  <h2
+                    className="
+                      text-2xl
+                      font-black
+                      text-slate-900
+                      mt-3
+                    "
+                  >
                     {getSchemeName(selectedScheme)}
                   </h2>
 
@@ -757,7 +1334,20 @@ function EligibilityChecker() {
                 <button
                   type="button"
                   onClick={() => setSelectedScheme(null)}
-                  className="w-10 h-10 rounded-xl bg-[#0b1528] border border-blue-900/40 text-slate-400 hover:text-white transition"
+                  className="
+                    w-10
+                    h-10
+                    rounded-xl
+                    bg-slate-50
+                    border border-slate-200
+                    text-slate-500
+                    hover:text-sky-600
+                    hover:border-sky-300
+                    flex
+                    items-center
+                    justify-center
+                    transition-all
+                  "
                   aria-label="Close details"
                 >
                   ✕
@@ -767,35 +1357,77 @@ function EligibilityChecker() {
 
             </div>
 
+
+            {/* Modal Content */}
+
             <div className="p-6 space-y-6">
 
               <div>
 
-                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-2">
+                <h4
+                  className="
+                    text-xs
+                    uppercase
+                    tracking-wider
+                    text-sky-600
+                    font-semibold
+                    mb-2
+                  "
+                >
                   Description
                 </h4>
 
-                <p className="text-sm text-slate-300 leading-relaxed">
+                <p className="text-sm text-slate-600 leading-relaxed">
                   {getDescription(selectedScheme)}
                 </p>
 
               </div>
 
+
               <div>
 
-                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-2">
+                <h4
+                  className="
+                    text-xs
+                    uppercase
+                    tracking-wider
+                    text-sky-600
+                    font-semibold
+                    mb-2
+                  "
+                >
                   Eligibility
                 </h4>
 
-                <p className="text-sm text-slate-300 leading-relaxed p-4 rounded-2xl bg-[#0b1528] border border-blue-900/40">
+                <p
+                  className="
+                    text-sm
+                    text-slate-600
+                    leading-relaxed
+                    p-4
+                    rounded-2xl
+                    bg-sky-50/70
+                    border border-sky-100
+                  "
+                >
                   {getEligibility(selectedScheme)}
                 </p>
 
               </div>
 
+
               <div>
 
-                <h4 className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">
+                <h4
+                  className="
+                    text-xs
+                    uppercase
+                    tracking-wider
+                    text-sky-600
+                    font-semibold
+                    mb-3
+                  "
+                >
                   Documents Required
                 </h4>
 
@@ -806,12 +1438,20 @@ function EligibilityChecker() {
 
                       <div
                         key={index}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-[#0b1528] border border-blue-900/40"
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          p-3
+                          rounded-xl
+                          bg-slate-50
+                          border border-slate-200
+                        "
                       >
 
-                        <FaCheckCircle className="text-emerald-400" />
+                        <FaCheckCircle className="text-emerald-500" />
 
-                        <span className="text-sm text-slate-300">
+                        <span className="text-sm text-slate-600">
                           {document}
                         </span>
 
@@ -824,23 +1464,44 @@ function EligibilityChecker() {
 
               </div>
 
-              <div className="pt-4 border-t border-blue-900/40 flex justify-end">
+
+              {/* Modal Action */}
+
+              <div
+                className="
+                  pt-4
+                  border-t
+                  border-sky-100
+                  flex
+                  justify-end
+                "
+              >
 
                 <a
-                  href={
-                    selectedScheme.application_link ||
-                    selectedScheme.apply_url ||
-                    "https://myScheme.gov.in"
-                  }
+                  href={getApplyUrl(selectedScheme)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold flex items-center gap-2"
+                  className="
+                    px-6
+                    py-3
+                    rounded-xl
+                    bg-gradient-to-r
+                    from-sky-500
+                    to-blue-600
+                    text-white
+                    text-sm
+                    font-semibold
+                    flex
+                    items-center
+                    gap-2
+                    shadow-lg
+                    shadow-sky-200/50
+                    hover:scale-[1.02]
+                    transition-all
+                  "
                 >
-
                   Apply Now
-
                   <FaExternalLinkAlt className="text-xs" />
-
                 </a>
 
               </div>

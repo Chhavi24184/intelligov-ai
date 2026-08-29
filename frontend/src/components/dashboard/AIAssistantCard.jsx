@@ -1,54 +1,155 @@
-import hero from "../../assets/hero.jpeg";
+import hero from "../../assets/hero.png";
 import { FaRobot, FaArrowRight } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 function AIAssistantCard() {
   return (
-    <section className="relative mt-4 overflow-hidden rounded-3xl bg-[#101d34] border border-blue-900/40 px-6 py-4">
+    <section
+      className="
+        relative
+        mt-4
+        overflow-hidden
+        rounded-3xl
+        bg-white/80
+        backdrop-blur-xl
+        border
+        border-cyan-200
+        px-6
+        py-5
+        shadow-[0_10px_40px_rgba(37,99,235,0.08)]
+      "
+    >
 
-      {/* Background Glow */}
-      <div className="absolute -right-16 top-1/2 -translate-y-1/2 w-72 h-72 bg-blue-500/20 blur-[120px] rounded-full"></div>
+      {/* =====================================================
+          BACKGROUND GRADIENT GLOWS
+      ===================================================== */}
 
-      <div className="relative flex items-center justify-between">
+      <div
+        className="
+          absolute
+          -right-20
+          top-1/2
+          -translate-y-1/2
+          w-80
+          h-80
+          bg-cyan-400/15
+          blur-[120px]
+          rounded-full
+          pointer-events-none
+        "
+      />
 
-        {/* Left Side */}
+      <div
+        className="
+          absolute
+          -left-20
+          -bottom-24
+          w-64
+          h-64
+          bg-blue-400/10
+          blur-[100px]
+          rounded-full
+          pointer-events-none
+        "
+      />
+
+
+      {/* =====================================================
+          CONTENT
+      ===================================================== */}
+
+      <div className="relative z-10 flex items-center justify-between gap-6">
+
+
+        {/* =================================================
+            LEFT SIDE
+        ================================================= */}
 
         <div className="max-w-xl">
 
-          <p className="text-sky-300 font-semibold tracking-widest uppercase">
+          {/* Label */}
+
+          <p
+            className="
+              text-sm
+              font-bold
+              tracking-widest
+              uppercase
+              bg-gradient-to-r
+              from-cyan-500
+              via-blue-600
+              to-indigo-600
+              bg-clip-text
+              text-transparent
+            "
+          >
             AI Assistant
           </p>
 
-          <div className="mt-2 text-2xl font-bold text-white">
+
+          {/* Heading */}
+
+          <div
+            className="
+              mt-2
+              text-2xl
+              sm:text-3xl
+              font-bold
+              bg-gradient-to-r
+              from-slate-800
+              via-blue-700
+              to-cyan-600
+              bg-clip-text
+              text-transparent
+            "
+          >
             Your AI Government Guide
           </div>
 
-          <p className="mt-2 text-gray-400 leading-5">
 
+          {/* Description */}
+
+          <p
+            className="
+              mt-2
+              text-slate-500
+              leading-6
+              text-sm
+              sm:text-base
+            "
+          >
             Get instant recommendations for government schemes,
             scholarships, jobs, internships and eligibility checks
             using our intelligent AI assistant.
-
           </p>
 
-          <button
+
+          {/* =================================================
+              START AI CHAT BUTTON
+          ================================================= */}
+
+          <Link
+            to="/chat"
             className="
-            mt-6
-            flex
-            items-center
-            gap-3
-            px-6
-            py-3
-            rounded-xl
-            bg-gradient-to-r
-            from-[#1a56db]
-            to-[#2563eb]
-            text-white
-            font-semibold
-            shadow-lg
-            hover:scale-105
-            hover:shadow-[0_0_25px_rgba(59,130,246,.6)]
-            transition-all
-            duration-300
+              mt-5
+              inline-flex
+              items-center
+              gap-3
+              px-6
+              py-3
+              rounded-xl
+              bg-gradient-to-r
+              from-cyan-500
+              via-blue-600
+              to-indigo-600
+              text-white
+              font-semibold
+              shadow-lg
+              shadow-blue-500/20
+              hover:scale-105
+              hover:shadow-cyan-500/30
+              transition-all
+              duration-300
             "
           >
 
@@ -56,20 +157,45 @@ function AIAssistantCard() {
 
             Start AI Chat
 
-            <FaArrowRight />
+            <FaArrowRight className="text-sm" />
 
-          </button>
+          </Link>
 
         </div>
 
-        {/* Right Side */}
 
-        <div className="hidden lg:flex justify-center items-center">
+        {/* =================================================
+            RIGHT SIDE — AI IMAGE
+        ================================================= */}
+
+        <div className="hidden lg:flex justify-center items-center relative">
+
+          {/* Image Glow */}
+
+          <div
+            className="
+              absolute
+              w-40
+              h-40
+              bg-cyan-400/20
+              blur-3xl
+              rounded-full
+            "
+          />
+
 
           <img
             src={hero}
             alt="AI Assistant"
-            className="w-36 float drop-shadow-[0_0_35px_rgba(59,130,246,.8)]"
+            className="
+              relative
+              w-36
+              float
+              drop-shadow-[0_0_30px_rgba(6,182,212,0.35)]
+              transition-transform
+              duration-500
+              hover:scale-105
+            "
           />
 
         </div>

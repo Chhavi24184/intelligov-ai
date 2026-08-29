@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
   FaUniversity,
   FaGraduationCap,
@@ -6,14 +7,18 @@ import {
   FaBookmark,
 } from "react-icons/fa";
 
+
 function StatsCards() {
+
   const [savedCount, setSavedCount] = useState(0);
+
 
   /* =========================================================
      CURRENT USER
   ========================================================= */
 
   const getCurrentUserKey = () => {
+
     const email = localStorage.getItem("userEmail");
 
     if (email) {
@@ -29,6 +34,7 @@ function StatsCards() {
   ========================================================= */
 
   const getStorageKeys = () => {
+
     const userKey = getCurrentUserKey();
 
     return [
@@ -46,12 +52,16 @@ function StatsCards() {
   ========================================================= */
 
   const loadSavedCount = () => {
+
     const keys = getStorageKeys();
 
     const allItems = [];
 
+
     keys.forEach((key) => {
+
       try {
+
         const data = localStorage.getItem(key);
 
         if (!data) return;
@@ -60,17 +70,27 @@ function StatsCards() {
 
         if (!Array.isArray(parsed)) return;
 
+
         parsed.forEach((item) => {
-          if (item && typeof item === "object") {
+
+          if (
+            item &&
+            typeof item === "object"
+          ) {
             allItems.push(item);
           }
+
         });
+
       } catch (error) {
+
         console.error(
           `Unable to read saved items from ${key}:`,
           error
         );
+
       }
+
     });
 
 
@@ -79,7 +99,9 @@ function StatsCards() {
     ======================================================= */
 
     const uniqueItems = [];
+
     const seen = new Set();
+
 
     allItems.forEach((item, index) => {
 
@@ -105,7 +127,6 @@ function StatsCards() {
 
 
       /*
-        Same logic as Saved.jsx:
         Internships + Jobs = Jobs category
       */
 
@@ -117,7 +138,9 @@ function StatsCards() {
         type.includes("fellowship") ||
         type.includes("grant")
       ) {
+
         normalizedType = "scholarship";
+
       }
 
       else if (
@@ -129,7 +152,9 @@ function StatsCards() {
         item?.job_id ||
         item?.jobId
       ) {
+
         normalizedType = "job";
+
       }
 
       else if (
@@ -139,21 +164,29 @@ function StatsCards() {
         item?.scheme_id ||
         item?.schemeId
       ) {
+
         normalizedType = "scheme";
+
       }
 
 
-      const uniqueKey = `${normalizedType}-${String(id)}`;
+      const uniqueKey =
+        `${normalizedType}-${String(id)}`;
 
 
       if (!seen.has(uniqueKey)) {
+
         seen.add(uniqueKey);
+
         uniqueItems.push(item);
+
       }
+
     });
 
 
     setSavedCount(uniqueItems.length);
+
   };
 
 
@@ -166,10 +199,6 @@ function StatsCards() {
     loadSavedCount();
 
 
-    /*
-      This catches changes made from another tab/window.
-    */
-
     const handleStorageChange = () => {
       loadSavedCount();
     };
@@ -180,11 +209,6 @@ function StatsCards() {
       handleStorageChange
     );
 
-
-    /*
-      Custom event catches save/unsave actions
-      inside the same React application.
-    */
 
     const handleSavedItemsChanged = () => {
       loadSavedCount();
@@ -197,14 +221,12 @@ function StatsCards() {
     );
 
 
-    /*
-      Small refresh when dashboard becomes visible again.
-    */
-
     const handleVisibilityChange = () => {
+
       if (!document.hidden) {
         loadSavedCount();
       }
+
     };
 
 
@@ -241,37 +263,47 @@ function StatsCards() {
   ========================================================= */
 
   const stats = [
+
     {
       title: "Total Schemes",
       value: "126",
       subtitle: "Available for you",
-      icon: <FaUniversity size={24} />,
-      color: "from-blue-500 to-cyan-400",
+      icon: <FaUniversity size={22} />,
+      gradient: "from-blue-500 to-cyan-400",
+      iconBg: "bg-blue-50",
+      iconColor: "text-blue-600",
     },
 
     {
       title: "Eligible Schemes",
       value: "18",
       subtitle: "You qualify for",
-      icon: <FaGraduationCap size={24} />,
-      color: "from-emerald-500 to-green-400",
+      icon: <FaGraduationCap size={22} />,
+      gradient: "from-emerald-500 to-green-400",
+      iconBg: "bg-emerald-50",
+      iconColor: "text-emerald-600",
     },
 
     {
       title: "Applications",
       value: "07",
       subtitle: "Submitted by you",
-      icon: <FaBriefcase size={24} />,
-      color: "from-purple-500 to-pink-400",
+      icon: <FaBriefcase size={22} />,
+      gradient: "from-purple-500 to-pink-400",
+      iconBg: "bg-purple-50",
+      iconColor: "text-purple-600",
     },
 
     {
       title: "Saved Schemes",
       value: savedCount,
       subtitle: "Saved for later",
-      icon: <FaBookmark size={24} />,
-      color: "from-amber-500 to-orange-400",
+      icon: <FaBookmark size={22} />,
+      gradient: "from-amber-500 to-orange-400",
+      iconBg: "bg-amber-50",
+      iconColor: "text-amber-600",
     },
+
   ];
 
 
@@ -280,6 +312,7 @@ function StatsCards() {
   ========================================================= */
 
   return (
+
     <section
       className="
         grid
@@ -300,25 +333,39 @@ function StatsCards() {
             group
             w-full
             min-w-0
-            bg-[#101d34]
-            border border-blue-900/40
+            bg-white/85
+            backdrop-blur-xl
+            border
+            border-slate-200
             rounded-2xl
             p-5
+            shadow-[0_8px_30px_rgba(15,23,42,0.06)]
             transition-all
             duration-300
             hover:-translate-y-1
-            hover:border-cyan-400/30
-            hover:shadow-[0_0_25px_rgba(59,130,246,0.20)]
+            hover:shadow-[0_15px_35px_rgba(37,99,235,0.12)]
+            hover:border-blue-200
           "
         >
 
           <div className="flex items-center justify-between gap-4">
 
-            {/* TEXT */}
+
+            {/* =================================================
+                TEXT
+            ================================================= */}
 
             <div className="min-w-0">
 
-              <p className="text-gray-300 text-sm sm:text-base font-medium truncate">
+              <p
+                className="
+                  text-slate-600
+                  text-sm
+                  sm:text-base
+                  font-medium
+                  truncate
+                "
+              >
                 {item.title}
               </p>
 
@@ -329,7 +376,7 @@ function StatsCards() {
                   font-bold
                   mt-2
                   bg-gradient-to-r
-                  ${item.color}
+                  ${item.gradient}
                   bg-clip-text
                   text-transparent
                 `}
@@ -338,14 +385,23 @@ function StatsCards() {
               </h2>
 
 
-              <p className="text-gray-500 text-xs sm:text-sm mt-1">
+              <p
+                className="
+                  text-slate-400
+                  text-xs
+                  sm:text-sm
+                  mt-1
+                "
+              >
                 {item.subtitle}
               </p>
 
             </div>
 
 
-            {/* ICON */}
+            {/* =================================================
+                ICON
+            ================================================= */}
 
             <div
               className={`
@@ -353,13 +409,14 @@ function StatsCards() {
                 w-12
                 h-12
                 rounded-xl
-                bg-gradient-to-br
-                ${item.color}
+                ${item.iconBg}
+                ${item.iconColor}
+                border
+                border-slate-100
                 flex
                 items-center
                 justify-center
-                text-white
-                shadow-lg
+                shadow-sm
                 group-hover:scale-105
                 transition-transform
                 duration-300
@@ -375,7 +432,9 @@ function StatsCards() {
       ))}
 
     </section>
+
   );
 }
+
 
 export default StatsCards;

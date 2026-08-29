@@ -6,13 +6,10 @@ function ScrollToTop() {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show the button after only a small amount of scrolling
       setShowButton(window.scrollY > 80);
     };
 
     window.addEventListener("scroll", handleScroll);
-
-    // Check initial position
     handleScroll();
 
     return () => {
@@ -34,17 +31,27 @@ function ScrollToTop() {
       aria-label="Scroll to top"
       className={`
         fixed bottom-6 left-6 z-[100]
-        w-14 h-14
+
+        w-12 h-12 sm:w-14 sm:h-14
         rounded-full
+
         bg-white
         border-2 border-cyan-400
         text-cyan-500
+
         flex items-center justify-center
+
         shadow-lg shadow-cyan-500/20
+
         transition-all duration-300
+
         hover:bg-cyan-50
+        hover:border-blue-500
+        hover:text-blue-600
         hover:scale-110
+
         active:scale-95
+
         ${
           showButton
             ? "opacity-100 translate-y-0 pointer-events-auto"
@@ -52,7 +59,7 @@ function ScrollToTop() {
         }
       `}
     >
-      <FaArrowUp className="text-xl" />
+      <FaArrowUp className="text-lg sm:text-xl" />
     </button>
   );
 }

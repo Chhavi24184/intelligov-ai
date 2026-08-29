@@ -52,13 +52,13 @@ function Sidebar() {
     gap-2
     px-3
     py-2
-    rounded-lg
+    rounded-xl
     transition-all
     duration-300
     ${
       isActive(path)
-        ? "bg-[#142442] text-white border border-blue-800/40"
-        : "text-gray-300 hover:bg-[#101d32] hover:text-gray-100"
+        ? "bg-gradient-to-r from-cyan-50 to-blue-50 text-blue-600 border border-blue-200 shadow-sm"
+        : "text-slate-600 hover:bg-blue-50/80 hover:text-blue-600"
     }
   `;
 
@@ -67,6 +67,7 @@ function Sidebar() {
     <>
 
       {/* Dashboard */}
+
       <li>
         <Link
           to="/dashboard"
@@ -80,6 +81,7 @@ function Sidebar() {
 
 
       {/* AI Chat */}
+
       <li>
         <Link
           to="/chat"
@@ -93,6 +95,7 @@ function Sidebar() {
 
 
       {/* Schemes */}
+
       <li>
         <Link
           to="/schemes"
@@ -106,6 +109,7 @@ function Sidebar() {
 
 
       {/* Eligibility */}
+
       <li>
         <Link
           to="/eligibility"
@@ -119,6 +123,7 @@ function Sidebar() {
 
 
       {/* Profile */}
+
       <li>
         <Link
           to="/profile"
@@ -132,7 +137,8 @@ function Sidebar() {
 
 
       {/* Saved */}
-      <li className="pt-3 mt-3 border-t border-blue-900/40">
+
+      <li className="pt-3 mt-3 border-t border-blue-100">
 
         <Link
           to="/saved"
@@ -147,6 +153,7 @@ function Sidebar() {
 
 
       {/* Settings */}
+
       <li>
         <Link
           to="/settings"
@@ -179,14 +186,15 @@ function Sidebar() {
           right-0
           z-40
           h-16
-          bg-[#08111f]/95
+          bg-white/90
           backdrop-blur-xl
           border-b
-          border-blue-900/40
+          border-blue-100
           flex
           items-center
           justify-between
           px-4
+          shadow-sm
         "
       >
 
@@ -194,11 +202,29 @@ function Sidebar() {
 
         <div className="text-xl font-bold flex items-center gap-1">
 
-          <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
+          <span
+            className="
+              bg-gradient-to-r
+              from-cyan-500
+              via-sky-500
+              to-blue-600
+              bg-clip-text
+              text-transparent
+            "
+          >
             IntelliGov
           </span>
 
-          <span className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-orange-500 bg-clip-text text-transparent">
+          <span
+            className="
+              bg-gradient-to-r
+              from-amber-400
+              via-orange-400
+              to-yellow-500
+              bg-clip-text
+              text-transparent
+            "
+          >
             AI
           </span>
 
@@ -214,15 +240,17 @@ function Sidebar() {
             w-10
             h-10
             rounded-xl
-            bg-[#0c182d]
+            bg-gradient-to-br
+            from-cyan-50
+            to-blue-50
             border
-            border-blue-900/50
+            border-blue-100
             flex
             items-center
             justify-center
-            text-slate-300
-            hover:text-white
-            hover:border-blue-700/60
+            text-blue-600
+            hover:border-cyan-300
+            hover:bg-blue-50
             transition-all
           "
         >
@@ -248,7 +276,7 @@ function Sidebar() {
             fixed
             inset-0
             z-40
-            bg-black/60
+            bg-slate-900/20
             backdrop-blur-sm
           "
         />
@@ -269,11 +297,13 @@ function Sidebar() {
           z-50
           w-50
           h-screen
-          bg-[#08111f]
+          bg-white/95
+          backdrop-blur-xl
           border-r
-          border-blue-900/40
+          border-blue-100
           flex
           flex-col
+          shadow-[8px_0_35px_rgba(37,99,235,0.06)]
           transition-transform
           duration-300
           ease-out
@@ -293,7 +323,39 @@ function Sidebar() {
             LOGO
         ================================================= */}
 
-        <div className="px-5 py-4 border-b border-blue-900/40 flex flex-col items-center justify-center shrink-0">
+        <div
+          className="
+            px-5
+            py-4
+            border-b
+            border-blue-100
+            flex
+            flex-col
+            items-center
+            justify-center
+            shrink-0
+            relative
+            overflow-hidden
+          "
+        >
+
+          {/* Soft Logo Glow */}
+
+          <div
+            className="
+              absolute
+              -top-12
+              left-1/2
+              -translate-x-1/2
+              w-36
+              h-24
+              bg-cyan-300/20
+              blur-3xl
+              rounded-full
+              pointer-events-none
+            "
+          />
+
 
           {/* Mobile Close */}
 
@@ -306,8 +368,8 @@ function Sidebar() {
                 p-2
                 rounded-lg
                 text-slate-400
-                hover:text-white
-                hover:bg-[#101d32]
+                hover:text-blue-600
+                hover:bg-blue-50
                 transition
               "
             >
@@ -317,20 +379,38 @@ function Sidebar() {
           </div>
 
 
-          <div className="text-2xl font-bold flex items-center gap-1">
+          <div className="relative text-2xl font-bold flex items-center gap-1">
 
-            <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
+            <span
+              className="
+                bg-gradient-to-r
+                from-cyan-500
+                via-sky-500
+                to-blue-600
+                bg-clip-text
+                text-transparent
+              "
+            >
               IntelliGov
             </span>
 
-            <span className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            <span
+              className="
+                bg-gradient-to-r
+                from-amber-400
+                via-orange-400
+                to-yellow-500
+                bg-clip-text
+                text-transparent
+              "
+            >
               AI
             </span>
 
           </div>
 
 
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="relative text-xs text-slate-500 mt-2">
             AI Government Assistant
           </p>
 
@@ -360,13 +440,13 @@ function Sidebar() {
 
         <div className="px-4 pb-3 shrink-0">
 
-          <div className="border-t border-blue-900/40 pt-4 mb-3">
+          <div className="border-t border-blue-100 pt-4 mb-3">
 
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-slate-400">
               Logged in as
             </p>
 
-            <p className="text-sm text-cyan-400 truncate">
+            <p className="text-sm text-blue-600 truncate">
               {localStorage.getItem("userEmail") || "Citizen"}
             </p>
 
@@ -382,13 +462,18 @@ function Sidebar() {
               items-center
               justify-center
               gap-2
-              bg-red-500
-              hover:bg-red-600
+              bg-gradient-to-r
+              from-red-500
+              to-rose-500
+              hover:from-red-600
+              hover:to-rose-600
               text-white
               py-2
               rounded-xl
               font-medium
-              transition
+              shadow-sm
+              hover:shadow-md
+              transition-all
               duration-300
             "
           >

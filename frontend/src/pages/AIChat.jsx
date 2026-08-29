@@ -83,9 +83,6 @@ function AIChat() {
         response?.recommendedScheme ||
         null;
 
-      console.log("AI Reply:", reply);
-      console.log("Recommended Scheme:", recommendedScheme);
-
       setMessages((prev) => [
         ...prev,
         {
@@ -238,33 +235,33 @@ function AIChat() {
       title: "Farmer Schemes",
       question:
         "What agricultural schemes are available for farmers?",
-      color: "text-cyan-400",
+      color: "text-cyan-500",
     },
     {
       icon: <PiStudentFill />,
       title: "Scholarships",
       question:
         "Tell me about scholarships for college students.",
-      color: "text-blue-400",
+      color: "text-blue-500",
     },
     {
       icon: <FaShieldAlt />,
       title: "Health Benefits",
       question:
         "How to check eligibility for health schemes?",
-      color: "text-emerald-400",
+      color: "text-emerald-500",
     },
     {
       icon: <HiBriefcase />,
       title: "Jobs & Internships",
       question:
         "Show government job vacancies and internships.",
-      color: "text-amber-400",
+      color: "text-amber-500",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#060c17] text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-800">
 
       <section className="relative max-w-6xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
 
@@ -272,15 +269,13 @@ function AIChat() {
             CHAT HEADER
         ================================================= */}
 
-        <div className="glass-panel rounded-2xl sm:rounded-3xl border border-blue-900/40 p-4 sm:p-6 mb-4 sm:mb-5">
+        <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6 mb-4 sm:mb-5">
 
           <div className="flex items-center justify-between gap-3">
 
             {/* AI INFORMATION */}
 
             <div className="flex items-center gap-3 min-w-0">
-
-              {/* FIXED ROBOT BOX */}
 
               <div className="relative shrink-0">
 
@@ -294,17 +289,16 @@ function AIChat() {
                     rounded-2xl
                     overflow-hidden
                     bg-gradient-to-br
-                    from-cyan-500/15
-                    via-blue-600/10
-                    to-transparent
+                    from-cyan-100
+                    via-blue-50
+                    to-white
                     border
-                    border-cyan-400/40
+                    border-cyan-200
                     flex
                     items-center
                     justify-center
                   "
                 >
-
                   <img
                     src={robot}
                     alt="IntelliGov AI Assistant"
@@ -317,12 +311,8 @@ function AIChat() {
                     "
                   />
 
-                  {/* Subtle overlay to blend robot with box */}
                   <div className="absolute inset-0 bg-cyan-400/5 pointer-events-none" />
-
                 </div>
-
-                {/* ONLINE INDICATOR */}
 
                 <span
                   className="
@@ -331,7 +321,7 @@ function AIChat() {
                     rounded-full
                     bg-emerald-400
                     border-2
-                    border-[#060c17]
+                    border-white
                     absolute
                     bottom-0
                     right-0
@@ -340,22 +330,21 @@ function AIChat() {
 
               </div>
 
-
               <div className="min-w-0">
 
-                <div className="text-base sm:text-2xl font-black text-white flex items-center gap-2 flex-wrap">
+                <div className="text-base sm:text-2xl font-black text-slate-800 flex items-center gap-2 flex-wrap">
 
                   <span>
                     IntelliGov AI Assistant
                   </span>
 
-                  <span className="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-400/30">
+                  <span className="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
                     Online
                   </span>
 
                 </div>
 
-                <p className="text-[11px] sm:text-xs text-slate-400 mt-1 truncate sm:whitespace-normal">
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-1 truncate sm:whitespace-normal">
                   Your AI assistant for government schemes, scholarships,
                   healthcare & careers.
                 </p>
@@ -363,7 +352,6 @@ function AIChat() {
               </div>
 
             </div>
-
 
             {/* CLEAR CHAT */}
 
@@ -376,13 +364,13 @@ function AIChat() {
                   sm:px-4
                   py-2
                   rounded-xl
-                  bg-red-500/10
+                  bg-red-50
                   border
-                  border-red-500/30
-                  text-red-300
+                  border-red-200
+                  text-red-500
                   text-xs
                   font-semibold
-                  hover:bg-red-500/20
+                  hover:bg-red-100
                   transition
                   flex
                   items-center
@@ -406,7 +394,7 @@ function AIChat() {
             CHAT BOX
         ================================================= */}
 
-        <div className="relative glass-panel rounded-2xl sm:rounded-3xl border border-blue-900/40 overflow-hidden">
+        <div className="relative bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
 
           {/* =================================================
               INTERNAL CHAT AREA
@@ -447,9 +435,7 @@ function AIChat() {
                 "
               >
 
-                {/* =================================================
-                    PREMIUM CENTER ROBOT BACKGROUND
-                ================================================= */}
+                {/* ROBOT BACKGROUND */}
 
                 <div
                   className="
@@ -463,13 +449,13 @@ function AIChat() {
                     sm:w-[380px]
                     sm:h-[380px]
                     rounded-full
-                    bg-cyan-500/5
+                    bg-cyan-100/60
                     blur-3xl
                     pointer-events-none
                   "
                 />
 
-                {/* LARGE BLENDED ROBOT */}
+                {/* ROBOT */}
 
                 <div
                   className="
@@ -485,33 +471,27 @@ function AIChat() {
                   "
                 >
 
-                  {/* Outer glow */}
-
                   <div
                     className="
                       absolute
                       inset-[-35px]
                       rounded-full
-                      bg-cyan-400/5
+                      bg-cyan-100
                       blur-3xl
                       pointer-events-none
                     "
                   />
-
-                  {/* Soft blue aura */}
 
                   <div
                     className="
                       absolute
                       inset-[-10px]
                       rounded-full
-                      bg-blue-500/5
+                      bg-blue-100
                       blur-2xl
                       pointer-events-none
                     "
                   />
-
-                  {/* Robot */}
 
                   <img
                     src={robot}
@@ -521,58 +501,36 @@ function AIChat() {
                       w-full
                       h-full
                       object-contain
-                      opacity-75
-                      drop-shadow-[0_0_35px_rgba(34,211,238,0.22)]
-                    "
-                  />
-
-                  {/* Bottom fade for blending */}
-
-                  <div
-                    className="
-                      absolute
-                      bottom-0
-                      left-1/2
-                      -translate-x-1/2
-                      w-32
-                      h-16
-                      bg-gradient-to-t
-                      from-[#081224]
-                      via-[#081224]/40
-                      to-transparent
-                      pointer-events-none
+                      opacity-90
+                      drop-shadow-[0_0_30px_rgba(34,211,238,0.20)]
                     "
                   />
 
                 </div>
 
 
-                {/* =================================================
-                    GREETING
-                ================================================= */}
+                {/* GREETING */}
 
-                <div className="relative text-2xl sm:text-3xl font-black text-white mb-2">
+                <div className="relative text-2xl sm:text-3xl font-black text-slate-800 mb-2">
                   👋 Namaste!
                 </div>
 
-                <div className="relative text-lg sm:text-xl font-bold text-cyan-300 mb-2">
+                <div className="relative text-lg sm:text-xl font-bold text-cyan-600 mb-2">
                   I'm IntelliGov AI.
                 </div>
 
-                <p className="relative text-sm text-slate-400 max-w-md mb-7">
+                <p className="relative text-sm text-slate-500 max-w-md mb-7">
                   How can I help you today?
                 </p>
 
 
-                {/* =================================================
-                    QUICK QUESTIONS
-                ================================================= */}
+                {/* QUICK QUESTIONS */}
 
                 <div className="relative w-full max-w-3xl">
 
-                  <div className="flex items-center justify-center gap-2 text-xs text-slate-400 uppercase tracking-wider font-semibold mb-3">
+                  <div className="flex items-center justify-center gap-2 text-xs text-slate-500 uppercase tracking-wider font-semibold mb-3">
 
-                    <FaSearch className="text-cyan-400" />
+                    <FaSearch className="text-cyan-500" />
 
                     Try asking
 
@@ -592,11 +550,11 @@ function AIChat() {
                         p-3
                         sm:p-4
                         rounded-xl
-                        bg-[#0b1528]
+                        bg-slate-50
                         border
-                        border-blue-900/40
-                        hover:border-cyan-400/60
-                        hover:bg-cyan-500/5
+                        border-slate-200
+                        hover:border-cyan-300
+                        hover:bg-cyan-50
                         transition-all
                         group
                       "
@@ -604,9 +562,9 @@ function AIChat() {
 
                       <div className="flex items-center gap-3">
 
-                        <FaTractor className="text-cyan-400 text-lg group-hover:scale-110 transition-transform" />
+                        <FaTractor className="text-cyan-500 text-lg group-hover:scale-110 transition-transform" />
 
-                        <span className="text-xs sm:text-sm text-slate-200">
+                        <span className="text-xs sm:text-sm text-slate-700">
                           What schemes are available for farmers?
                         </span>
 
@@ -626,11 +584,11 @@ function AIChat() {
                         p-3
                         sm:p-4
                         rounded-xl
-                        bg-[#0b1528]
+                        bg-slate-50
                         border
-                        border-blue-900/40
-                        hover:border-blue-400/60
-                        hover:bg-blue-500/5
+                        border-slate-200
+                        hover:border-blue-300
+                        hover:bg-blue-50
                         transition-all
                         group
                       "
@@ -638,9 +596,9 @@ function AIChat() {
 
                       <div className="flex items-center gap-3">
 
-                        <FaGraduationCap className="text-blue-400 text-lg group-hover:scale-110 transition-transform" />
+                        <FaGraduationCap className="text-blue-500 text-lg group-hover:scale-110 transition-transform" />
 
-                        <span className="text-xs sm:text-sm text-slate-200">
+                        <span className="text-xs sm:text-sm text-slate-700">
                           Am I eligible for any scholarship?
                         </span>
 
@@ -660,11 +618,11 @@ function AIChat() {
                         p-3
                         sm:p-4
                         rounded-xl
-                        bg-[#0b1528]
+                        bg-slate-50
                         border
-                        border-blue-900/40
-                        hover:border-emerald-400/60
-                        hover:bg-emerald-500/5
+                        border-slate-200
+                        hover:border-emerald-300
+                        hover:bg-emerald-50
                         transition-all
                         group
                       "
@@ -672,9 +630,9 @@ function AIChat() {
 
                       <div className="flex items-center gap-3">
 
-                        <FaSearch className="text-emerald-400 text-lg group-hover:scale-110 transition-transform" />
+                        <FaSearch className="text-emerald-500 text-lg group-hover:scale-110 transition-transform" />
 
-                        <span className="text-xs sm:text-sm text-slate-200">
+                        <span className="text-xs sm:text-sm text-slate-700">
                           What documents do I need?
                         </span>
 
@@ -694,11 +652,11 @@ function AIChat() {
                         p-3
                         sm:p-4
                         rounded-xl
-                        bg-[#0b1528]
+                        bg-slate-50
                         border
-                        border-blue-900/40
-                        hover:border-amber-400/60
-                        hover:bg-amber-500/5
+                        border-slate-200
+                        hover:border-amber-300
+                        hover:bg-amber-50
                         transition-all
                         group
                       "
@@ -706,9 +664,9 @@ function AIChat() {
 
                       <div className="flex items-center gap-3">
 
-                        <FaBriefcase className="text-amber-400 text-lg group-hover:scale-110 transition-transform" />
+                        <FaBriefcase className="text-amber-500 text-lg group-hover:scale-110 transition-transform" />
 
-                        <span className="text-xs sm:text-sm text-slate-200">
+                        <span className="text-xs sm:text-sm text-slate-700">
                           Tell me about PM Kisan.
                         </span>
 
@@ -741,19 +699,19 @@ function AIChat() {
 
                     <div className="flex gap-2 sm:gap-3 max-w-[90%] sm:max-w-2xl items-end">
 
-                      <div className="bg-indigo-600/30 border border-indigo-400/30 rounded-2xl rounded-br-md px-4 py-3">
+                      <div className="bg-blue-600 text-white rounded-2xl rounded-br-md px-4 py-3 shadow-sm">
 
-                        <div className="text-sm text-white whitespace-pre-wrap">
+                        <div className="text-sm whitespace-pre-wrap">
                           {msg.text}
                         </div>
 
-                        <div className="text-[10px] text-slate-400 mt-1 text-right">
+                        <div className="text-[10px] text-blue-100 mt-1 text-right">
                           {msg.timestamp}
                         </div>
 
                       </div>
 
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0">
 
                         <FaUser />
 
@@ -769,9 +727,7 @@ function AIChat() {
 
                   <div className="flex gap-2 sm:gap-4 max-w-[95%] sm:max-w-2xl">
 
-                    {/* AI ICON */}
-
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-cyan-600 shrink-0">
 
                       <FaRobot />
 
@@ -785,8 +741,8 @@ function AIChat() {
                       <div
                         className={`p-4 rounded-2xl text-sm leading-relaxed relative group ${
                           msg.error
-                            ? "bg-red-500/10 border border-red-500/30 text-red-300"
-                            : "glass-card text-slate-200 border border-blue-900/40"
+                            ? "bg-red-50 border border-red-200 text-red-600"
+                            : "bg-slate-50 border border-slate-200 text-slate-700"
                         }`}
                       >
 
@@ -808,7 +764,7 @@ function AIChat() {
                               top-3
                               right-3
                               text-slate-400
-                              hover:text-white
+                              hover:text-cyan-600
                               transition
                               opacity-0
                               group-hover:opacity-100
@@ -818,7 +774,7 @@ function AIChat() {
                           >
 
                             {copiedIndex === idx ? (
-                              <FaCheck className="text-emerald-400" />
+                              <FaCheck className="text-emerald-500" />
                             ) : (
                               <FaCopy />
                             )}
@@ -834,13 +790,13 @@ function AIChat() {
 
                       {msg.scheme && (
 
-                        <div className="mt-3 p-4 rounded-2xl bg-cyan-500/10 border border-cyan-400/30">
+                        <div className="mt-3 p-4 rounded-2xl bg-cyan-50 border border-cyan-200">
 
-                          <div className="text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-1">
+                          <div className="text-xs text-cyan-600 font-semibold uppercase tracking-wider mb-1">
                             Recommended Scheme
                           </div>
 
-                          <div className="text-white font-bold">
+                          <div className="text-slate-800 font-bold">
                             {msg.scheme.name ||
                               msg.scheme.scheme_name ||
                               msg.scheme.title ||
@@ -848,20 +804,20 @@ function AIChat() {
                           </div>
 
                           {msg.scheme.category && (
-                            <div className="text-xs text-cyan-300 mt-1">
+                            <div className="text-xs text-cyan-600 mt-1">
                               Category: {msg.scheme.category}
                             </div>
                           )}
 
                           {msg.scheme.description && (
-                            <p className="text-xs text-slate-400 mt-2">
+                            <p className="text-xs text-slate-500 mt-2">
                               {msg.scheme.description}
                             </p>
                           )}
 
                           {msg.scheme.eligibility && (
-                            <p className="text-xs text-slate-400 mt-2">
-                              <span className="text-slate-300 font-semibold">
+                            <p className="text-xs text-slate-500 mt-2">
+                              <span className="text-slate-700 font-semibold">
                                 Eligibility:
                               </span>{" "}
                               {msg.scheme.eligibility}
@@ -875,7 +831,7 @@ function AIChat() {
 
                       {/* TIMESTAMP */}
 
-                      <div className="text-[10px] text-slate-500 mt-1 px-1">
+                      <div className="text-[10px] text-slate-400 mt-1 px-1">
                         {msg.timestamp}
                       </div>
 
@@ -898,26 +854,26 @@ function AIChat() {
 
               <div className="flex gap-3 sm:gap-4">
 
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-cyan-600 shrink-0">
 
                   <FaRobot className="animate-pulse" />
 
                 </div>
 
 
-                <div className="glass-card px-4 py-3 rounded-2xl text-xs sm:text-sm text-cyan-300 flex items-center gap-3 border border-cyan-400/20">
+                <div className="bg-slate-50 px-4 py-3 rounded-2xl text-xs sm:text-sm text-cyan-600 flex items-center gap-3 border border-cyan-200">
 
                   <span className="flex gap-1">
 
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" />
 
                     <span
-                      className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce"
+                      className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce"
                       style={{ animationDelay: "150ms" }}
                     />
 
                     <span
-                      className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce"
+                      className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce"
                       style={{ animationDelay: "300ms" }}
                     />
 
@@ -956,9 +912,8 @@ function AIChat() {
                 bg-blue-600
                 hover:bg-blue-500
                 border
-                border-cyan-400/50
+                border-cyan-300
                 shadow-lg
-                shadow-blue-600/30
                 flex
                 items-center
                 justify-center
@@ -980,7 +935,7 @@ function AIChat() {
               MESSAGE INPUT
           ================================================= */}
 
-          <div className="border-t border-blue-900/40 p-3 sm:p-4">
+          <div className="border-t border-slate-200 p-3 sm:p-4 bg-white">
 
             <div className="flex gap-2 sm:gap-3">
 
@@ -995,17 +950,19 @@ function AIChat() {
                   flex-1
                   min-w-0
                   resize-none
-                  bg-[#0b1528]
+                  bg-slate-50
                   border
-                  border-blue-900/50
+                  border-slate-200
                   rounded-xl
                   px-4
                   py-3
                   text-sm
-                  text-white
-                  placeholder:text-slate-500
+                  text-slate-800
+                  placeholder:text-slate-400
                   focus:outline-none
-                  focus:border-cyan-400/50
+                  focus:border-cyan-400
+                  focus:ring-2
+                  focus:ring-cyan-100
                   disabled:opacity-50
                 "
               />
@@ -1047,7 +1004,7 @@ function AIChat() {
 
             </div>
 
-            <p className="text-[10px] text-slate-600 mt-2 text-center">
+            <p className="text-[10px] text-slate-400 mt-2 text-center">
               IntelliGov AI provides guidance based on available scheme data.
             </p>
 
@@ -1064,7 +1021,7 @@ function AIChat() {
 
           <div className="space-y-3 mt-6">
 
-            <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold block">
+            <span className="text-xs uppercase tracking-wider text-slate-500 font-semibold block">
               💡 Suggested Questions
             </span>
 
@@ -1076,13 +1033,14 @@ function AIChat() {
                   key={index}
                   onClick={() => useSuggestion(item.question)}
                   className="
-                    glass-card
+                    bg-white
                     p-3
                     rounded-2xl
                     text-left
                     border
-                    border-blue-900/40
-                    hover:border-cyan-400/60
+                    border-slate-200
+                    hover:border-cyan-300
+                    hover:shadow-sm
                     transition
                     group
                   "
@@ -1094,7 +1052,7 @@ function AIChat() {
                     {item.icon}
                   </div>
 
-                  <div className="text-xs font-bold text-white">
+                  <div className="text-xs font-bold text-slate-700">
                     {item.title}
                   </div>
 

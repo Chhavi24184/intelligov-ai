@@ -67,13 +67,13 @@ function ServiceCard({ service, index }) {
         relative
         flex flex-col justify-between
         group
-        border border-blue-900/30
+        border border-sky-200/70
 
         transition-all
         duration-700
         ease-[cubic-bezier(0.22,1,0.36,1)]
 
-        hover:border-cyan-400/40
+        hover:border-sky-400/60
         hover:-translate-y-2
 
         ${
@@ -98,9 +98,9 @@ function ServiceCard({ service, index }) {
           inset-0
           rounded-3xl
           bg-gradient-to-br
-          from-cyan-400/[0.04]
+          from-sky-400/[0.08]
           via-transparent
-          to-blue-500/[0.04]
+          to-blue-500/[0.06]
           opacity-0
           group-hover:opacity-100
           transition-opacity
@@ -129,10 +129,10 @@ function ServiceCard({ service, index }) {
             className="
               p-4
               rounded-2xl
-              bg-[#0d1b32]
-              border border-blue-900/40
+              bg-sky-50
+              border border-sky-200
 
-              group-hover:border-cyan-400/30
+              group-hover:border-sky-400/60
               group-hover:scale-110
               group-hover:-rotate-2
 
@@ -153,14 +153,14 @@ function ServiceCard({ service, index }) {
               px-3
               py-1
               rounded-full
-              bg-blue-950/60
-              border border-blue-800/40
-              text-slate-300
+              bg-sky-50
+              border border-sky-200
+              text-slate-600
               text-xs
               font-medium
 
-              group-hover:border-cyan-400/30
-              group-hover:text-cyan-300
+              group-hover:border-sky-400/60
+              group-hover:text-sky-600
 
               transition-all
               duration-300
@@ -182,10 +182,10 @@ function ServiceCard({ service, index }) {
           className="
             text-xl
             font-bold
-            text-white
+            text-slate-900
             mb-3
 
-            group-hover:text-cyan-300
+            group-hover:text-sky-600
 
             transition-colors
             duration-300
@@ -203,7 +203,7 @@ function ServiceCard({ service, index }) {
 
         <p
           className="
-            text-slate-400
+            text-slate-600
             text-sm
             leading-relaxed
             mb-6
@@ -234,9 +234,9 @@ function ServiceCard({ service, index }) {
 
             text-sm
             font-semibold
-            text-cyan-400
+            text-sky-600
 
-            hover:text-cyan-300
+            hover:text-blue-600
 
             transition-all
             duration-300
@@ -278,8 +278,8 @@ function ServiceCard({ service, index }) {
           w-1/2
           h-px
 
-          bg-cyan-400/0
-          group-hover:bg-cyan-400/50
+          bg-sky-400/0
+          group-hover:bg-sky-400/50
 
           blur-sm
 
@@ -305,7 +305,7 @@ function Features() {
   const services = [
 
     {
-      icon: <FaTractor className="text-2xl text-cyan-400" />,
+      icon: <FaTractor className="text-2xl text-sky-500" />,
       title: "Government Schemes",
       description:
         "Discover welfare benefits, agricultural subsidies, financial support, and housing initiatives suited for your profile.",
@@ -315,7 +315,7 @@ function Features() {
 
 
     {
-      icon: <FaGraduationCap className="text-2xl text-cyan-400" />,
+      icon: <FaGraduationCap className="text-2xl text-sky-500" />,
       title: "Scholarships & Education",
       description:
         "Find educational grants, merit scholarships, and research fellowships for school, undergraduate, and postgrad students.",
@@ -325,7 +325,7 @@ function Features() {
 
 
     {
-      icon: <FaBriefcase className="text-2xl text-cyan-400" />,
+      icon: <FaBriefcase className="text-2xl text-sky-500" />,
       title: "Jobs & Careers",
       description:
         "Explore government jobs, career opportunities, skill-development programs, and employment initiatives.",
@@ -335,7 +335,7 @@ function Features() {
 
 
     {
-      icon: <FaHeartbeat className="text-2xl text-cyan-400" />,
+      icon: <FaHeartbeat className="text-2xl text-sky-500" />,
       title: "Healthcare & Insurance",
       description:
         "Access universal health coverage schemes, maternity support, medical assistance, and senior citizen benefits.",
@@ -345,7 +345,7 @@ function Features() {
 
 
     {
-      icon: <FaUserShield className="text-2xl text-cyan-400" />,
+      icon: <FaUserShield className="text-2xl text-sky-500" />,
       title: "Eligibility Matcher",
       description:
         "Instantly check your eligibility score across hundreds of central and state government schemes in one step.",
@@ -355,7 +355,7 @@ function Features() {
 
 
     {
-      icon: <FaRobot className="text-2xl text-cyan-400" />,
+      icon: <FaRobot className="text-2xl text-sky-500" />,
       title: "24/7 AI Voice & Text Chat",
       description:
         "Ask questions in simple natural language and receive instant, personalized scheme recommendations and steps.",
@@ -372,8 +372,8 @@ function Features() {
       id="services"
       className="
         relative
-        bg-[#0a1628]
-        text-white
+        bg-[#ffffff]
+        text-slate-900
         py-16
         lg:py-20
         overflow-hidden
@@ -394,7 +394,7 @@ function Features() {
             left-0
             w-80
             h-80
-            bg-blue-600/10
+            bg-sky-400/10
             rounded-full
             blur-3xl
           "
@@ -407,7 +407,7 @@ function Features() {
             right-0
             w-80
             h-80
-            bg-cyan-500/10
+            bg-blue-400/10
             rounded-full
             blur-3xl
           "
@@ -447,9 +447,9 @@ function Features() {
               px-4
               py-1.5
               rounded-full
-              bg-cyan-500/10
-              border border-cyan-400/30
-              text-cyan-300
+              bg-sky-50
+              border border-sky-200
+              text-sky-600
               text-xs
               font-semibold
               uppercase
@@ -472,7 +472,7 @@ function Features() {
               sm:text-4xl
               lg:text-5xl
               font-black
-              text-white
+              text-slate-900
               leading-tight
             "
           >
@@ -482,8 +482,8 @@ function Features() {
             <span
               className="
                 bg-gradient-to-r
-                from-cyan-400
-                to-blue-500
+                from-sky-500
+                to-blue-600
                 bg-clip-text
                 text-transparent
               "
@@ -502,7 +502,7 @@ function Features() {
 
           <p
             className="
-              text-slate-400
+              text-slate-600
               text-base
               leading-relaxed
             "

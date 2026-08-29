@@ -5,11 +5,26 @@ function WelcomeSection() {
   return (
     <section className="mb-3 text-left">
 
-      <div className="text-xl font-bold text-white">
+      {/* Welcome Heading */}
+      <div
+        className="
+          text-xl
+          sm:text-2xl
+          font-bold
+          bg-gradient-to-r
+          from-slate-800
+          via-blue-700
+          to-cyan-600
+          bg-clip-text
+          text-transparent
+        "
+      >
         Welcome back, {userName}! 👋
       </div>
 
-      <p className="mt-1 text-xs text-gray-400">
+
+      {/* Subtitle */}
+      <p className="mt-1 text-xs sm:text-sm text-slate-500">
         Here's what's happening with your account today.
       </p>
 

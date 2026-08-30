@@ -411,7 +411,7 @@ Copy `.env.example` to `.env` in the `backend/` directory and configure as neede
 
 ```bash
 # Terminal 1
-cd backend && uvicorn main:app --reload --port 8000
+cd backend && uvicorn main:app --port 8000
 
 # Terminal 2
 cd frontend && npm run dev

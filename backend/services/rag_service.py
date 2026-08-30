@@ -182,11 +182,17 @@ def search_schemes(
 # indicate the scheme is semantically unrelated to the query.
 _MAX_RELEVANT_DISTANCE = 0.9
 
+# For document queries, use a higher threshold to allow more schemes.
+# Generic document queries may not match well semantically but are still relevant.
+_MAX_DOCUMENT_QUERY_DISTANCE = 1.5
+
 
 def search_full_schemes(
     query: str,
     top_k: int = 8,
-    distance_threshold: float = _MAX_RELEVANT_DISTANCE
+    distance_threshold: float = _MAX_RELEVANT_DISTANCE,
+    is_document_query: bool = False,
+    prefer_with_documents: bool = False
 ):
 
     """
@@ -197,6 +203,19 @@ def search_full_schemes(
     Schemes whose ChromaDB distance exceeds *distance_threshold*
     are dropped so that only genuinely relevant results reach
     IBM Granite.
+
+    Parameters:
+    -----------
+    query : str
+        The user query to search for.
+    top_k : int
+        Number of results to fetch from ChromaDB.
+    distance_threshold : float
+        Maximum semantic distance for a scheme to be considered relevant.
+    is_document_query : bool
+        If True, use a higher distance threshold for generic document queries.
+    prefer_with_documents : bool
+        If True, prioritize schemes that have non-empty documents field.
 
     Additional internal fields:
 
@@ -211,8 +230,11 @@ def search_full_schemes(
     """
 
     # --------------------------------------------------------
-    # Validate query
+    # Adjust distance threshold for document queries
     # --------------------------------------------------------
+    
+    if is_document_query:
+        distance_threshold = _MAX_DOCUMENT_QUERY_DISTANCE
 
     if not query or not query.strip():
 
@@ -347,6 +369,23 @@ def search_full_schemes(
         retrieved_schemes.append(
             retrieved_scheme
         )
+
+    # --------------------------------------------------------
+    # For document queries, prioritize schemes with non-empty documents
+    # --------------------------------------------------------
+    
+    if prefer_with_documents:
+        # Separate schemes with and without documents
+        with_docs = [
+            s for s in retrieved_schemes 
+            if s.get("documents") and len(s.get("documents", [])) > 0
+        ]
+        without_docs = [
+            s for s in retrieved_schemes 
+            if not s.get("documents") or len(s.get("documents", [])) == 0
+        ]
+        # Put schemes with documents first, maintain RAG score order within each group
+        retrieved_schemes = with_docs + without_docs
 
     return retrieved_schemes
 

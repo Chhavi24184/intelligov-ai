@@ -40,12 +40,16 @@ class MockGraniteClient:
         context: list
     ) -> str:
 
+        _logger.info(f"MockGraniteClient: generating response for query: {query}")
+        _logger.info(f"MockGraniteClient: received {len(context)} scheme(s)")
+
         # ----------------------------------------------------
         # No context
         # ----------------------------------------------------
 
         if not context:
 
+            _logger.warning("MockGraniteClient: no context provided")
             return (
                 "I could not find a relevant government scheme "
                 "in the available government data.\n\n"
@@ -56,7 +60,16 @@ class MockGraniteClient:
 
         # ----------------------------------------------------
         # Grounded response
+        # Detect if this is a document-focused query
         # ----------------------------------------------------
+        
+        query_lower = query.lower()
+        is_document_query = any(
+            word in query_lower 
+            for word in ["document", "documents", "required", "need", "require"]
+        )
+        
+        _logger.info(f"MockGraniteClient: is_document_query={is_document_query}")
 
         response = (
             "Based on the available government scheme data, "
@@ -103,7 +116,7 @@ class MockGraniteClient:
             if documents:
 
                 response += (
-                    "   Common documents: "
+                    "   Required documents: "
                     + ", ".join(documents)
                     + "\n"
                 )
@@ -116,6 +129,8 @@ class MockGraniteClient:
             "application. Please verify the latest official "
             "eligibility requirements before applying."
         )
+        
+        _logger.info(f"MockGraniteClient: response generated ({len(response)} chars)")
 
         return response
 

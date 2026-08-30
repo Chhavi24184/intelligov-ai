@@ -62,6 +62,7 @@ def generate_reply(message: str, profile: dict | None = None):
     intent = intent_result.get("intent", "unknown")
 
     logger.info(f"INTENT DETECTED: {intent}")
+    logger.info(f"AGENT RESULT: success={agent_result.get('success')}, agent={agent_result.get('agent')}")
 
     # --------------------------------------------------------
     # Step 2: Handle empty agent result
@@ -117,9 +118,10 @@ def generate_reply(message: str, profile: dict | None = None):
 
     context = _collect_context(agent_result, intent, message)
 
+    logger.info(f"DOCUMENT RESULTS: {len(context)} scheme(s) with documents")
     logger.info(
-        f"RETRIEVED SCHEMES: {len(context)} scheme(s) — "
-        + ", ".join(s.get("name", "?") for s in context)
+        f"FINAL CONTEXT: {len(context)} scheme(s) — "
+        + (", ".join(s.get("name", "?") for s in context) if context else "(empty)")
     )
 
     # --------------------------------------------------------
@@ -177,7 +179,10 @@ def generate_reply(message: str, profile: dict | None = None):
     # Step 7: Call IBM Granite with grounded context
     # --------------------------------------------------------
 
-    logger.info("GRANITE CALLED: generating grounded response")
+    logger.info(f"GRANITE CALLED: generating grounded response with {len(context)} scheme(s)")
+    logger.debug(f"GRANITE INPUT - Query: {message}")
+    if context:
+        logger.debug(f"GRANITE INPUT - First scheme: {context[0].get('name')}, has {len(context[0].get('documents', []))} documents")
 
     try:
         reply = granite_client.generate(
@@ -189,7 +194,8 @@ def generate_reply(message: str, profile: dict | None = None):
         # Safe fallback: build a grounded reply from context directly
         reply = _safe_context_reply(context)
 
-    logger.info(f"FINAL RESPONSE (first 120 chars): {reply[:120]}")
+    logger.info(f"GRANITE RESPONSE: {reply[:120]}...")
+    logger.info(f"FINAL RESPONSE: {reply[:120]}...")
 
     # --------------------------------------------------------
     # Step 8: Build recommended_scheme (singular, best match)
@@ -234,6 +240,8 @@ def _collect_context(
 
     context = []
 
+    logger.info(f"_collect_context: intent={intent}, agent_result keys={list(agent_result.keys())}")
+
     if isinstance(agent_result, dict):
 
         # Scheme / eligibility agents return "schemes"
@@ -243,6 +251,7 @@ def _collect_context(
             schemes = agent_result.get("recommended_schemes", [])
         if isinstance(schemes, list) and schemes:
             context = schemes
+            logger.info(f"_collect_context: got {len(schemes)} schemes from agent_result")
 
     # --------------------------------------------------------
     # RAG fallback: if agent returned no schemes, search
@@ -252,11 +261,16 @@ def _collect_context(
 
     if not context:
         try:
+            logger.info(f"_collect_context: RAG fallback triggered for intent={intent}")
+            # For document queries, use lenient distance threshold
+            is_doc_query = (intent == "document")
             # Fetch extra candidates so the distance filter
             # still yields up to 5 relevant results.
             rag_results = search_full_schemes(
                 query=query,
-                top_k=8
+                top_k=8,
+                is_document_query=is_doc_query,
+                prefer_with_documents=is_doc_query
             )
             clean = [
                 {k: v for k, v in s.items() if not k.startswith("_rag_")}
@@ -264,10 +278,12 @@ def _collect_context(
                 if s.get("name")
             ]
             context = clean[:5]
+            logger.info(f"_collect_context: RAG fallback returned {len(context)} schemes")
         except Exception as e:
             logger.warning(f"RAG fallback search failed: {e}")
             context = []
 
+    logger.info(f"_collect_context: returning {len(context)} schemes total")
     return context
 
 

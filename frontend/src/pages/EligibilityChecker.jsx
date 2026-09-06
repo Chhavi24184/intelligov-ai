@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import {
   FaUser,
   FaUserCheck,
@@ -17,6 +18,32 @@ import {
 import { eligibilityAPI } from "../services/api";
 
 function EligibilityChecker() {
+
+  // =====================================================
+  // STORAGE KEY
+  // =====================================================
+
+  const getCurrentUserKey = () => {
+
+    const email = localStorage.getItem("userEmail");
+
+    if (email) {
+      return email.toLowerCase().trim();
+    }
+
+    return "guest";
+  };
+
+
+  const getEligibilityStorageKey = () => {
+    return `eligibilityData_${getCurrentUserKey()}`;
+  };
+
+
+  // =====================================================
+  // FORM DATA
+  // =====================================================
+
   const [formData, setFormData] = useState({
     age: "",
     occupation: "",
@@ -25,184 +52,477 @@ function EligibilityChecker() {
     state: "",
   });
 
+
+  // =====================================================
+  // RESULTS
+  // =====================================================
+
   const [schemes, setSchemes] = useState([]);
+
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState("");
+
   const [checked, setChecked] = useState(false);
+
   const [selectedScheme, setSelectedScheme] = useState(null);
+
+
+  // =====================================================
+  // RESTORE SAVED ELIGIBILITY DATA
+  // =====================================================
+
+  useEffect(() => {
+
+    const storageKey = getEligibilityStorageKey();
+
+    try {
+
+      const savedData = localStorage.getItem(storageKey);
+
+      if (!savedData) {
+        return;
+      }
+
+      const parsedData = JSON.parse(savedData);
+
+
+      // Restore profile
+      if (
+        parsedData?.formData &&
+        typeof parsedData.formData === "object"
+      ) {
+
+        setFormData({
+          age: parsedData.formData.age || "",
+          occupation: parsedData.formData.occupation || "",
+          gender: parsedData.formData.gender || "",
+          income: parsedData.formData.income || "",
+          state: parsedData.formData.state || "",
+        });
+
+      }
+
+
+      // Restore eligible schemes
+      if (Array.isArray(parsedData?.schemes)) {
+
+        setSchemes(parsedData.schemes);
+
+      }
+
+
+      // Restore checked state
+      if (parsedData?.checked === true) {
+
+        setChecked(true);
+
+      }
+
+
+    } catch (restoreError) {
+
+      console.error(
+        "Unable to restore eligibility data:",
+        restoreError
+      );
+
+    }
+
+  }, []);
+
+
+  // =====================================================
+  // SAVE ELIGIBILITY DATA
+  // =====================================================
+
+  const saveEligibilityData = (
+    updatedFormData,
+    updatedSchemes
+  ) => {
+
+    const storageKey = getEligibilityStorageKey();
+
+    const eligibilityData = {
+
+      formData: updatedFormData,
+
+      schemes: updatedSchemes,
+
+      checked: true,
+
+      savedAt: new Date().toISOString(),
+
+    };
+
+
+    try {
+
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify(eligibilityData)
+      );
+
+
+      // Tell Dashboard / other components that
+      // eligibility data has changed.
+      window.dispatchEvent(
+        new Event("eligibilityUpdated")
+      );
+
+
+    } catch (storageError) {
+
+      console.error(
+        "Unable to save eligibility data:",
+        storageError
+      );
+
+    }
+
+  };
+
 
   // =====================================================
   // FORM CHANGE
   // =====================================================
 
   const handleChange = (e) => {
+
     const { name, value } = e.target;
 
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+
   };
+
 
   // =====================================================
   // EXTRACT SCHEMES
   // =====================================================
 
   const extractSchemes = (data) => {
+
     if (Array.isArray(data)) {
+
       return data;
+
     }
+
 
     if (Array.isArray(data?.recommended_schemes)) {
+
       return data.recommended_schemes;
+
     }
+
 
     if (Array.isArray(data?.data?.recommended_schemes)) {
+
       return data.data.recommended_schemes;
+
     }
+
 
     if (Array.isArray(data?.schemes)) {
+
       return data.schemes;
+
     }
+
 
     if (Array.isArray(data?.data?.schemes)) {
+
       return data.data.schemes;
+
     }
 
+
     return [];
+
   };
+
 
   // =====================================================
   // SUBMIT
   // =====================================================
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
     try {
+
       setLoading(true);
+
       setError("");
-      setChecked(false);
-      setSchemes([]);
+
       setSelectedScheme(null);
 
+
       const payload = {
+
         age: Number(formData.age),
+
         occupation: formData.occupation,
+
         gender: formData.gender,
+
         income: Number(formData.income),
+
         state: formData.state,
+
       };
 
-      console.log("Eligibility Request:", payload);
+
+      console.log(
+        "Eligibility Request:",
+        payload
+      );
+
 
       const data = await eligibilityAPI(payload);
 
-      console.log("Eligibility Response:", data);
 
-      const recommendedSchemes = extractSchemes(data);
-
-      setSchemes(recommendedSchemes);
-      setChecked(true);
-
-      if (data?.success === false) {
-        setError(
-          data?.message || "Unable to process your eligibility."
-        );
-      }
-    } catch (err) {
-      console.error("Eligibility API Error:", err);
-
-      setError(
-        err?.response?.data?.detail ||
-          err?.response?.data?.message ||
-          "Could not connect to the server. Please make sure the backend server is running."
+      console.log(
+        "Eligibility Response:",
+        data
       );
 
-      setSchemes([]);
+
+      const recommendedSchemes =
+        extractSchemes(data);
+
+
+      // =================================================
+      // UPDATE REACT STATE
+      // =================================================
+
+      setSchemes(recommendedSchemes);
+
       setChecked(true);
+
+
+      // =================================================
+      // SAVE EVERYTHING PERMANENTLY UNTIL RESET
+      // =================================================
+
+      saveEligibilityData(
+        formData,
+        recommendedSchemes
+      );
+
+
+      if (data?.success === false) {
+
+        setError(
+          data?.message ||
+          "Unable to process your eligibility."
+        );
+
+      }
+
+
+    } catch (err) {
+
+      console.error(
+        "Eligibility API Error:",
+        err
+      );
+
+
+      const errorMessage =
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        "Could not connect to the server. Please make sure the backend server is running.";
+
+
+      setError(errorMessage);
+
+
+      /*
+        IMPORTANT:
+
+        We do NOT remove previously saved eligibility
+        data here.
+
+        This means if the user already had a successful
+        eligibility result, a temporary API error will
+        not erase it.
+      */
+
+      setChecked(true);
+
+
     } finally {
+
       setLoading(false);
+
     }
+
   };
+
 
   // =====================================================
   // RESET
   // =====================================================
 
   const handleReset = () => {
+
+    const storageKey =
+      getEligibilityStorageKey();
+
+
+    // =================================================
+    // REMOVE SAVED DATA ONLY WHEN RESET IS PRESSED
+    // =================================================
+
+    try {
+
+      localStorage.removeItem(
+        storageKey
+      );
+
+    } catch (storageError) {
+
+      console.error(
+        "Unable to remove eligibility data:",
+        storageError
+      );
+
+    }
+
+
+    // =================================================
+    // CLEAR REACT STATE
+    // =================================================
+
     setFormData({
+
       age: "",
+
       occupation: "",
+
       gender: "",
+
       income: "",
+
       state: "",
+
     });
 
+
     setSchemes([]);
+
     setError("");
+
     setChecked(false);
+
     setSelectedScheme(null);
+
+
+    // =================================================
+    // UPDATE DASHBOARD
+    // =================================================
+
+    window.dispatchEvent(
+      new Event("eligibilityUpdated")
+    );
+
   };
+
 
   // =====================================================
   // HELPERS
   // =====================================================
 
   const getSchemeName = (scheme) =>
+
     scheme.name ||
     scheme.title ||
     scheme.scheme_name ||
     "Government Welfare Scheme";
 
+
   const getCategory = (scheme) =>
+
     scheme.category ||
     scheme.type ||
     "Welfare Scheme";
 
+
   const getDescription = (scheme) =>
+
     scheme.description ||
     scheme.details ||
     "This scheme may provide benefits based on your profile.";
 
+
   const getEligibility = (scheme) =>
+
     scheme.eligibility ||
     scheme.eligibility_criteria ||
     "Eligibility details are available on the official scheme portal.";
 
+
   const getDocuments = (scheme) => {
+
     if (Array.isArray(scheme.documents)) {
+
       return scheme.documents;
+
     }
+
 
     if (Array.isArray(scheme.documents_required)) {
+
       return scheme.documents_required;
+
     }
+
 
     if (scheme.documents) {
+
       return [scheme.documents];
+
     }
+
 
     if (scheme.documents_required) {
+
       return [scheme.documents_required];
+
     }
 
+
     return [
+
       "Aadhaar Card",
+
       "Income Certificate",
+
       "Residence Proof",
+
       "Bank Details",
+
     ];
+
   };
 
+
   const getApplyUrl = (scheme) =>
+
     scheme.application_link ||
     scheme.apply_url ||
     scheme.application_url ||
     scheme.url ||
     "https://www.myscheme.gov.in/";
 
+
   return (
+
     <div className="w-full min-h-screen bg-white text-slate-900">
 
       {/* =====================================================
@@ -259,6 +579,7 @@ function EligibilityChecker() {
 
         </div>
 
+
         <div className="relative max-w-6xl mx-auto">
 
           {/* =================================================
@@ -286,6 +607,7 @@ function EligibilityChecker() {
               Smart Citizen Matcher
             </span>
 
+
             <h1
               className="
                 text-4xl
@@ -296,6 +618,7 @@ function EligibilityChecker() {
                 text-slate-900
               "
             >
+
               Check Scheme{" "}
 
               <span
@@ -309,7 +632,9 @@ function EligibilityChecker() {
               >
                 Eligibility
               </span>
+
             </h1>
+
 
             <p
               className="
@@ -376,6 +701,7 @@ function EligibilityChecker() {
                     Age
                   </label>
 
+
                   <input
                     type="number"
                     name="age"
@@ -425,6 +751,7 @@ function EligibilityChecker() {
                     Occupation
                   </label>
 
+
                   <input
                     type="text"
                     name="occupation"
@@ -472,6 +799,7 @@ function EligibilityChecker() {
                     Gender
                   </label>
 
+
                   <select
                     name="gender"
                     value={formData.gender}
@@ -492,10 +820,23 @@ function EligibilityChecker() {
                       transition-all
                     "
                   >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
+
+                    <option value="">
+                      Select Gender
+                    </option>
+
+                    <option value="Male">
+                      Male
+                    </option>
+
+                    <option value="Female">
+                      Female
+                    </option>
+
+                    <option value="Other">
+                      Other
+                    </option>
+
                   </select>
 
                 </div>
@@ -520,6 +861,7 @@ function EligibilityChecker() {
                     <FaMoneyBillWave className="text-emerald-500" />
                     Annual Income
                   </label>
+
 
                   <input
                     type="number"
@@ -569,6 +911,7 @@ function EligibilityChecker() {
                     State of Residence
                   </label>
 
+
                   <select
                     name="state"
                     value={formData.state}
@@ -589,23 +932,39 @@ function EligibilityChecker() {
                       transition-all
                     "
                   >
-                    <option value="">Select State</option>
 
-                    <option value="Haryana">Haryana</option>
-                    <option value="Punjab">Punjab</option>
-                    <option value="Delhi">Delhi</option>
+                    <option value="">
+                      Select State
+                    </option>
+
+                    <option value="Haryana">
+                      Haryana
+                    </option>
+
+                    <option value="Punjab">
+                      Punjab
+                    </option>
+
+                    <option value="Delhi">
+                      Delhi
+                    </option>
+
                     <option value="Uttar Pradesh">
                       Uttar Pradesh
                     </option>
+
                     <option value="Rajasthan">
                       Rajasthan
                     </option>
+
                     <option value="Maharashtra">
                       Maharashtra
                     </option>
+
                     <option value="Gujarat">
                       Gujarat
                     </option>
+
                     <option value="Other">
                       Other State
                     </option>
@@ -716,8 +1075,11 @@ function EligibilityChecker() {
                     disabled:opacity-50
                   "
                 >
+
                   <FaRedo className="text-xs" />
+
                   Reset
+
                 </button>
 
               </div>
@@ -758,14 +1120,18 @@ function EligibilityChecker() {
                   shrink-0
                 "
               >
+
                 <FaExclamationTriangle className="text-red-500" />
+
               </div>
+
 
               <div>
 
                 <h3 className="text-sm font-bold text-red-600 mb-1">
                   Unable to Check Eligibility
                 </h3>
+
 
                 <p className="text-xs text-red-500/80 leading-relaxed">
                   {error}
@@ -814,6 +1180,7 @@ function EligibilityChecker() {
                     AI Recommendation Results
                   </span>
 
+
                   <h2
                     className="
                       text-2xl
@@ -827,6 +1194,7 @@ function EligibilityChecker() {
                   </h2>
 
                 </div>
+
 
                 <div
                   className="
@@ -844,10 +1212,12 @@ function EligibilityChecker() {
                     w-fit
                   "
                 >
+
                   <FaCheckCircle />
 
                   {schemes.length} Match
                   {schemes.length !== 1 ? "es" : ""}
+
                 </div>
 
               </div>
@@ -875,11 +1245,9 @@ function EligibilityChecker() {
                       flex
                       flex-col
                       shadow-sm
-
                       transition-all
                       duration-500
                       ease-[cubic-bezier(0.22,1,0.36,1)]
-
                       hover:border-sky-400/60
                       hover:-translate-y-2
                       hover:shadow-xl
@@ -906,6 +1274,7 @@ function EligibilityChecker() {
                       "
                     />
 
+
                     <div className="relative z-10">
 
                       {/* Card Header */}
@@ -931,7 +1300,6 @@ function EligibilityChecker() {
                             items-center
                             justify-center
                             shrink-0
-
                             group-hover:border-sky-400/60
                             group-hover:scale-110
                             group-hover:-rotate-2
@@ -939,8 +1307,11 @@ function EligibilityChecker() {
                             duration-500
                           "
                         >
+
                           <FaAward className="text-sky-500" />
+
                         </div>
+
 
                         {scheme.category && (
 
@@ -1020,9 +1391,13 @@ function EligibilityChecker() {
                             gap-2
                           "
                         >
+
                           <FaCheckCircle />
+
                           Eligibility
+
                         </div>
+
 
                         <p className="text-xs text-slate-600 leading-relaxed">
                           {getEligibility(scheme)}
@@ -1056,9 +1431,13 @@ function EligibilityChecker() {
                             gap-2
                           "
                         >
+
                           <FaFileAlt className="text-sky-500" />
+
                           Documents Required
+
                         </div>
+
 
                         <div className="space-y-1.5">
 
@@ -1127,9 +1506,13 @@ function EligibilityChecker() {
                             group-hover:translate-x-1
                           "
                         >
+
                           View Details
+
                           <FaArrowRight className="text-[10px]" />
+
                         </button>
+
 
                         <a
                           href={getApplyUrl(scheme)}
@@ -1154,13 +1537,17 @@ function EligibilityChecker() {
                             shadow-sky-200/50
                           "
                         >
+
                           Apply Now
+
                           <FaExternalLinkAlt className="text-[9px]" />
+
                         </a>
 
                       </div>
 
                     </div>
+
 
                     {/* Bottom Glow */}
 
@@ -1229,9 +1616,11 @@ function EligibilityChecker() {
                   🔍
                 </div>
 
+
                 <h3 className="text-lg font-bold text-slate-900 mb-2">
                   No Schemes Matched
                 </h3>
+
 
                 <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
                   No schemes were returned for the profile you
@@ -1318,6 +1707,7 @@ function EligibilityChecker() {
                     {getCategory(selectedScheme)}
                   </span>
 
+
                   <h2
                     className="
                       text-2xl
@@ -1330,6 +1720,7 @@ function EligibilityChecker() {
                   </h2>
 
                 </div>
+
 
                 <button
                   type="button"
@@ -1377,6 +1768,7 @@ function EligibilityChecker() {
                   Description
                 </h4>
 
+
                 <p className="text-sm text-slate-600 leading-relaxed">
                   {getDescription(selectedScheme)}
                 </p>
@@ -1398,6 +1790,7 @@ function EligibilityChecker() {
                 >
                   Eligibility
                 </h4>
+
 
                 <p
                   className="
@@ -1430,6 +1823,7 @@ function EligibilityChecker() {
                 >
                   Documents Required
                 </h4>
+
 
                 <div className="space-y-2">
 
@@ -1500,8 +1894,11 @@ function EligibilityChecker() {
                     transition-all
                   "
                 >
+
                   Apply Now
+
                   <FaExternalLinkAlt className="text-xs" />
+
                 </a>
 
               </div>
@@ -1515,7 +1912,9 @@ function EligibilityChecker() {
       )}
 
     </div>
+
   );
+
 }
 
 export default EligibilityChecker;

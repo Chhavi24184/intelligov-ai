@@ -11,7 +11,6 @@ import EligibilityChecker from "./pages/EligibilityChecker";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
 import Saved from "./pages/Saved";
 
 function App() {
@@ -23,8 +22,7 @@ function App() {
       {location.pathname !== "/dashboard" &&
         location.pathname !== "/login" &&
         location.pathname !== "/register" &&
-        location.pathname !== "/profile" &&
-        location.pathname !== "/settings" && <Navbar />}
+        location.pathname !== "/profile" && <Navbar />}
 
       <Routes>
 
@@ -49,11 +47,11 @@ function App() {
         />
 
         {/* Saved */}
-        <Route 
-          path="/saved" 
+        <Route
+          path="/saved"
           element={
             <Saved />
-          } 
+          }
         />
 
         {/* ================= PROTECTED ROUTES ================= */}
@@ -104,16 +102,6 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Settings */}
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Settings />
             </ProtectedRoute>
           }
         />

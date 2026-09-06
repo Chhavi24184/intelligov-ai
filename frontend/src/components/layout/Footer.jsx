@@ -72,7 +72,7 @@ function Footer() {
               <div className="flex items-center gap-4 text-slate-500 pt-2">
 
                 <a
-                  href="https://github.com"
+                  href="https://github.com/Chhavi24184/intelligov-ai"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 rounded-lg bg-white/75 border border-sky-200 hover:text-blue-600 hover:border-sky-400 hover:shadow-md hover:shadow-sky-500/10 transition-all"

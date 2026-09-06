@@ -144,7 +144,6 @@ function Dashboard() {
                 className="
                   flex
                   items-center
-                  justify-between
                   mb-6
                 "
               >
@@ -180,54 +179,6 @@ function Dashboard() {
                   <FaArrowLeft className="text-xs" />
 
                   <span>Back</span>
-
-                </button>
-
-
-                {/* Notification */}
-
-                <button
-                  type="button"
-                  className="
-                    relative
-                    w-10
-                    h-10
-                    rounded-xl
-                    bg-white/80
-                    backdrop-blur-md
-                    border
-                    border-blue-100
-                    flex
-                    items-center
-                    justify-center
-                    text-slate-500
-                    shadow-sm
-                    hover:text-blue-600
-                    hover:border-blue-300
-                    hover:bg-white
-                    transition-all
-                    duration-300
-                  "
-                  aria-label="Notifications"
-                >
-
-                  <span className="text-lg">
-                    🔔
-                  </span>
-
-
-                  <span
-                    className="
-                      absolute
-                      top-2
-                      right-2
-                      w-2
-                      h-2
-                      rounded-full
-                      bg-cyan-500
-                      shadow-[0_0_8px_rgba(6,182,212,0.7)]
-                    "
-                  />
 
                 </button>
 

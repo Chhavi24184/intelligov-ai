@@ -6,7 +6,6 @@ import {
   FaClipboardList,
   FaCheckCircle,
   FaUserCircle,
-  FaCog,
   FaSignOutAlt,
   FaBookmark,
   FaBars,
@@ -149,20 +148,6 @@ function Sidebar() {
           Saved
         </Link>
 
-      </li>
-
-
-      {/* Settings */}
-
-      <li>
-        <Link
-          to="/settings"
-          onClick={closeMobileMenu}
-          className={menuItemClass("/settings")}
-        >
-          <FaCog size={16} />
-          Settings
-        </Link>
       </li>
 
     </>

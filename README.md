@@ -504,3 +504,58 @@ This project is licensed under the **Apache License 2.0** — see [`LICENSE`](LI
 - The open-source maintainers of **FastAPI**, **React**, **ChromaDB**, **NetworkX**, and **sentence-transformers**.
 - Public government data initiatives — **MyScheme**, **National Career Service (NCS)**, **National Scholarship Portal (NSP)**, and **Skill India** — whose structure informed our mock datasets.
 
+## 🔐 Environment Configuration
+
+IntelliGov AI uses environment variables for backend configuration, including **PostgreSQL database connectivity**.
+
+> [!IMPORTANT]
+> For security reasons, the actual `.env` file containing database credentials is **not included in this repository**.
+
+### ⚙️ Backend Setup
+
+#### 1️⃣ Navigate to the Backend
+
+```bash
+cd backend
+```
+
+#### 2️⃣ Create the Environment File
+
+Create a `.env` file using the provided `.env.example` file.
+
+**Windows:**
+
+```bash
+copy .env.example .env
+```
+
+**Linux / macOS:**
+
+```bash
+cp .env.example .env
+```
+
+#### 3️⃣ Configure the Database
+
+Open the newly created `.env` file and add your PostgreSQL database connection URL:
+
+```env
+DATABASE_URL=your_database_url_here
+```
+
+The required environment variable is already documented in:
+
+```text
+backend/.env.example
+```
+
+### 🛡️ Security
+
+The actual `.env` file is intentionally excluded from GitHub because it contains **sensitive database credentials**.
+
+* ✅ `.env.example` → Safe to commit and included in the repository
+* ❌ `.env` → Contains private credentials and must remain local
+* ❌ Never commit database passwords, API keys, or other secrets to GitHub
+
+> [!TIP]
+> If you are setting up the project locally, simply copy `.env.example` to `.env` and replace the placeholder value with your own PostgreSQL connection string.

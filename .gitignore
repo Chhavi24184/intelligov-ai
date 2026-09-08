@@ -9,6 +9,7 @@
 backend/.env
 frontend/.env
 *.env.backup
+!.env.example
 
 # ---------- Python / FastAPI ----------
 __pycache__/

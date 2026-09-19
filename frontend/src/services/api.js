@@ -83,6 +83,61 @@ export const searchSchemesAPI = async (query) => {
 };
 
 // ======================================================
+// NOTIFICATION APIs
+// ======================================================
+
+// CREATE NOTIFICATION
+export const createNotificationAPI = async (
+  userId,
+  title,
+  message,
+  type = "general"
+) => {
+  const response = await API.post("/notifications", {
+    user_id: Number(userId),
+    title,
+    message,
+    type,
+  });
+
+  return response.data;
+};
+
+// GET USER NOTIFICATIONS
+export const getNotificationsAPI = async (userId) => {
+  const response = await API.get(`/notifications/${userId}`);
+
+  return response.data;
+};
+
+// MARK ONE NOTIFICATION AS READ
+export const markNotificationReadAPI = async (notificationId) => {
+  const response = await API.patch(
+    `/notifications/${notificationId}/read`
+  );
+
+  return response.data;
+};
+
+// MARK ALL NOTIFICATIONS AS READ
+export const markAllNotificationsReadAPI = async (userId) => {
+  const response = await API.patch(
+    `/notifications/user/${userId}/read-all`
+  );
+
+  return response.data;
+};
+
+// CLEAR ALL USER NOTIFICATIONS
+export const clearNotificationsAPI = async (userId) => {
+  const response = await API.delete(
+    `/notifications/user/${userId}`
+  );
+
+  return response.data;
+};
+
+// ======================================================
 // DEFAULT EXPORT
 // ======================================================
 

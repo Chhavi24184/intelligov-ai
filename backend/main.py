@@ -10,6 +10,7 @@ from database import engine, Base
 
 from models.user import User
 from models.chat_history import ChatHistory
+from models.notification import Notification
 
 
 # =========================================================
@@ -22,6 +23,7 @@ from api.eligibility import router as eligibility_router
 from api.schemes import router as schemes_router
 from api.auth import router as auth_router
 from api.chat_history import router as chat_history_router
+from api.notifications import router as notifications_router
 
 
 # =========================================================
@@ -65,6 +67,7 @@ app.include_router(eligibility_router)
 app.include_router(schemes_router)
 app.include_router(auth_router)
 app.include_router(chat_history_router)
+app.include_router(notifications_router)
 
 
 # =========================================================

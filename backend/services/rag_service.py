@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 import chromadb
-from sentence_transformers import SentenceTransformer
+from chromadb.utils import embedding_functions
 
 
 # ============================================================
@@ -17,15 +17,6 @@ CHROMA_DIR = BASE_DIR / "vector_store"
 
 
 # ============================================================
-# EMBEDDING MODEL
-# ============================================================
-
-embedding_model = SentenceTransformer(
-    "all-MiniLM-L6-v2"
-)
-
-
-# ============================================================
 # CHROMA CLIENT
 # ============================================================
 
@@ -35,11 +26,19 @@ chroma_client = chromadb.PersistentClient(
 
 
 # ============================================================
+# EMBEDDING FUNCTION
+# ============================================================
+
+embedding_function = embedding_functions.DefaultEmbeddingFunction()
+
+
+# ============================================================
 # COLLECTION
 # ============================================================
 
 collection = chroma_client.get_or_create_collection(
-    name="government_schemes"
+    name="government_schemes",
+    embedding_function=embedding_function
 )
 
 
@@ -118,21 +117,13 @@ def index_schemes():
         })
 
     # --------------------------------------------------------
-    # Generate embeddings
-    # --------------------------------------------------------
-
-    embeddings = embedding_model.encode(
-        documents
-    ).tolist()
-
-    # --------------------------------------------------------
-    # Store in ChromaDB
+    # Store documents in ChromaDB
+    # ChromaDB generates embeddings automatically
     # --------------------------------------------------------
 
     collection.upsert(
         ids=ids,
         documents=documents,
-        embeddings=embeddings,
         metadatas=metadatas
     )
 
@@ -159,12 +150,12 @@ def search_schemes(
             "distances": [[]]
         }
 
-    query_embedding = embedding_model.encode(
-        [query]
-    ).tolist()
+    # --------------------------------------------------------
+    # ChromaDB automatically generates query embedding
+    # --------------------------------------------------------
 
     results = collection.query(
-        query_embeddings=query_embedding,
+        query_texts=[query],
         n_results=top_k
     )
 
@@ -177,13 +168,10 @@ def search_schemes(
 # ============================================================
 
 # Maximum ChromaDB L2 distance to consider a scheme relevant.
-# Distances are squared-Euclidean in cosine-normalised space,
-# so 1.0 ≈ cos-similarity 0.5. Values above this threshold
-# indicate the scheme is semantically unrelated to the query.
 _MAX_RELEVANT_DISTANCE = 0.9
 
-# For document queries, use a higher threshold to allow more schemes.
-# Generic document queries may not match well semantically but are still relevant.
+
+# For document queries, use a higher threshold.
 _MAX_DOCUMENT_QUERY_DISTANCE = 1.5
 
 
@@ -199,41 +187,14 @@ def search_full_schemes(
     Performs semantic search using ChromaDB
     and returns complete scheme objects
     from schemes.json.
-
-    Schemes whose ChromaDB distance exceeds *distance_threshold*
-    are dropped so that only genuinely relevant results reach
-    IBM Granite.
-
-    Parameters:
-    -----------
-    query : str
-        The user query to search for.
-    top_k : int
-        Number of results to fetch from ChromaDB.
-    distance_threshold : float
-        Maximum semantic distance for a scheme to be considered relevant.
-    is_document_query : bool
-        If True, use a higher distance threshold for generic document queries.
-    prefer_with_documents : bool
-        If True, prioritize schemes that have non-empty documents field.
-
-    Additional internal fields:
-
-    _rag_distance
-        ChromaDB semantic distance.
-
-    _rag_score
-        Converted semantic relevance score.
-
-    _rag_rank
-        Position returned by ChromaDB.
     """
 
     # --------------------------------------------------------
     # Adjust distance threshold for document queries
     # --------------------------------------------------------
-    
+
     if is_document_query:
+
         distance_threshold = _MAX_DOCUMENT_QUERY_DISTANCE
 
     if not query or not query.strip():
@@ -241,8 +202,7 @@ def search_full_schemes(
         return []
 
     # --------------------------------------------------------
-    # Semantic search — fetch more than needed so the
-    # distance filter still leaves enough candidates.
+    # Semantic search
     # --------------------------------------------------------
 
     results = search_schemes(
@@ -319,9 +279,7 @@ def search_full_schemes(
             distance = distances[index]
 
         # ----------------------------------------------------
-        # Distance threshold filter:
-        # Drop schemes that are semantically too far from the
-        # query so that irrelevant results never reach Granite.
+        # Distance threshold filter
         # ----------------------------------------------------
 
         if (
@@ -329,14 +287,11 @@ def search_full_schemes(
             and distance_threshold is not None
             and distance > distance_threshold
         ):
+
             continue
 
         # ----------------------------------------------------
         # Convert distance to relevance score
-        #
-        # Lower distance = better match
-        #
-        # relevance = 1 / (1 + distance)
         # ----------------------------------------------------
 
         if distance is not None:
@@ -371,21 +326,29 @@ def search_full_schemes(
         )
 
     # --------------------------------------------------------
-    # For document queries, prioritize schemes with non-empty documents
+    # For document queries, prioritize schemes
+    # with non-empty documents
     # --------------------------------------------------------
-    
+
     if prefer_with_documents:
-        # Separate schemes with and without documents
+
         with_docs = [
-            s for s in retrieved_schemes 
-            if s.get("documents") and len(s.get("documents", [])) > 0
+            s
+            for s in retrieved_schemes
+            if s.get("documents")
+            and len(s.get("documents", [])) > 0
         ]
+
         without_docs = [
-            s for s in retrieved_schemes 
-            if not s.get("documents") or len(s.get("documents", [])) == 0
+            s
+            for s in retrieved_schemes
+            if not s.get("documents")
+            or len(s.get("documents", [])) == 0
         ]
-        # Put schemes with documents first, maintain RAG score order within each group
-        retrieved_schemes = with_docs + without_docs
+
+        retrieved_schemes = (
+            with_docs + without_docs
+        )
 
     return retrieved_schemes
 

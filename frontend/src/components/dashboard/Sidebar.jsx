@@ -7,6 +7,7 @@ import {
   FaCheckCircle,
   FaUserCircle,
   FaSignOutAlt,
+  FaHistory,
   FaBookmark,
   FaBars,
   FaTimes,
@@ -23,6 +24,10 @@ function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
 
+  // =====================================================
+  // LOGOUT
+  // =====================================================
+
   const handleLogout = () => {
 
     localStorage.removeItem("isLoggedIn");
@@ -35,10 +40,18 @@ function Sidebar() {
   };
 
 
+  // =====================================================
+  // CLOSE MOBILE MENU
+  // =====================================================
+
   const closeMobileMenu = () => {
     setMobileOpen(false);
   };
 
+
+  // =====================================================
+  // ACTIVE MENU
+  // =====================================================
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -62,10 +75,14 @@ function Sidebar() {
   `;
 
 
+  // =====================================================
+  // SIDEBAR MENU
+  // =====================================================
+
   const menu = (
     <>
 
-      {/* Dashboard */}
+      {/* ================= DASHBOARD ================= */}
 
       <li>
         <Link
@@ -79,7 +96,7 @@ function Sidebar() {
       </li>
 
 
-      {/* AI Chat */}
+      {/* ================= AI CHAT ================= */}
 
       <li>
         <Link
@@ -93,7 +110,7 @@ function Sidebar() {
       </li>
 
 
-      {/* Schemes */}
+      {/* ================= SCHEMES ================= */}
 
       <li>
         <Link
@@ -107,7 +124,7 @@ function Sidebar() {
       </li>
 
 
-      {/* Eligibility */}
+      {/* ================= ELIGIBILITY ================= */}
 
       <li>
         <Link
@@ -121,7 +138,7 @@ function Sidebar() {
       </li>
 
 
-      {/* Profile */}
+      {/* ================= PROFILE ================= */}
 
       <li>
         <Link
@@ -135,7 +152,21 @@ function Sidebar() {
       </li>
 
 
-      {/* Saved */}
+      {/* ================= CHAT HISTORY ================= */}
+
+      <li>
+        <Link
+          to="/chat-history"
+          onClick={closeMobileMenu}
+          className={menuItemClass("/chat-history")}
+        >
+          <FaHistory size={16} />
+          Chat History
+        </Link>
+      </li>
+
+
+      {/* ================= SAVED ================= */}
 
       <li className="pt-3 mt-3 border-t border-blue-100">
 
@@ -247,7 +278,6 @@ function Sidebar() {
       </div>
 
 
-
       {/* =====================================================
           MOBILE OVERLAY
       ===================================================== */}
@@ -267,7 +297,6 @@ function Sidebar() {
         />
 
       )}
-
 
 
       {/* =====================================================
@@ -292,7 +321,6 @@ function Sidebar() {
           transition-transform
           duration-300
           ease-out
-
           md:translate-x-0
 
           ${
@@ -324,7 +352,7 @@ function Sidebar() {
           "
         >
 
-          {/* Soft Logo Glow */}
+          {/* Logo Glow */}
 
           <div
             className="
@@ -364,6 +392,8 @@ function Sidebar() {
           </div>
 
 
+          {/* Logo */}
+
           <div className="relative text-2xl font-bold flex items-center gap-1">
 
             <span
@@ -402,7 +432,6 @@ function Sidebar() {
         </div>
 
 
-
         {/* =================================================
             MENU
         ================================================= */}
@@ -416,7 +445,6 @@ function Sidebar() {
           </ul>
 
         </nav>
-
 
 
         {/* =================================================
@@ -437,6 +465,8 @@ function Sidebar() {
 
           </div>
 
+
+          {/* Logout Button */}
 
           <button
             type="button"

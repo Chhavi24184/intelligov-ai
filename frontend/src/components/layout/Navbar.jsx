@@ -13,6 +13,8 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+import NotificationBell from "../NotificationBell";
+
 
 function Navbar() {
 
@@ -22,14 +24,37 @@ function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
 
+  // =====================================================
+  // NAVIGATION LINKS
+  // =====================================================
+
   const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Services", path: "#services" },
-    { name: "Schemes", path: "/schemes" },
-    { name: "About", path: "#about" },
-    { name: "Dashboard", path: "/dashboard" },
+    {
+      name: "Home",
+      path: "/",
+    },
+    {
+      name: "Services",
+      path: "#services",
+    },
+    {
+      name: "Schemes",
+      path: "/schemes",
+    },
+    {
+      name: "About",
+      path: "#about",
+    },
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+    },
   ];
 
+
+  // =====================================================
+  // ACTIVE LINK
+  // =====================================================
 
   const isActive = (path) => {
 
@@ -42,9 +67,9 @@ function Navbar() {
   };
 
 
-  // =========================================
+  // =====================================================
   // SCROLL TO SERVICES / ABOUT
-  // =========================================
+  // =====================================================
 
   const handleSectionClick = (sectionId) => {
 
@@ -54,7 +79,8 @@ function Navbar() {
     // Already on Home page
     if (location.pathname === "/") {
 
-      const section = document.getElementById(sectionId);
+      const section =
+        document.getElementById(sectionId);
 
       if (section) {
 
@@ -66,19 +92,19 @@ function Navbar() {
       }
 
       return;
+
     }
 
 
-    // If we are on another page:
-    // Go directly to Home first
+    // Go to Home first
     navigate("/");
 
 
-    // Wait for Home page to render,
-    // then scroll directly to the section
+    // Wait for Home page to render
     setTimeout(() => {
 
-      const section = document.getElementById(sectionId);
+      const section =
+        document.getElementById(sectionId);
 
       if (section) {
 
@@ -94,9 +120,9 @@ function Navbar() {
   };
 
 
-  // =========================================
+  // =====================================================
   // HOME BUTTON
-  // =========================================
+  // =====================================================
 
   const handleHomeClick = () => {
 
@@ -119,9 +145,9 @@ function Navbar() {
   };
 
 
-  // =========================================
+  // =====================================================
   // NAVIGATION CLICK
-  // =========================================
+  // =====================================================
 
   const handleNavClick = (link) => {
 
@@ -148,23 +174,71 @@ function Navbar() {
   };
 
 
+  // =====================================================
+  // RETURN
+  // =====================================================
+
   return (
 
-    <header className="relative z-50 w-full bg-white border-b border-sky-200">
+    <header
+      className="
+        relative
+        z-50
+        w-full
+        bg-white
+        border-b
+        border-sky-200
+      "
+    >
 
-      <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div
+        className="
+          max-w-7xl
+          mx-auto
+          px-6
+          py-3
+          flex
+          items-center
+          justify-between
+        "
+      >
 
 
-        {/* =========================
+        {/* =================================================
             BRAND LOGO
-        ========================= */}
+        ================================================= */}
 
         <Link
           to="/"
-          className="flex items-center gap-3 group"
+          onClick={handleHomeClick}
+          className="
+            flex
+            items-center
+            gap-3
+            group
+          "
         >
 
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-300">
+          <div
+            className="
+              w-10
+              h-10
+              rounded-xl
+              bg-gradient-to-tr
+              from-blue-600
+              via-cyan-500
+              to-indigo-600
+              flex
+              items-center
+              justify-center
+              text-white
+              shadow-lg
+              shadow-cyan-500/20
+              group-hover:scale-105
+              transition-transform
+              duration-300
+            "
+          >
 
             <FaRobot className="text-xl" />
 
@@ -173,27 +247,47 @@ function Navbar() {
 
           <div className="flex flex-col">
 
-            <span className="text-2xl font-black tracking-tight">
+            <span
+              className="
+                text-2xl
+                font-black
+                tracking-tight
+              "
+            >
 
-              <span className="bg-gradient-to-r from-sky-500 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
-
+              <span
+                className="
+                  bg-gradient-to-r
+                  from-sky-500
+                  via-blue-600
+                  to-cyan-500
+                  bg-clip-text
+                  text-transparent
+                "
+              >
                 IntelliGov
+              </span>
 
-              </span>{" "}
+              {" "}
 
               <span className="text-amber-500 font-extrabold">
-
                 AI
-
               </span>
 
             </span>
 
 
-            <span className="text-[10px] uppercase tracking-widest text-cyan-600 font-semibold -mt-1">
-
+            <span
+              className="
+                text-[10px]
+                uppercase
+                tracking-widest
+                text-cyan-600
+                font-semibold
+                -mt-1
+              "
+            >
               Smart Gov Assistant
-
             </span>
 
           </div>
@@ -201,20 +295,46 @@ function Navbar() {
         </Link>
 
 
-        {/* =========================
+        {/* =================================================
             DESKTOP NAVIGATION
-        ========================= */}
+        ================================================= */}
 
-        <nav className="hidden md:flex items-center gap-1 bg-sky-50/80 p-1.5 rounded-full border border-sky-200">
+        <nav
+          className="
+            hidden
+            md:flex
+            items-center
+            gap-1
+            bg-sky-50/80
+            p-1.5
+            rounded-full
+            border
+            border-sky-200
+          "
+        >
 
           {navLinks.map((link) => (
 
-            link.path === "#services" || link.path === "#about" ? (
+            link.path === "#services" ||
+            link.path === "#about" ? (
 
               <button
                 key={link.path}
-                onClick={() => handleNavClick(link)}
-                className="px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 text-slate-600 hover:text-blue-700 hover:bg-sky-100"
+                onClick={() =>
+                  handleNavClick(link)
+                }
+                className="
+                  px-5
+                  py-2
+                  rounded-full
+                  text-sm
+                  font-medium
+                  transition-all
+                  duration-300
+                  text-slate-600
+                  hover:text-blue-700
+                  hover:bg-sky-100
+                "
               >
 
                 {link.name}
@@ -235,11 +355,20 @@ function Navbar() {
                   setMobileMenuOpen(false);
 
                 }}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                  isActive(link.path)
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-semibold"
-                    : "text-slate-600 hover:text-blue-700 hover:bg-sky-100"
-                }`}
+                className={`
+                  px-5
+                  py-2
+                  rounded-full
+                  text-sm
+                  font-medium
+                  transition-all
+                  duration-300
+                  ${
+                    isActive(link.path)
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-semibold"
+                      : "text-slate-600 hover:text-blue-700 hover:bg-sky-100"
+                  }
+                `}
               >
 
                 {link.name}
@@ -253,27 +382,70 @@ function Navbar() {
         </nav>
 
 
-        {/* =========================
-            ACTION BUTTON + PROFILE
-        ========================= */}
+        {/* =================================================
+            DESKTOP ACTIONS
+        ================================================= */}
 
-        <div className="hidden md:flex items-center gap-4">
+        <div
+          className="
+            hidden
+            md:flex
+            items-center
+            gap-3
+          "
+        >
+
+
+          {/* NOTIFICATION */}
+
+          <NotificationBell />
+
+
+          {/* ASK AI */}
 
           <Link
             to="/chat"
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-300 flex items-center gap-2"
+            className="
+              px-5
+              py-2.5
+              rounded-xl
+              bg-gradient-to-r
+              from-cyan-500
+              to-blue-600
+              text-white
+              text-sm
+              font-semibold
+              shadow-lg
+              shadow-cyan-500/25
+              hover:shadow-cyan-500/40
+              hover:scale-105
+              transition-all
+              duration-300
+              flex
+              items-center
+              gap-2
+            "
           >
 
             <FaRobot className="text-sm animate-pulse" />
 
-            <span>Ask AI</span>
+            <span>
+              Ask AI
+            </span>
 
           </Link>
 
 
+          {/* DASHBOARD / PROFILE */}
+
           <Link
             to="/dashboard"
-            className="p-2 text-slate-500 hover:text-blue-600 transition-colors"
+            className="
+              p-2
+              text-slate-500
+              hover:text-blue-600
+              transition-colors
+            "
             title="Dashboard"
           >
 
@@ -284,23 +456,53 @@ function Navbar() {
         </div>
 
 
-        {/* =========================
-            MOBILE MENU BUTTON
-        ========================= */}
+        {/* =================================================
+            MOBILE ACTIONS
+        ================================================= */}
 
-        <div className="md:hidden flex items-center">
+        <div
+          className="
+            md:hidden
+            flex
+            items-center
+            gap-2
+          "
+        >
+
+          {/* MOBILE NOTIFICATION */}
+
+          <NotificationBell />
+
+
+          {/* MOBILE MENU BUTTON */}
 
           <button
+            type="button"
             onClick={() =>
-              setMobileMenuOpen(!mobileMenuOpen)
+              setMobileMenuOpen(
+                !mobileMenuOpen
+              )
             }
-            className="p-2.5 rounded-xl bg-sky-50 text-slate-600 hover:text-blue-700 border border-sky-200 focus:outline-none"
+            className="
+              p-2.5
+              rounded-xl
+              bg-sky-50
+              text-slate-600
+              hover:text-blue-700
+              border
+              border-sky-200
+              focus:outline-none
+            "
           >
 
             {mobileMenuOpen ? (
+
               <FaTimes className="text-xl" />
+
             ) : (
+
               <FaBars className="text-xl" />
+
             )}
 
           </button>
@@ -310,22 +512,49 @@ function Navbar() {
       </div>
 
 
-      {/* =========================
+      {/* =================================================
           MOBILE NAVIGATION
-      ========================= */}
+      ================================================= */}
 
       {mobileMenuOpen && (
 
-        <div className="md:hidden bg-white border-b border-sky-200 px-4 pt-3 pb-6 space-y-2">
+        <div
+          className="
+            md:hidden
+            bg-white
+            border-b
+            border-sky-200
+            px-4
+            pt-3
+            pb-6
+            space-y-2
+          "
+        >
 
           {navLinks.map((link) => (
 
-            link.path === "#services" || link.path === "#about" ? (
+            link.path === "#services" ||
+            link.path === "#about" ? (
 
               <button
                 key={link.path}
-                onClick={() => handleNavClick(link)}
-                className="block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-all text-slate-600 hover:bg-sky-100 hover:text-blue-700"
+                onClick={() =>
+                  handleNavClick(link)
+                }
+                className="
+                  block
+                  w-full
+                  text-left
+                  px-4
+                  py-3
+                  rounded-xl
+                  text-base
+                  font-medium
+                  transition-all
+                  text-slate-600
+                  hover:bg-sky-100
+                  hover:text-blue-700
+                "
               >
 
                 {link.name}
@@ -346,11 +575,20 @@ function Navbar() {
                   }
 
                 }}
-                className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${
-                  isActive(link.path)
-                    ? "bg-blue-600 text-white font-semibold"
-                    : "text-slate-600 hover:bg-sky-100 hover:text-blue-700"
-                }`}
+                className={`
+                  block
+                  px-4
+                  py-3
+                  rounded-xl
+                  text-base
+                  font-medium
+                  transition-all
+                  ${
+                    isActive(link.path)
+                      ? "bg-blue-600 text-white font-semibold"
+                      : "text-slate-600 hover:bg-sky-100 hover:text-blue-700"
+                  }
+                `}
               >
 
                 {link.name}
@@ -362,9 +600,9 @@ function Navbar() {
           ))}
 
 
-          {/* =========================
+          {/* =================================================
               MOBILE ASK AI
-          ========================= */}
+          ================================================= */}
 
           <div className="pt-2">
 
@@ -373,7 +611,22 @@ function Navbar() {
               onClick={() =>
                 setMobileMenuOpen(false)
               }
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-center font-semibold flex items-center justify-center gap-2 shadow-lg"
+              className="
+                w-full
+                py-3
+                rounded-xl
+                bg-gradient-to-r
+                from-cyan-500
+                to-blue-600
+                text-white
+                text-center
+                font-semibold
+                flex
+                items-center
+                justify-center
+                gap-2
+                shadow-lg
+              "
             >
 
               <FaRobot />

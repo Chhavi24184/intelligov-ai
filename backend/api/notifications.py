@@ -13,12 +13,20 @@ router = APIRouter(
 )
 
 
+# ======================================================
+# REQUEST MODEL
+# ======================================================
+
 class NotificationCreate(BaseModel):
     user_id: int
     title: str
     message: str
     type: str = "general"
 
+
+# ======================================================
+# CREATE NOTIFICATION
+# ======================================================
 
 @router.post("")
 def create_notification(
@@ -62,6 +70,10 @@ def create_notification(
     }
 
 
+# ======================================================
+# GET USER NOTIFICATIONS
+# ======================================================
+
 @router.get("/{user_id}")
 def get_notifications(
     user_id: int,
@@ -88,7 +100,8 @@ def get_notifications(
         "user_id": user_id,
         "total_notifications": len(notifications),
         "unread_count": sum(
-            1 for item in notifications
+            1
+            for item in notifications
             if not item.is_read
         ),
         "notifications": [
@@ -104,6 +117,10 @@ def get_notifications(
         ]
     }
 
+
+# ======================================================
+# MARK ONE NOTIFICATION AS READ
+# ======================================================
 
 @router.patch("/{notification_id}/read")
 def mark_notification_read(
@@ -131,6 +148,10 @@ def mark_notification_read(
         "notification_id": notification.id
     }
 
+
+# ======================================================
+# MARK ALL NOTIFICATIONS AS READ
+# ======================================================
 
 @router.patch("/user/{user_id}/read-all")
 def mark_all_notifications_read(
@@ -163,6 +184,10 @@ def mark_all_notifications_read(
         "updated_count": updated_count
     }
 
+
+# ======================================================
+# CLEAR ALL NOTIFICATIONS
+# ======================================================
 
 @router.delete("/user/{user_id}")
 def clear_notifications(

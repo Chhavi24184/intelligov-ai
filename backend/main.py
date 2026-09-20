@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
-
+from api.notifications import router as notifications_router
 from database import engine, Base
 
 # =========================================================

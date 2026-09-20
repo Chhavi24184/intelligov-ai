@@ -81,6 +81,74 @@ export const searchSchemesAPI = async (query) => {
 
   return response.data;
 };
+// ======================================================
+// CHAT HISTORY APIs
+// ======================================================
+
+export const saveChatHistoryAPI = async (userId, message, response) => {
+  const result = await API.post("/chat-history/save", {
+    user_id: Number(userId),
+    message,
+    response,
+  });
+
+  return result.data;
+};
+
+export const getChatHistoryAPI = async (userId) => {
+  const result = await API.get(`/chat-history/${userId}`);
+
+  return result.data;
+};
+// ======================================================
+// NOTIFICATION APIs
+// ======================================================
+
+export const createNotificationAPI = async (
+  userId,
+  title,
+  message,
+  type = "general"
+) => {
+  const response = await API.post("/notifications", {
+    user_id: Number(userId),
+    title,
+    message,
+    type,
+  });
+
+  return response.data;
+};
+
+export const getNotificationsAPI = async (userId) => {
+  const response = await API.get(`/notifications/${userId}`);
+
+  return response.data;
+};
+
+export const markNotificationReadAPI = async (notificationId) => {
+  const response = await API.patch(
+    `/notifications/${notificationId}/read`
+  );
+
+  return response.data;
+};
+
+export const markAllNotificationsReadAPI = async (userId) => {
+  const response = await API.patch(
+    `/notifications/user/${userId}/read-all`
+  );
+
+  return response.data;
+};
+
+export const clearNotificationsAPI = async (userId) => {
+  const response = await API.delete(
+    `/notifications/user/${userId}`
+  );
+
+  return response.data;
+};
 
 // ======================================================
 // NOTIFICATION APIs

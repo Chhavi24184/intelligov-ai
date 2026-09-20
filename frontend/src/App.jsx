@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Saved from "./pages/Saved";
-
+import ChatHistory from "./pages/ChatHistory";
 function App() {
   const location = useLocation();
 
@@ -72,6 +72,16 @@ function App() {
           element={
             <ProtectedRoute>
               <AIChat />
+            </ProtectedRoute>
+          }
+        />
+        {/* Chat History */}
+
+        <Route
+          path="/chat-history"
+          element={
+            <ProtectedRoute>
+              <ChatHistory />
             </ProtectedRoute>
           }
         />

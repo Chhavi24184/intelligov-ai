@@ -3,9 +3,8 @@ import axios from "axios";
 // ======================================================
 // BACKEND BASE URL
 // ======================================================
-
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://intelligov-ai.onrender.com",
+  baseURL: "https://intelligov-ai.onrender.com",
   headers: {
     "Content-Type": "application/json",
   },

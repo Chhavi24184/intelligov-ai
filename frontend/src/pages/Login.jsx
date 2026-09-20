@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { loginUser } from "../services/api";
+import { loginUser, registerUser } from "../services/api";
 
 function Login() {
   const navigate = useNavigate();
@@ -117,19 +116,16 @@ function Login() {
     try {
       setLoading(true);
 
-      // EXISTING REGISTER API — NOT CHANGED
-      const response = await axios.post(
-        "http://127.0.0.1:8000/auth/register",
-        {
-          name: name.trim(),
-          email: registerEmail.trim(),
-          password: registerPassword,
-        }
+      // REGISTER API
+      const response = await registerUser(
+        name.trim(),
+        registerEmail.trim(),
+        registerPassword
       );
 
       console.log(
         "Register response:",
-        response.data
+        response
       );
 
       alert("Account created successfully!");

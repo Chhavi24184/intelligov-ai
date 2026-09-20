@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import heroImage from "../../assets/hero.png";
 
 import {
   FaRobot,
@@ -22,7 +23,7 @@ function Hero() {
     <section
       className="relative min-h-[calc(100vh-80px)] overflow-hidden bg-white text-slate-900"
       style={{
-        backgroundImage: "url('/src/assets/hero.png')",
+        backgroundImage: `url(${heroImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",

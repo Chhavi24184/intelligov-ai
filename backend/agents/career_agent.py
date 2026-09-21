@@ -1,46 +1,56 @@
+from services.rag_service import search_full_schemes
+
+
 class CareerAgent:
     """
-    Provides basic career and employment guidance.
+    Provides career and employment guidance by retrieving
+    relevant government schemes from the RAG store.
+    Career/employment/internship queries are answered
+    using scheme data; Granite generation is handled
+    centrally by chat_service.
     """
 
     def run(self, query: str, profile: dict | None = None) -> dict:
 
-        query_lower = query.lower()
+        if not query or not query.strip():
+            return {
+                "agent": "CareerAgent",
+                "success": False,
+                "schemes": [],
+                "message": "Please provide a valid career or employment query."
+            }
 
-        recommendations = []
+        # ============================================================
+        # Retrieve relevant schemes via RAG
+        # ============================================================
 
-        if "student" in query_lower:
-            recommendations.extend([
-                "Skill development programs",
-                "Government internships",
-                "Scholarships",
-                "Apprenticeship opportunities"
-            ])
+        try:
+            # Career/internship queries are semantically distant
+            # from scheme names in the embedding space; use a
+            # higher distance threshold to retrieve relevant results.
+            schemes = search_full_schemes(
+                query=query,
+                top_k=8,
+                distance_threshold=2.0
+            )
+        except Exception as e:
+            print(f"CareerAgent RAG warning: {e}")
+            schemes = []
 
-        if "job" in query_lower or "employment" in query_lower:
-            recommendations.extend([
-                "Government employment portals",
-                "Skill development programs",
-                "Apprenticeships",
-                "Job opportunities"
-            ])
+        # ============================================================
+        # Clean internal RAG metadata before returning
+        # ============================================================
 
-        if "farmer" in query_lower:
-            recommendations.extend([
-                "Agricultural skill programs",
-                "Farmer training programs",
-                "Agriculture-related government opportunities"
-            ])
-
-        if not recommendations:
-            recommendations = [
-                "Skill development programs",
-                "Government employment opportunities",
-                "Internships and apprenticeships"
-            ]
+        clean_schemes = [
+            {k: v for k, v in s.items() if not k.startswith("_rag_")}
+            for s in schemes
+            if s.get("name")
+        ]
 
         return {
             "agent": "CareerAgent",
             "success": True,
-            "recommendations": recommendations
+            "schemes": clean_schemes,
+            "count": len(clean_schemes),
+            "message": "Career and employment schemes retrieved."
         }

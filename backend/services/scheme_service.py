@@ -1,16 +1,22 @@
 import json
 from pathlib import Path
 
+_DATA_FILE = (
+    Path(__file__).parent.parent
+    / "data"
+    / "schemes.json"
+)
 
-def get_all_schemes():
-    data_file = (
-        Path(__file__).parent.parent
-        / "data"
-        / "schemes.json"
-    )
+_schemes_cache: list | None = None
 
-    with open(data_file, "r", encoding="utf-8") as file:
-        return json.load(file)
+
+def get_all_schemes() -> list:
+    global _schemes_cache
+    if _schemes_cache is not None:
+        return _schemes_cache
+    with open(_DATA_FILE, "r", encoding="utf-8") as file:
+        _schemes_cache = json.load(file)
+    return _schemes_cache
 
 
 def get_schemes_by_category(category: str):

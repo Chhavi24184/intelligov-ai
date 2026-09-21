@@ -120,6 +120,7 @@ class IntentDetectionAgent:
             "explain the scheme",
             "what is this scheme",
             "tell me about this scheme",
+            "tell me about pm kisan",
             "how does pm kisan work",
             "how does pmjay work"
         ]
@@ -157,6 +158,8 @@ class IntentDetectionAgent:
             "agricultural",
             "crop",
             "crops",
+            "kisan",
+            "pm kisan",
 
             # Women / Girl Child
             "women",

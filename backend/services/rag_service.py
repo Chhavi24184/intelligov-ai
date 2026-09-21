@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 import chromadb
@@ -14,6 +15,19 @@ BASE_DIR = Path(__file__).parent.parent
 SCHEMES_FILE = BASE_DIR / "data" / "schemes.json"
 
 CHROMA_DIR = BASE_DIR / "vector_store"
+
+
+# ============================================================
+# CHROMA ONNX CACHE — point to a stable directory so the
+# all-MiniLM-L6-v2 model is not re-downloaded on every cold
+# start on Render or similar ephemeral environments.
+# Dockerfile pre-bakes the model into /app/.chroma_cache.
+# Falls back to a writable local path when not in Docker.
+# ============================================================
+
+_DEFAULT_CACHE = str(BASE_DIR / ".chroma_cache")
+os.environ.setdefault("CHROMA_CACHE_DIR", _DEFAULT_CACHE)
+os.environ.setdefault("SENTENCE_TRANSFORMERS_HOME", _DEFAULT_CACHE)
 
 
 # ============================================================
@@ -43,18 +57,28 @@ collection = chroma_client.get_or_create_collection(
 
 
 # ============================================================
-# LOAD SCHEMES
+# LOAD SCHEMES — cached so schemes.json is read only once
+# per process, not on every query.
 # ============================================================
 
-def load_schemes():
+_schemes_cache: list | None = None
+
+
+def load_schemes() -> list:
+
+    global _schemes_cache
+
+    if _schemes_cache is not None:
+        return _schemes_cache
 
     with open(
         SCHEMES_FILE,
         "r",
         encoding="utf-8"
     ) as file:
+        _schemes_cache = json.load(file)
 
-        return json.load(file)
+    return _schemes_cache
 
 
 # ============================================================
@@ -168,11 +192,15 @@ def search_schemes(
 # ============================================================
 
 # Maximum ChromaDB L2 distance to consider a scheme relevant.
-_MAX_RELEVANT_DISTANCE = 0.9
+# The all-MiniLM-L6-v2 L2 distances for this scheme corpus
+# typically range from ~0.6 (exact name match) to ~1.5
+# (thematically related). A threshold of 0.9 was too strict
+# and filtered out almost all valid employment/career results.
+_MAX_RELEVANT_DISTANCE = 1.5
 
 
-# For document queries, use a higher threshold.
-_MAX_DOCUMENT_QUERY_DISTANCE = 1.5
+# For document queries, use an even higher threshold.
+_MAX_DOCUMENT_QUERY_DISTANCE = 1.8
 
 
 def search_full_schemes(

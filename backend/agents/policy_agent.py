@@ -1,11 +1,11 @@
 from services.rag_service import search_full_schemes
-from services.granite_service import granite_client
 
 
 class PolicyExplanationAgent:
     """
-    Explains government schemes using retrieved
-    government scheme data.
+    Retrieves relevant government schemes for policy/explanation
+    queries. Granite generation is handled centrally by
+    chat_service to avoid duplicate LLM calls.
     """
 
     def run(self, query: str) -> dict:
@@ -21,7 +21,6 @@ class PolicyExplanationAgent:
                 "success": False,
                 "query": query,
                 "schemes": [],
-                "explanation": "",
                 "message": "Please provide a valid policy or scheme query."
             }
 
@@ -35,7 +34,7 @@ class PolicyExplanationAgent:
 
             schemes = search_full_schemes(
                 query=query,
-                top_k=3
+                top_k=5
             )
 
         except Exception as e:
@@ -47,58 +46,26 @@ class PolicyExplanationAgent:
             schemes = []
 
         # ============================================================
-        # 3. No Relevant Scheme Found
+        # 3. Clean internal RAG metadata before returning
         # ============================================================
 
-        if not schemes:
-
-            return {
-                "agent": "PolicyExplanationAgent",
-                "success": True,
-                "query": query,
-                "schemes": [],
-                "explanation": "",
-                "message": (
-                    "I could not find a relevant government scheme "
-                    "in the available government scheme database."
-                )
-            }
+        clean_schemes = [
+            {k: v for k, v in s.items() if not k.startswith("_rag_")}
+            for s in schemes
+            if s.get("name")
+        ]
 
         # ============================================================
-        # 4. Generate Grounded Explanation
-        # ============================================================
-
-        try:
-
-            explanation = granite_client.generate(
-                query,
-                schemes
-            )
-
-        except Exception as e:
-
-            print(
-                f"Granite generation warning: {e}"
-            )
-
-            explanation = (
-                "Relevant government scheme information was found, "
-                "but an explanation could not be generated."
-            )
-
-        # ============================================================
-        # 5. Return Result
+        # 4. Return Result — Granite is called by chat_service
         # ============================================================
 
         return {
             "agent": "PolicyExplanationAgent",
             "success": True,
             "query": query,
-            "schemes": schemes,
-            "explanation": explanation,
-            "count": len(schemes),
+            "schemes": clean_schemes,
+            "count": len(clean_schemes),
             "message": (
-                "Policy explanation generated using "
-                "RAG-grounded government scheme data."
+                "Relevant schemes retrieved for policy explanation."
             )
         }

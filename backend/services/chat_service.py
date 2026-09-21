@@ -1,6 +1,6 @@
 from agents.orchestrator import OrchestratorAgent
 from services.granite_service import granite_client
-from services.rag_service import search_full_schemes
+from services.rag_service import search_full_schemes, _MAX_RELEVANT_DISTANCE
 from core.logger import logger
 
 
@@ -262,13 +262,17 @@ def _collect_context(
     if not context:
         try:
             logger.info(f"_collect_context: RAG fallback triggered for intent={intent}")
-            # For document queries, use lenient distance threshold
             is_doc_query = (intent == "document")
-            # Fetch extra candidates so the distance filter
-            # still yields up to 5 relevant results.
+            # Career/general queries are semantically distant from
+            # individual scheme names; raise threshold so
+            # apprenticeship/internship results pass (dist ~1.58).
+            # All other intents use the standard threshold (1.5)
+            # so only genuinely relevant schemes are returned.
+            is_career_query = (intent in ("career", "general"))
             rag_results = search_full_schemes(
                 query=query,
                 top_k=8,
+                distance_threshold=2.0 if is_career_query else _MAX_RELEVANT_DISTANCE,
                 is_document_query=is_doc_query,
                 prefer_with_documents=is_doc_query
             )

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from api.notifications import router as notifications_router
 from database import engine, Base
+from core.logger import logger
 
 # =========================================================
 # Models
@@ -31,6 +32,35 @@ from api.notifications import router as notifications_router
 # =========================================================
 
 Base.metadata.create_all(bind=engine)
+
+
+# =========================================================
+# Ensure ChromaDB is indexed on startup
+# If the vector store is empty (e.g. fresh Render deployment
+# or ephemeral filesystem), index all schemes now so that
+# RAG queries work immediately without a separate script.
+# =========================================================
+
+try:
+    from services.rag_service import get_collection_count, index_schemes
+    from services.scheme_service import get_all_schemes as _get_all_schemes
+    _chroma_count = get_collection_count()
+    _scheme_count = len(_get_all_schemes())
+    if _chroma_count == 0:
+        logger.info("ChromaDB collection empty — indexing schemes now...")
+        index_schemes()
+        logger.info(f"ChromaDB indexed: {get_collection_count()} documents")
+    elif _chroma_count != _scheme_count:
+        logger.info(
+            f"ChromaDB count ({_chroma_count}) does not match "
+            f"schemes.json ({_scheme_count}) — re-indexing..."
+        )
+        index_schemes()
+        logger.info(f"ChromaDB re-indexed: {get_collection_count()} documents")
+    else:
+        logger.info(f"ChromaDB ready: {_chroma_count} documents already indexed")
+except Exception as _e:
+    logger.warning(f"ChromaDB startup indexing skipped: {_e}")
 
 
 # =========================================================

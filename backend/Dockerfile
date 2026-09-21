@@ -33,12 +33,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # chromadb.utils.embedding_functions.DefaultEmbeddingFunction.
 # This runs once during the image build and caches the model
 # at CHROMA_CACHE_DIR so it is never downloaded at request time.
-RUN python -c " \
-from chromadb.utils import embedding_functions; \
-ef = embedding_functions.DefaultEmbeddingFunction(); \
-ef(['warmup']); \
-print('ONNX model pre-cached successfully.') \
-"
+RUN python -c "from chromadb.utils import embedding_functions; ef = embedding_functions.DefaultEmbeddingFunction(); ef(['warmup']); print('ONNX model pre-cached successfully.')"
 
 # Copy application source
 COPY . .

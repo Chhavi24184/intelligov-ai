@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaUserCircle,
   FaEnvelope,
@@ -15,9 +15,6 @@ import {
   FaCalendarAlt,
   FaSpinner,
   FaExclamationCircle,
-  FaChevronDown,
-  FaSearch,
-  FaTimes,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getProfileAPI, updateProfileAPI } from "../services/api";
@@ -137,34 +134,12 @@ const T = {
 };
 
 // =========================================================
-// SINGLE AUTHORITATIVE LANGUAGE LIST — 23 Indian languages
-// Used by the dropdown, display, save/load, and localStorage.
-// Do NOT duplicate this list anywhere else in this file.
+// LANGUAGE OPTIONS
 // =========================================================
 const LANGUAGES = [
-  { code: "en",  label: "English",   native: "English" },
-  { code: "hi",  label: "Hindi",     native: "हिन्दी" },
-  { code: "bn",  label: "Bengali",   native: "বাংলা" },
-  { code: "te",  label: "Telugu",    native: "తెలుగు" },
-  { code: "mr",  label: "Marathi",   native: "मराठी" },
-  { code: "ta",  label: "Tamil",     native: "தமிழ்" },
-  { code: "gu",  label: "Gujarati",  native: "ગુજરાતી" },
-  { code: "ur",  label: "Urdu",      native: "اردو" },
-  { code: "kn",  label: "Kannada",   native: "ಕನ್ನಡ" },
-  { code: "or",  label: "Odia",      native: "ଓଡ଼ିଆ" },
-  { code: "ml",  label: "Malayalam", native: "മലയാളം" },
-  { code: "pa",  label: "Punjabi",   native: "ਪੰਜਾਬੀ" },
-  { code: "as",  label: "Assamese",  native: "অসমীয়া" },
-  { code: "mai", label: "Maithili",  native: "मैथिली" },
-  { code: "sa",  label: "Sanskrit",  native: "संस्कृतम्" },
-  { code: "ne",  label: "Nepali",    native: "नेपाली" },
-  { code: "kok", label: "Konkani",   native: "कोंकणी" },
-  { code: "mni", label: "Manipuri",  native: "মণিপুরী" },
-  { code: "ks",  label: "Kashmiri",  native: "कश्मीरी" },
-  { code: "sd",  label: "Sindhi",    native: "سنڌي" },
-  { code: "doi", label: "Dogri",     native: "डोगरी" },
-  { code: "brx", label: "Bodo",      native: "बड़ो" },
-  { code: "sat", label: "Santali",   native: "সাঁওতালি" },
+  { code: "en", label: "English" },
+  { code: "hi", label: "Hindi — हिन्दी" },
+  { code: "pa", label: "Punjabi — ਪੰਜਾਬੀ" },
 ];
 
 // =========================================================
@@ -265,118 +240,6 @@ const inputCls =
 
 const filledCls   = "border-emerald-300";
 const emptyBorder = "border-slate-200";
-
-// =========================================================
-// SEARCHABLE LANGUAGE DROPDOWN
-// Reads from LANGUAGES — the single authoritative list above.
-// =========================================================
-
-function LanguageDropdown({ value, onChange }) {
-  const [open, setOpen]   = useState(false);
-  const [query, setQuery] = useState("");
-  const dropdownRef       = useRef(null);
-
-  // Find selected language entry; default to English if code not found
-  const selected = LANGUAGES.find((l) => l.code === value) || LANGUAGES[0];
-
-  // Filter list by search query (matches English label or native name)
-  const filtered = query.trim()
-    ? LANGUAGES.filter(
-        (l) =>
-          l.label.toLowerCase().includes(query.toLowerCase()) ||
-          l.native.toLowerCase().includes(query.toLowerCase())
-      )
-    : LANGUAGES;
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handler = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setOpen(false);
-        setQuery("");
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const select = (code) => {
-    onChange(code);
-    setOpen(false);
-    setQuery("");
-  };
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      {/* Trigger button */}
-      <button
-        type="button"
-        onClick={() => setOpen((p) => !p)}
-        className={`${inputCls} ${value && value !== "en" ? filledCls : emptyBorder} flex items-center justify-between gap-2`}
-      >
-        <span className="flex items-center gap-2">
-          <FaGlobe className="text-sky-400 shrink-0" />
-          <span className="font-medium">{selected.label}</span>
-          <span className="text-slate-400 text-xs">— {selected.native}</span>
-        </span>
-        <FaChevronDown
-          className={`text-slate-400 text-xs transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-
-      {/* Dropdown panel */}
-      {open && (
-        <div className="absolute z-50 mt-1.5 w-full bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden">
-          {/* Search */}
-          <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100">
-            <FaSearch className="text-slate-400 text-xs shrink-0" />
-            <input
-              autoFocus
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search language…"
-              className="flex-1 bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <FaTimes className="text-xs" />
-              </button>
-            )}
-          </div>
-
-          {/* Options list — all 23 languages */}
-          <ul className="max-h-56 overflow-y-auto py-1">
-            {filtered.length === 0 ? (
-              <li className="px-4 py-3 text-xs text-slate-400 text-center">No language found</li>
-            ) : (
-              filtered.map((lang) => (
-                <li key={lang.code}>
-                  <button
-                    type="button"
-                    onClick={() => select(lang.code)}
-                    className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors duration-100 ${
-                      value === lang.code
-                        ? "bg-sky-50 text-sky-700 font-semibold"
-                        : "text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    <span>{lang.label}</span>
-                    <span className="text-slate-400 text-xs">{lang.native}</span>
-                  </button>
-                </li>
-              ))
-            )}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // =========================================================
 // MAIN COMPONENT
@@ -613,8 +476,15 @@ function Profile() {
           <p className="text-[10px] text-slate-400 mb-2">
             AI Chat will respond in your selected language
           </p>
-          {/* LanguageDropdown reads LANGUAGES — the single 23-language list */}
-          <LanguageDropdown value={language} onChange={handleLanguageChange} />
+          <select
+            value={language}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+            className={`${inputCls} ${language !== "en" ? filledCls : emptyBorder}`}
+          >
+            {LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code}>{l.label}</option>
+            ))}
+          </select>
         </div>
 
         {/* ── Personal Information ── */}

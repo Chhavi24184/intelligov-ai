@@ -23,14 +23,13 @@ import {
   getSavedSchemesAPI,
 } from "../services/api";
 
-// Inline source fetch (no need to add to api.js for this small call)
 const BASE_URL =
   import.meta.env.VITE_API_URL || "https://intelligov-ai.onrender.com";
+
 const fetchSchemesSource = () =>
   fetch(`${BASE_URL}/schemes/source`)
-    .then((r) => r.json())
+    .then((r) => (r.ok ? r.json() : null))
     .catch(() => null);
-
 
 function SchemeRecommendation() {
   const navigate = useNavigate();
@@ -41,76 +40,188 @@ function SchemeRecommendation() {
 
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
-
   const [error, setError] = useState("");
 
-  // bookmarkedIds: set of scheme names (as primary key for DB-backed saves)
   const [bookmarkedNames, setBookmarkedNames] = useState(new Set());
-  // savedIdMap: schemeName → saved_id (DB primary key) for removal
   const [savedIdMap, setSavedIdMap] = useState({});
 
   const [selectedSchemeModal, setSelectedSchemeModal] = useState(null);
   const [saveLoading, setSaveLoading] = useState(false);
-  const [dataSource, setDataSource] = useState(null);
 
   const userId = localStorage.getItem("userId");
-
 
   // =========================================================
   // HELPERS
   // =========================================================
 
   const getSchemeName = (s) =>
-    s?.name || s?.title || s?.scheme_name || "Government Scheme";
+    s?.name ||
+    s?.title ||
+    s?.scheme_name ||
+    s?.schemeName ||
+    "Government Scheme";
 
   const getCategory = (s) =>
-    s?.category || s?.type || "Welfare Scheme";
+    s?.category ||
+    s?.type ||
+    s?.scheme_category ||
+    "Welfare Scheme";
 
   const getDescription = (s) =>
-    s?.description || s?.details || "No description available.";
+    s?.description ||
+    s?.details ||
+    s?.summary ||
+    "No description available.";
 
   const getBenefits = (s) =>
-    s?.benefits || s?.benefit || "";
+    s?.benefits ||
+    s?.benefit ||
+    s?.benefit_details ||
+    "";
 
   const getEligibility = (s) =>
-    s?.eligibility || s?.eligibility_criteria || "";
+    s?.eligibility ||
+    s?.eligibility_criteria ||
+    s?.eligibilityCriteria ||
+    "";
 
   const getDocuments = (s) => {
     if (Array.isArray(s?.documents)) return s.documents;
     if (Array.isArray(s?.documents_required)) return s.documents_required;
+    if (Array.isArray(s?.required_documents)) return s.required_documents;
+
+    if (typeof s?.documents === "string" && s.documents.trim()) {
+      return [s.documents];
+    }
+
     return [];
   };
 
-  const getDeadline = (s) => s?.deadline || "";
+  const getDeadline = (s) =>
+    s?.deadline ||
+    s?.application_deadline ||
+    s?.last_date ||
+    "";
 
   const getOfficialUrl = (s) => {
-    const raw = s?.official_url || s?.application_url || s?.schemeUrl || "";
-    if (!raw) return "";
-    // Ensure absolute URL — if no protocol, prepend https://
-    if (/^https?:\/\//i.test(raw)) return raw;
-    return "https://" + raw;
+    const raw =
+      s?.official_url ||
+      s?.officialUrl ||
+      s?.application_url ||
+      s?.applicationUrl ||
+      s?.schemeUrl ||
+      s?.url ||
+      "";
+
+    if (!raw || typeof raw !== "string") return "";
+
+    const cleanUrl = raw.trim();
+
+    if (/^https?:\/\//i.test(cleanUrl)) {
+      return cleanUrl;
+    }
+
+    return `https://${cleanUrl}`;
   };
 
+  // Normalize every scheme before saving.
+  // This makes curated + dynamic/API/RAG schemes use the same structure.
+  const normalizeScheme = (scheme) => ({
+    id:
+      scheme?.id ||
+      scheme?.scheme_id ||
+      scheme?.schemeId ||
+      scheme?.slug ||
+      null,
+
+    name: getSchemeName(scheme),
+    category: getCategory(scheme),
+    description: getDescription(scheme),
+    benefits: getBenefits(scheme),
+    eligibility: getEligibility(scheme),
+    documents: getDocuments(scheme),
+    deadline: getDeadline(scheme),
+    official_url: getOfficialUrl(scheme),
+
+    // Keep source information when available.
+    source:
+      scheme?.source ||
+      scheme?.source_type ||
+      scheme?.sourceType ||
+      "government",
+  });
 
   // =========================================================
-  // LOAD SAVED SCHEMES FROM DB
+  // EXTRACT SCHEMES
+  // =========================================================
+
+  const extractSchemes = (response) => {
+    if (Array.isArray(response)) return response;
+
+    if (Array.isArray(response?.schemes)) {
+      return response.schemes;
+    }
+
+    if (Array.isArray(response?.data)) {
+      return response.data;
+    }
+
+    if (Array.isArray(response?.data?.schemes)) {
+      return response.data.schemes;
+    }
+
+    if (Array.isArray(response?.recommended_schemes)) {
+      return response.recommended_schemes;
+    }
+
+    if (Array.isArray(response?.data?.recommended_schemes)) {
+      return response.data.recommended_schemes;
+    }
+
+    return [];
+  };
+
+  // =========================================================
+  // LOAD SAVED SCHEMES FROM DATABASE
   // =========================================================
 
   const loadSavedFromDB = async () => {
-    if (!userId) return;
+    if (!userId) {
+      setBookmarkedNames(new Set());
+      setSavedIdMap({});
+      return;
+    }
+
     try {
       const data = await getSavedSchemesAPI(userId);
-      const schemes = data?.schemes || [];
-      const names = new Set(schemes.map((s) => s.name));
+      const savedSchemes = Array.isArray(data?.schemes)
+        ? data.schemes
+        : [];
+
+      const names = new Set();
       const idMap = {};
-      schemes.forEach((s) => { idMap[s.name] = s.saved_id; });
+
+      savedSchemes.forEach((saved) => {
+        const name =
+          saved?.name ||
+          saved?.scheme_name ||
+          saved?.title;
+
+        if (!name) return;
+
+        names.add(name);
+
+        if (saved?.saved_id != null) {
+          idMap[name] = saved.saved_id;
+        }
+      });
+
       setBookmarkedNames(names);
       setSavedIdMap(idMap);
-    } catch {
-      // silent — don't break scheme listing
+    } catch (err) {
+      console.error("Failed to load saved schemes:", err);
     }
   };
-
 
   // =========================================================
   // LOAD SCHEMES
@@ -120,35 +231,32 @@ function SchemeRecommendation() {
     try {
       setLoading(true);
       setError("");
+
       const response = await schemesAPI();
       const list = extractSchemes(response);
-      setSchemes(list);
+
+      setSchemes(Array.isArray(list) ? list : []);
     } catch (err) {
-      setError("Unable to connect to server. Please make sure the backend is running.");
+      console.error("Failed to load schemes:", err);
+
+      setError(
+        "Unable to connect to server. Please make sure the backend is running."
+      );
+
       setSchemes([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const extractSchemes = (response) => {
-    if (Array.isArray(response)) return response;
-    if (Array.isArray(response?.schemes)) return response.schemes;
-    if (Array.isArray(response?.data)) return response.data;
-    if (Array.isArray(response?.data?.schemes)) return response.data.schemes;
-    if (Array.isArray(response?.recommended_schemes)) return response.recommended_schemes;
-    if (Array.isArray(response?.data?.recommended_schemes)) return response.data.recommended_schemes;
-    return [];
-  };
-
-
   useEffect(() => {
     loadSavedFromDB();
     loadSchemes();
-    // Load data-source metadata (shows users whether data is live or curated)
-    fetchSchemesSource().then((src) => src && setDataSource(src));
-  }, []);
 
+    // Source endpoint is intentionally kept for backend functionality,
+    // but no fallback/source information is shown to the user.
+    fetchSchemesSource().catch(() => null);
+  }, []);
 
   // =========================================================
   // SEARCH
@@ -156,14 +264,25 @@ function SchemeRecommendation() {
 
   const handleSearch = async (e) => {
     e.preventDefault();
+
     const query = search.trim();
-    if (!query) { await loadSchemes(); return; }
+
+    if (!query) {
+      await loadSchemes();
+      return;
+    }
+
     try {
       setSearching(true);
       setError("");
+
       const response = await searchSchemesAPI(query);
-      setSchemes(extractSchemes(response));
-    } catch {
+      const list = extractSchemes(response);
+
+      setSchemes(Array.isArray(list) ? list : []);
+    } catch (err) {
+      console.error("Scheme search failed:", err);
+
       setError("Unable to search schemes.");
       setSchemes([]);
     } finally {
@@ -177,9 +296,8 @@ function SchemeRecommendation() {
     await loadSchemes();
   };
 
-
   // =========================================================
-  // SAVE / UNSAVE (PostgreSQL)
+  // SAVE / UNSAVE
   // =========================================================
 
   const toggleBookmark = async (scheme) => {
@@ -187,66 +305,95 @@ function SchemeRecommendation() {
       alert("Please log in to save schemes.");
       return;
     }
-    const name = getSchemeName(scheme);
+
+    const normalizedScheme = normalizeScheme(scheme);
+    const name = normalizedScheme.name;
     const isBookmarked = bookmarkedNames.has(name);
 
     setSaveLoading(true);
+
     try {
       if (isBookmarked) {
         const savedId = savedIdMap[name];
+
         if (savedId) {
           await removeSavedSchemeAPI(savedId);
         }
+
         setBookmarkedNames((prev) => {
           const next = new Set(prev);
           next.delete(name);
           return next;
         });
+
         setSavedIdMap((prev) => {
           const next = { ...prev };
           delete next[name];
           return next;
         });
       } else {
-        const result = await saveSchemeAPI(userId, scheme);
+        // Send normalized complete scheme.
+        // Works for curated and dynamically fetched schemes.
+        const result = await saveSchemeAPI(userId, normalizedScheme);
+
         const savedId = result?.saved_id;
-        setBookmarkedNames((prev) => new Set([...prev, name]));
-        if (savedId) {
-          setSavedIdMap((prev) => ({ ...prev, [name]: savedId }));
+
+        setBookmarkedNames((prev) => {
+          const next = new Set(prev);
+          next.add(name);
+          return next;
+        });
+
+        if (savedId != null) {
+          setSavedIdMap((prev) => ({
+            ...prev,
+            [name]: savedId,
+          }));
         }
+
+        // Refresh saved state from DB so frontend reflects actual
+        // persisted data rather than only local state.
+        await loadSavedFromDB();
       }
-    } catch {
+    } catch (err) {
+      console.error("Save/remove scheme failed:", err);
       alert("Unable to save/remove scheme. Please try again.");
     } finally {
       setSaveLoading(false);
     }
   };
 
-
   // =========================================================
   // CATEGORIES
   // =========================================================
 
   const categories = useMemo(() => {
-    const set = new Set();
-    schemes.forEach((s) => {
-      const cat = s?.category || s?.type;
-      if (cat) set.add(cat);
-    });
-    return ["All", ...Array.from(set)];
-  }, [schemes]);
+    const categorySet = new Set();
 
+    schemes.forEach((scheme) => {
+      const category = getCategory(scheme);
+
+      if (category) {
+        categorySet.add(category);
+      }
+    });
+
+    return ["All", ...Array.from(categorySet)];
+  }, [schemes]);
 
   // =========================================================
   // FILTER
   // =========================================================
 
-  const filteredSchemes = schemes.filter((s) => {
-    if (selectedCategory === "All") return true;
-    const cat = (s?.category || s?.type || "").toLowerCase();
-    return cat.includes(selectedCategory.toLowerCase());
-  });
+  const filteredSchemes = schemes.filter((scheme) => {
+    if (selectedCategory === "All") {
+      return true;
+    }
 
+    const category = getCategory(scheme).toLowerCase();
+
+    return category.includes(selectedCategory.toLowerCase());
+  });
 
   // =========================================================
   // CATEGORY COLOR
@@ -254,30 +401,74 @@ function SchemeRecommendation() {
 
   const catColor = (cat = "") => {
     const c = cat.toLowerCase();
-    if (c.includes("farm") || c.includes("agri")) return "bg-emerald-50 text-emerald-700 border-emerald-200";
-    if (c.includes("health")) return "bg-red-50 text-red-600 border-red-200";
-    if (c.includes("edu") || c.includes("scholar")) return "bg-blue-50 text-blue-700 border-blue-200";
-    if (c.includes("employ") || c.includes("career") || c.includes("job")) return "bg-amber-50 text-amber-700 border-amber-200";
-    if (c.includes("housing") || c.includes("awas")) return "bg-purple-50 text-purple-700 border-purple-200";
-    if (c.includes("skill") || c.includes("train")) return "bg-indigo-50 text-indigo-700 border-indigo-200";
-    if (c.includes("women") || c.includes("maternity") || c.includes("girl")) return "bg-pink-50 text-pink-700 border-pink-200";
-    if (c.includes("pension") || c.includes("social") || c.includes("insur")) return "bg-teal-50 text-teal-700 border-teal-200";
+
+    if (c.includes("farm") || c.includes("agri")) {
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    }
+
+    if (c.includes("health")) {
+      return "bg-red-50 text-red-600 border-red-200";
+    }
+
+    if (c.includes("edu") || c.includes("scholar")) {
+      return "bg-blue-50 text-blue-700 border-blue-200";
+    }
+
+    if (
+      c.includes("employ") ||
+      c.includes("career") ||
+      c.includes("job")
+    ) {
+      return "bg-amber-50 text-amber-700 border-amber-200";
+    }
+
+    if (c.includes("housing") || c.includes("awas")) {
+      return "bg-purple-50 text-purple-700 border-purple-200";
+    }
+
+    if (c.includes("skill") || c.includes("train")) {
+      return "bg-indigo-50 text-indigo-700 border-indigo-200";
+    }
+
+    if (
+      c.includes("women") ||
+      c.includes("maternity") ||
+      c.includes("girl")
+    ) {
+      return "bg-pink-50 text-pink-700 border-pink-200";
+    }
+
+    if (
+      c.includes("pension") ||
+      c.includes("social") ||
+      c.includes("insur")
+    ) {
+      return "bg-teal-50 text-teal-700 border-teal-200";
+    }
+
     return "bg-sky-50 text-sky-700 border-sky-200";
   };
 
-
   // =========================================================
-  // SCHEME CARD MODAL
+  // SCHEME MODAL
   // =========================================================
 
   const SchemeModal = ({ scheme, onClose }) => {
     if (!scheme) return null;
-    const name = getSchemeName(scheme);
-    const benefits = getBenefits(scheme);
-    const eligibility = getEligibility(scheme);
-    const docs = getDocuments(scheme);
-    const deadline = getDeadline(scheme);
-    const url = getOfficialUrl(scheme);
+
+    const normalized = normalizeScheme(scheme);
+
+    const {
+      name,
+      category,
+      description,
+      benefits,
+      eligibility,
+      documents,
+      deadline,
+      official_url: url,
+    } = normalized;
+
     const isBookmarked = bookmarkedNames.has(name);
 
     return (
@@ -292,28 +483,47 @@ function SchemeRecommendation() {
           {/* Header */}
           <div className="flex items-start justify-between gap-3 p-6 border-b border-sky-100">
             <div>
-              <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border mb-2 ${catColor(getCategory(scheme))}`}>
-                {getCategory(scheme)}
+              <span
+                className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border mb-2 ${catColor(
+                  category
+                )}`}
+              >
+                {category}
               </span>
-              <h2 className="text-xl font-black text-slate-900">{name}</h2>
+
+              <h2 className="text-xl font-black text-slate-900">
+                {name}
+              </h2>
             </div>
-            <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 shrink-0">
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 rounded-xl hover:bg-slate-100 text-slate-500"
+            >
               <FaTimes />
             </button>
           </div>
 
           <div className="p-6 space-y-5">
             {/* Description */}
-            <p className="text-sm text-slate-700 leading-relaxed">{getDescription(scheme)}</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              {description}
+            </p>
 
             {/* Benefits */}
             {benefits && (
               <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
                 <div className="flex items-center gap-2 mb-1.5">
                   <FaGift className="text-emerald-500 text-sm" />
-                  <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-700">Benefits</span>
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-700">
+                    Benefits
+                  </span>
                 </div>
-                <p className="text-sm text-slate-700">{benefits}</p>
+
+                <p className="text-sm text-slate-700">
+                  {benefits}
+                </p>
               </div>
             )}
 
@@ -322,22 +532,35 @@ function SchemeRecommendation() {
               <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200">
                 <div className="flex items-center gap-2 mb-1.5">
                   <FaCheckCircle className="text-blue-500 text-sm" />
-                  <span className="text-[10px] uppercase tracking-wider font-bold text-blue-700">Eligibility</span>
+
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-blue-700">
+                    Eligibility
+                  </span>
                 </div>
-                <p className="text-sm text-slate-700">{eligibility}</p>
+
+                <p className="text-sm text-slate-700">
+                  {eligibility}
+                </p>
               </div>
             )}
 
             {/* Documents */}
-            {docs.length > 0 && (
+            {documents.length > 0 && (
               <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200">
                 <div className="flex items-center gap-2 mb-2">
                   <FaFileAlt className="text-amber-500 text-sm" />
-                  <span className="text-[10px] uppercase tracking-wider font-bold text-amber-700">Documents Required</span>
+
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-amber-700">
+                    Documents Required
+                  </span>
                 </div>
+
                 <ul className="space-y-1">
-                  {docs.map((doc, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-slate-700">
+                  {documents.map((doc, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center gap-2 text-sm text-slate-700"
+                    >
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
                       {doc}
                     </li>
@@ -350,7 +573,11 @@ function SchemeRecommendation() {
             {deadline && (
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <FaCalendarAlt className="text-sky-500" />
-                <span className="font-medium">Deadline:</span>
+
+                <span className="font-medium">
+                  Deadline:
+                </span>
+
                 <span>{deadline}</span>
               </div>
             )}
@@ -359,7 +586,8 @@ function SchemeRecommendation() {
             {url && (
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500">
                 <FaExclamationTriangle className="inline mr-1 text-amber-400" />
-                Information sourced from official government data. Verify latest requirements before applying.
+                Verify the latest requirements on the official government
+                portal before applying.
               </div>
             )}
 
@@ -369,13 +597,18 @@ function SchemeRecommendation() {
               <button
                 type="button"
                 onClick={() => {
-                  const encoded = encodeURIComponent(JSON.stringify(scheme));
+                  const encoded = encodeURIComponent(
+                    JSON.stringify(normalized)
+                  );
+
                   navigate(`/apply?scheme=${encoded}`);
                 }}
                 className="flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-600 text-white text-sm font-bold hover:scale-[1.02] transition-all duration-200 shadow-sm"
               >
                 Apply with AI Agent ✦
               </button>
+
+              {/* Official Portal */}
               {url && (
                 <a
                   href={url}
@@ -387,6 +620,8 @@ function SchemeRecommendation() {
                   Official Portal
                 </a>
               )}
+
+              {/* Save */}
               <button
                 type="button"
                 onClick={() => toggleBookmark(scheme)}
@@ -398,9 +633,15 @@ function SchemeRecommendation() {
                 }`}
               >
                 {isBookmarked ? (
-                  <><FaBookmark /> Saved</>
+                  <>
+                    <FaBookmark />
+                    Saved
+                  </>
                 ) : (
-                  <><FaRegBookmark /> Save Scheme</>
+                  <>
+                    <FaRegBookmark />
+                    Save Scheme
+                  </>
                 )}
               </button>
             </div>
@@ -410,79 +651,58 @@ function SchemeRecommendation() {
     );
   };
 
-
   // =========================================================
   // UI
   // =========================================================
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
-
       <section className="relative min-h-screen overflow-hidden bg-white">
-
-        {/* Background lights */}
+        {/* Background */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-20 left-0 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl" />
+
           <div className="absolute top-[450px] right-0 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl" />
+
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[250px] bg-sky-400/10 rounded-full blur-3xl" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-6 py-12 lg:py-16">
-
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-10 lg:mb-14">
             <span className="inline-block px-4 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-sky-600 text-xs font-semibold uppercase tracking-wider mb-5">
-              Verified Scheme Catalog
+              Government Opportunities
             </span>
+
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 leading-tight">
               Government Scheme{" "}
               <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
                 Directory
               </span>
             </h1>
+
             <p className="text-slate-600 text-sm sm:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
-              Browse the complete curated catalog of verified government schemes. For personalised
+              Explore government schemes and opportunities. For personalised
               3–5 recommendations based on your profile, use{" "}
-              <a href="/chat" className="text-sky-600 font-semibold hover:underline">AI Chat</a>.
+              <button
+                type="button"
+                onClick={() => navigate("/chat")}
+                className="text-sky-600 font-semibold hover:underline"
+              >
+                AI Chat
+              </button>
+              .
             </p>
-
-            {/* Catalog info banner */}
-            <div className="mt-5 max-w-xl mx-auto px-4 py-3 rounded-2xl bg-amber-50 border border-amber-200 text-left">
-              <div className="flex items-start gap-3">
-                <FaExclamationTriangle className="text-amber-500 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs font-semibold text-amber-800 mb-0.5">Fallback / Reference Catalog</p>
-                  <p className="text-xs text-amber-700 leading-relaxed">
-                    This page shows all available schemes for your own research. AI Chat uses
-                    RAG + IBM Granite to surface only the 3–5 most relevant matches for your
-                    profile — use it for personalised recommendations.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Data source badge */}
-            {dataSource && (
-              <div className="inline-flex items-center gap-2 mt-4 px-3.5 py-1.5 rounded-full border text-xs font-medium
-                bg-white border-slate-200 text-slate-500">
-                <span className={`w-2 h-2 rounded-full ${
-                  dataSource.source_type === "dynamic" ? "bg-emerald-400" : "bg-amber-400"
-                }`} />
-                Curated data: {dataSource.source} — {dataSource.total_schemes} schemes
-              </div>
-            )}
-            {!dataSource && (
-              <div className="inline-flex items-center gap-2 mt-4 px-3.5 py-1.5 rounded-full border text-xs font-medium bg-white border-slate-200 text-slate-500">
-                <span className="w-2 h-2 rounded-full bg-amber-400" />
-                Curated government scheme catalog
-              </div>
-            )}
           </div>
 
           {/* Search */}
-          <form onSubmit={handleSearch} className="max-w-4xl mx-auto mb-8">
+          <form
+            onSubmit={handleSearch}
+            className="max-w-4xl mx-auto mb-8"
+          >
             <div className="flex items-center gap-2 bg-white border border-sky-200 rounded-2xl p-2 shadow-lg shadow-sky-100 focus-within:border-sky-400 transition-all">
               <FaSearch className="text-sky-500 ml-4 shrink-0" />
+
               <input
                 type="text"
                 value={search}
@@ -490,11 +710,17 @@ function SchemeRecommendation() {
                 placeholder="Search schemes, categories, benefits..."
                 className="flex-1 bg-transparent px-3 py-2.5 text-slate-800 text-sm placeholder:text-slate-400 focus:outline-none"
               />
+
               {search && (
-                <button type="button" onClick={handleClearSearch} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400">
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="p-2 rounded-xl hover:bg-slate-100 text-slate-400"
+                >
                   <FaTimes />
                 </button>
               )}
+
               <button
                 type="submit"
                 disabled={searching}
@@ -509,6 +735,7 @@ function SchemeRecommendation() {
           {categories.length > 1 && (
             <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-8 max-w-4xl mx-auto">
               <FaFilter className="text-slate-400 shrink-0 text-xs" />
+
               {categories.map((cat) => (
                 <button
                   key={cat}
@@ -534,22 +761,32 @@ function SchemeRecommendation() {
             </div>
           )}
 
-          {/* Loading */}
+          {/* Loading / Grid */}
           {loading ? (
-            <div className="text-center py-20 text-slate-500">Loading schemes...</div>
+            <div className="text-center py-20 text-slate-500">
+              Loading schemes...
+            </div>
           ) : (
-
-            /* Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredSchemes.map((scheme, index) => {
-                const name = getSchemeName(scheme);
-                const category = getCategory(scheme);
-                const description = getDescription(scheme);
-                const benefits = getBenefits(scheme);
-                const url = getOfficialUrl(scheme);
-                const deadline = getDeadline(scheme);
+                const normalized = normalizeScheme(scheme);
+
+                const {
+                  name,
+                  category,
+                  description,
+                  benefits,
+                  deadline,
+                  official_url: url,
+                } = normalized;
+
                 const isBookmarked = bookmarkedNames.has(name);
-                const schemeId = scheme?.id || `scheme-${index}`;
+
+                const schemeId =
+                  scheme?.id ||
+                  scheme?.scheme_id ||
+                  scheme?.slug ||
+                  `scheme-${index}`;
 
                 return (
                   <div
@@ -560,11 +797,16 @@ function SchemeRecommendation() {
                     <div className="h-1 w-full bg-gradient-to-r from-sky-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                     <div className="p-5 flex flex-col flex-1">
-                      {/* Category badge */}
+                      {/* Category + Save */}
                       <div className="flex items-start justify-between gap-2 mb-3">
-                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${catColor(category)}`}>
+                        <span
+                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${catColor(
+                            category
+                          )}`}
+                        >
                           {category}
                         </span>
+
                         <button
                           type="button"
                           onClick={() => toggleBookmark(scheme)}
@@ -574,9 +816,17 @@ function SchemeRecommendation() {
                               ? "text-amber-500 hover:bg-amber-50"
                               : "text-slate-400 hover:text-sky-500 hover:bg-sky-50"
                           }`}
-                          title={isBookmarked ? "Remove from saved" : "Save scheme"}
+                          title={
+                            isBookmarked
+                              ? "Remove from saved"
+                              : "Save scheme"
+                          }
                         >
-                          {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
+                          {isBookmarked ? (
+                            <FaBookmark />
+                          ) : (
+                            <FaRegBookmark />
+                          )}
                         </button>
                       </div>
 
@@ -590,7 +840,7 @@ function SchemeRecommendation() {
                         {description}
                       </p>
 
-                      {/* Benefits preview */}
+                      {/* Benefits */}
                       {benefits && (
                         <div className="mb-3 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-100">
                           <p className="text-xs text-emerald-700 line-clamp-2">
@@ -612,11 +862,14 @@ function SchemeRecommendation() {
                       <div className="flex gap-2 mt-auto">
                         <button
                           type="button"
-                          onClick={() => setSelectedSchemeModal(scheme)}
+                          onClick={() =>
+                            setSelectedSchemeModal(scheme)
+                          }
                           className="flex-1 py-2.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold hover:bg-sky-100 transition-all"
                         >
                           View Details
                         </button>
+
                         {url && (
                           <a
                             href={url}
@@ -648,9 +901,12 @@ function SchemeRecommendation() {
               <p className="text-sm font-semibold text-slate-700 mb-1">
                 Want personalised recommendations?
               </p>
+
               <p className="text-xs text-slate-500 mb-4">
-                AI Chat uses IBM Granite + your profile to pick only the 3–5 schemes that best match you.
+                AI Chat uses IBM Granite + your profile to pick only the 3–5
+                schemes that match your profile.
               </p>
+
               <button
                 type="button"
                 onClick={() => navigate("/chat")}
@@ -660,7 +916,6 @@ function SchemeRecommendation() {
               </button>
             </div>
           )}
-
         </div>
       </section>
 

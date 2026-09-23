@@ -47,6 +47,21 @@ const OCCUPATION_OPTIONS = [
   "Unemployed","Homemaker","Other",
 ];
 
+// ── Social category options ──────────────────────────────
+const CATEGORY_OPTIONS = [
+  "General",
+  "OBC",
+  "SC",
+  "ST",
+  "EWS",
+];
+
+// ── Education options ────────────────────────────────────
+const EDUCATION_OPTIONS = [
+  "Below 10th","10th / Matric","12th / Higher Secondary",
+  "Diploma / ITI","Graduate","Post Graduate","PhD / Research","Other",
+];
+
 function EligibilityChecker() {
   const navigate = useNavigate();
 
@@ -81,6 +96,8 @@ function EligibilityChecker() {
     gender: "",
     income: "",
     state: "",
+    category: "",
+    education: "",
   });
 
 
@@ -130,6 +147,8 @@ function EligibilityChecker() {
           gender: parsedData.formData.gender || "",
           income: parsedData.formData.income || "",
           state: parsedData.formData.state || "",
+          category: parsedData.formData.category || "",
+          education: parsedData.formData.education || "",
         });
 
       }
@@ -300,6 +319,8 @@ function EligibilityChecker() {
         // income is now a string range — pass as-is, backend handles it
         income:     formData.income || "0",
         state:      formData.state,
+        category:   formData.category || "",
+        education:  formData.education || "",
       };
 
 
@@ -426,17 +447,13 @@ function EligibilityChecker() {
     // =================================================
 
     setFormData({
-
       age: "",
-
       occupation: "",
-
       gender: "",
-
       income: "",
-
       state: "",
-
+      category: "",
+      education: "",
     });
 
 
@@ -937,6 +954,46 @@ function EligibilityChecker() {
                     ))}
                   </select>
 
+                </div>
+
+                {/* SOCIAL CATEGORY */}
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                    <FaUserCheck className="text-purple-500" />
+                    Social Category
+                  </label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    className="w-full bg-sky-50/50 border border-sky-200 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none p-3.5 rounded-xl text-sm text-slate-900 transition-all"
+                  >
+                    <option value="">Select category (optional)</option>
+                    {CATEGORY_OPTIONS.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* EDUCATION */}
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                    <FaAward className="text-indigo-500" />
+                    Education
+                  </label>
+                  <select
+                    name="education"
+                    value={formData.education}
+                    onChange={handleChange}
+                    className="w-full bg-sky-50/50 border border-sky-200 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none p-3.5 rounded-xl text-sm text-slate-900 transition-all"
+                  >
+                    <option value="">Select education (optional)</option>
+                    {EDUCATION_OPTIONS.map((e) => (
+                      <option key={e} value={e}>{e}</option>
+                    ))}
+                  </select>
                 </div>
 
               </div>

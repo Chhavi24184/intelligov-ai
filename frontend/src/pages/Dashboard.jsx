@@ -146,7 +146,7 @@ function Dashboard() {
                 {/* =====================================================
                     SAVED OPPORTUNITIES
                 ===================================================== */}
-                <section className="space-y-4">
+                <section id="saved-opportunities" className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">

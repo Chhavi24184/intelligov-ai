@@ -8,7 +8,6 @@ import {
   FaUserCircle,
   FaSignOutAlt,
   FaHistory,
-  FaBookmark,
   FaBars,
   FaTimes,
 } from "react-icons/fa";
@@ -165,21 +164,6 @@ function Sidebar() {
         </Link>
       </li>
 
-
-      {/* ================= SAVED ================= */}
-
-      <li className="pt-3 mt-3 border-t border-blue-100">
-
-        <Link
-          to="/saved"
-          onClick={closeMobileMenu}
-          className={menuItemClass("/saved")}
-        >
-          <FaBookmark size={16} />
-          Saved
-        </Link>
-
-      </li>
 
     </>
   );

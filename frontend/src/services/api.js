@@ -78,6 +78,13 @@ export const eligibilityAPI = async (userData) => {
   return response.data;
 };
 
+// Fetch eligibility results for a user using their saved DB profile.
+// No need to re-send profile fields — the backend reads them directly.
+export const eligibilityByProfileAPI = async (userId) => {
+  const response = await API.get(`/eligibility/by-profile/${userId}`);
+  return response.data;
+};
+
 // ======================================================
 // SCHEMES API
 // ======================================================

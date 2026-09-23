@@ -13,6 +13,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Saved from "./pages/Saved";
 import ChatHistory from "./pages/ChatHistory";
+import ApplyFlow from "./pages/ApplyFlow";
 function App() {
   const location = useLocation();
 
@@ -22,7 +23,8 @@ function App() {
       {location.pathname !== "/dashboard" &&
         location.pathname !== "/login" &&
         location.pathname !== "/register" &&
-        location.pathname !== "/profile" && <Navbar />}
+        location.pathname !== "/profile" &&
+        location.pathname !== "/apply" && <Navbar />}
 
       <Routes>
 
@@ -112,6 +114,16 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Apply Flow — Application Agent */}
+        <Route
+          path="/apply"
+          element={
+            <ProtectedRoute>
+              <ApplyFlow />
             </ProtectedRoute>
           }
         />

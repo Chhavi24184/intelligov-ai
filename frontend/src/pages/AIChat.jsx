@@ -13,6 +13,11 @@ import {
   FaTractor,
   FaBriefcase,
   FaHistory,
+  FaBookmark,
+  FaExternalLinkAlt,
+  FaUserEdit,
+  FaCalendarAlt,
+  FaFileAlt,
 } from "react-icons/fa";
 
 import { PiStudentFill } from "react-icons/pi";
@@ -23,9 +28,176 @@ import { useNavigate } from "react-router-dom";
 import {
   chatAPI,
   saveChatHistoryAPI,
+  getProfileAPI,
+  saveSchemeAPI,
 } from "../services/api";
 
 import robot from "../assets/robot.png";
+
+
+// =====================================================
+// INLINE SCHEME CARD (shown inside AI chat messages)
+// =====================================================
+
+function InlineSchemCard({ scheme, userId, navigate }) {
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const name         = scheme.name || scheme.scheme_name || "Government Scheme";
+  const category     = scheme.category || "";
+  const description  = scheme.description || "";
+  const benefits     = scheme.benefits || "";
+  const eligibility  = scheme.eligibility || "";
+  const deadline     = scheme.deadline || "";
+  const officialUrl  = (() => {
+    const raw = scheme.official_url || "";
+    if (!raw) return "";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return "https://" + raw;
+  })();
+  const documents    = Array.isArray(scheme.documents) ? scheme.documents : [];
+  const reasons      = Array.isArray(scheme.eligibility_reasons) ? scheme.eligibility_reasons : [];
+
+  const handleSave = async () => {
+    if (!userId || saving || saved) return;
+    setSaving(true);
+    try {
+      await saveSchemeAPI(userId, scheme);
+      setSaved(true);
+    } catch {
+      /* ignore */
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleApplyWithAgent = () => {
+    const encoded = encodeURIComponent(JSON.stringify(scheme));
+    navigate(`/apply?scheme=${encoded}`);
+  };
+
+  return (
+    <div className="p-3 rounded-xl bg-white border border-slate-200 shadow-sm text-xs space-y-2">
+
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="font-bold text-slate-800 text-sm">{name}</div>
+          {category && (
+            <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200 text-[10px] font-semibold">
+              {category}
+            </span>
+          )}
+        </div>
+        {userId && (
+          <button
+            onClick={handleSave}
+            disabled={saving || saved}
+            title={saved ? "Saved" : "Save scheme"}
+            className={`shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-semibold transition ${
+              saved
+                ? "bg-emerald-50 border-emerald-200 text-emerald-600"
+                : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-cyan-50 hover:border-cyan-200 hover:text-cyan-600"
+            }`}
+          >
+            <FaBookmark className="text-[9px]" />
+            {saved ? "Saved" : saving ? "…" : "Save"}
+          </button>
+        )}
+      </div>
+
+      {/* Description */}
+      {description && (
+        <p className="text-slate-600 leading-relaxed">{description}</p>
+      )}
+
+      {/* Benefits */}
+      {benefits && (
+        <div>
+          <span className="font-semibold text-slate-700">Benefits: </span>
+          <span className="text-slate-600">{benefits}</span>
+        </div>
+      )}
+
+      {/* Eligibility */}
+      {eligibility && (
+        <div>
+          <span className="font-semibold text-slate-700">Eligibility: </span>
+          <span className="text-slate-600">{eligibility}</span>
+        </div>
+      )}
+
+      {/* Why relevant */}
+      {reasons.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {reasons.map((r, i) => (
+            <span key={i} className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px]">
+              ✓ {r}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Deadline */}
+      {deadline && (
+        <div className="flex items-center gap-1 text-amber-700">
+          <FaCalendarAlt className="text-[9px]" />
+          <span>Deadline: {deadline}</span>
+        </div>
+      )}
+
+      {/* Documents */}
+      {documents.length > 0 && (
+        <div className="flex items-start gap-1 text-slate-600">
+          <FaFileAlt className="text-[9px] mt-0.5 shrink-0" />
+          <span>
+            <span className="font-semibold text-slate-700">Documents: </span>
+            {documents.join(", ")}
+          </span>
+        </div>
+      )}
+
+      {/* Action buttons */}
+      <div className="flex flex-wrap gap-2 pt-1">
+        {/* Apply with Agent — primary CTA */}
+        {userId && (
+          <button
+            onClick={handleApplyWithAgent}
+            className="
+              inline-flex items-center gap-1.5
+              px-3 py-1.5
+              rounded-lg
+              bg-gradient-to-r from-emerald-500 to-cyan-600
+              text-white font-semibold text-[11px]
+              hover:shadow-md transition
+            "
+          >
+            Apply with AI Agent ✦
+          </button>
+        )}
+        {/* Apply Now — direct portal link */}
+        {officialUrl && (
+          <a
+            href={officialUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              inline-flex items-center gap-1.5
+              px-3 py-1.5
+              rounded-lg
+              bg-white border border-slate-200
+              text-slate-600 font-semibold text-[11px]
+              hover:border-cyan-300 hover:text-cyan-600 transition
+            "
+          >
+            Official Portal <FaExternalLinkAlt className="text-[9px]" />
+          </a>
+        )}
+      </div>
+
+    </div>
+  );
+}
 
 
 function AIChat() {
@@ -37,8 +209,23 @@ function AIChat() {
   const [messages, setMessages] = useState([]);
   const [copiedIndex, setCopiedIndex] = useState(null);
   const [showChatBottomButton, setShowChatBottomButton] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
 
   const chatContainerRef = useRef(null);
+
+  const userId = localStorage.getItem("userId");
+  const language = localStorage.getItem("userLanguage") || "en";
+
+  // Load profile on mount so chat can send it with each message
+  useEffect(() => {
+    if (userId) {
+      getProfileAPI(userId)
+        .then((data) => {
+          if (data?.profile) setUserProfile(data.profile);
+        })
+        .catch(() => {});
+    }
+  }, [userId]);
 
 
   // =====================================================
@@ -82,7 +269,7 @@ function AIChat() {
       // CALL AI CHAT API
       // =================================================
 
-      const response = await chatAPI(userMessage);
+      const response = await chatAPI(userMessage, userProfile, language);
 
       console.log(
         "FULL CHAT API RESPONSE:",
@@ -113,7 +300,7 @@ function AIChat() {
 
 
       // =================================================
-      // EXTRACT RECOMMENDED SCHEME
+      // EXTRACT RECOMMENDED SCHEMES + METADATA
       // =================================================
 
       const recommendedScheme =
@@ -123,12 +310,27 @@ function AIChat() {
         response?.recommendedScheme ||
         null;
 
+      const recommendedSchemes =
+        chatData?.recommended_schemes ||
+        response?.recommended_schemes ||
+        (recommendedScheme ? [recommendedScheme] : []);
+
+      const intentType =
+        chatData?.intent_type ||
+        response?.intent_type ||
+        "scheme";
+
+      const profileMissing =
+        chatData?.profile_missing ||
+        response?.profile_missing ||
+        false;
+
 
       // =================================================
       // SAVE CHAT HISTORY TO DATABASE
       // =================================================
 
-      const userId = localStorage.getItem("userId");
+      // userId already available from outer scope
 
 
       if (userId) {
@@ -175,6 +377,9 @@ function AIChat() {
           type: "ai",
           text: reply,
           scheme: recommendedScheme,
+          schemes: recommendedSchemes,
+          intentType,
+          profileMissing,
           timestamp: new Date().toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -1276,92 +1481,65 @@ function AIChat() {
 
 
                       {/* =================================================
-                          RECOMMENDED SCHEME
+                          PROFILE MISSING NUDGE
                       ================================================= */}
 
-                      {msg.scheme && (
-
+                      {msg.profileMissing && (
                         <div
                           className="
-                            mt-3
-                            p-4
-                            rounded-2xl
-                            bg-cyan-50
-                            border
-                            border-cyan-200
+                            mt-3 p-3
+                            rounded-xl
+                            bg-amber-50
+                            border border-amber-200
+                            flex items-center gap-3
                           "
                         >
-
-                          <div
-                            className="
-                              text-xs
-                              text-cyan-600
-                              font-semibold
-                              uppercase
-                              tracking-wider
-                              mb-1
-                            "
-                          >
-                            Recommended Scheme
-                          </div>
-
-
-                          <div className="text-slate-800 font-bold">
-
-                            {msg.scheme.name ||
-                              msg.scheme.scheme_name ||
-                              msg.scheme.title ||
-                              "Recommended Government Scheme"}
-
-                          </div>
-
-
-                          {msg.scheme.category && (
-
-                            <div
-                              className="
-                                text-xs
-                                text-cyan-600
-                                mt-1
-                              "
+                          <FaUserEdit className="text-amber-500 shrink-0" />
+                          <span className="text-xs text-amber-800">
+                            Fill in your{" "}
+                            <button
+                              onClick={() => navigate("/profile")}
+                              className="underline font-semibold hover:text-amber-600"
                             >
-                              Category: {msg.scheme.category}
+                              Profile
+                            </button>{" "}
+                            for personalised scheme recommendations.
+                          </span>
+                        </div>
+                      )}
+
+
+                      {/* =================================================
+                          ENRICHED SCHEME CARDS
+                      ================================================= */}
+
+                      {!msg.profileMissing &&
+                        msg.schemes &&
+                        msg.schemes.length > 0 && (
+                          <div className="mt-3 space-y-3">
+
+                            <div className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
+                              {msg.intentType === "job"
+                                ? "🏢 Job Opportunities"
+                                : msg.intentType === "scholarship"
+                                ? "🎓 Scholarships"
+                                : msg.intentType === "internship"
+                                ? "💼 Internships"
+                                : "📋 Recommended Schemes"}
+                              {" "}({msg.schemes.length})
                             </div>
 
-                          )}
+                            {msg.schemes.map((scheme, si) => (
+                              <InlineSchemCard
+                                key={si}
+                                scheme={scheme}
+                                userId={userId}
+                                navigate={navigate}
+                              />
+                            ))}
 
-
-                          {msg.scheme.description && (
-
-                            <p className="text-xs text-slate-500 mt-2">
-                              {msg.scheme.description}
-                            </p>
-
-                          )}
-
-
-                          {msg.scheme.eligibility && (
-
-                            <p className="text-xs text-slate-500 mt-2">
-
-                              <span
-                                className="
-                                  text-slate-700
-                                  font-semibold
-                                "
-                              >
-                                Eligibility:
-                              </span>{" "}
-
-                              {msg.scheme.eligibility}
-
-                            </p>
-
-                          )}
-
-                        </div>
-
-                      )}
+                          </div>
+                        )}
 
 
                       {/* TIMESTAMP */}

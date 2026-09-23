@@ -86,13 +86,16 @@ def load_schemes() -> list:
 # ============================================================
 
 def create_scheme_text(scheme):
-
+    benefits = scheme.get("benefits", "")
+    deadline = scheme.get("deadline", "")
     return (
         f"Scheme Name: {scheme.get('name', '')}. "
         f"Category: {scheme.get('category', '')}. "
         f"Description: {scheme.get('description', '')}. "
+        f"Benefits: {benefits}. "
         f"Eligibility: {scheme.get('eligibility', '')}. "
-        f"Documents: {', '.join(scheme.get('documents', []))}."
+        f"Documents: {', '.join(scheme.get('documents', []))}. "
+        f"Deadline: {deadline}."
     )
 
 

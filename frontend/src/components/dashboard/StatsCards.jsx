@@ -186,17 +186,12 @@ function StatsCards() {
       ===================================================== */
 
       const payload = {
-
-        age: Number(profile.age),
-
+        age:        Number(profile.age),
         occupation: profile.occupation,
-
-        gender: profile.gender,
-
-        income: Number(profile.income),
-
-        state: profile.state,
-
+        gender:     profile.gender || "",
+        // income is stored as a string range — pass as-is
+        income:     profile.income || "0",
+        state:      profile.state,
       };
 
 

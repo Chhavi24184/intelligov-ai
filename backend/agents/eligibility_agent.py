@@ -36,8 +36,10 @@ class EligibilityAgent:
             profile["age"],
             profile["occupation"],
             profile["income"],
-            profile["gender"],
-            profile["state"]
+            profile.get("gender", ""),
+            profile["state"],
+            category=profile.get("category", ""),
+            education=profile.get("education", ""),
         )
 
         return {

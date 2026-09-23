@@ -2,9 +2,15 @@ import axios from "axios";
 
 // ======================================================
 // BACKEND BASE URL
+// Reads VITE_API_URL from .env.local (local dev) or
+// .env.production (build/Render).
+// Falls back to Render so existing production still works.
 // ======================================================
+const BASE_URL =
+  import.meta.env.VITE_API_URL || "https://intelligov-ai.onrender.com";
+
 const API = axios.create({
-  baseURL: "https://intelligov-ai.onrender.com",
+  baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -36,14 +42,29 @@ export const loginUser = async (email, password) => {
 };
 
 // ======================================================
+// PROFILE APIs
+// ======================================================
+
+export const getProfileAPI = async (userId) => {
+  const response = await API.get(`/profile/${userId}`);
+  return response.data;
+};
+
+export const updateProfileAPI = async (profileData) => {
+  const response = await API.put("/profile/update", profileData);
+  return response.data;
+};
+
+// ======================================================
 // CHAT API
 // ======================================================
 
-export const chatAPI = async (message) => {
-  const response = await API.post("/chat", {
-    message,
-  });
-
+export const chatAPI = async (message, profile = null, language = "en") => {
+  const payload = { message, language };
+  if (profile) {
+    payload.profile = { ...profile, language };
+  }
+  const response = await API.post("/chat", payload);
   return response.data;
 };
 
@@ -78,6 +99,94 @@ export const searchSchemesAPI = async (query) => {
     },
   });
 
+  return response.data;
+};
+
+// ======================================================
+// SAVED SCHEMES APIs  (PostgreSQL-persisted)
+// ======================================================
+
+export const saveSchemeAPI = async (userId, scheme) => {
+  const response = await API.post("/saved-schemes/save", {
+    user_id: Number(userId),
+    scheme_id: scheme.id || null,
+    scheme_name: scheme.name,
+    scheme_category: scheme.category || null,
+    scheme_description: scheme.description || null,
+    scheme_benefits: scheme.benefits || null,
+    scheme_eligibility: scheme.eligibility || null,
+    scheme_documents: scheme.documents || [],
+    scheme_deadline: scheme.deadline || null,
+    scheme_official_url: scheme.official_url || null,
+  });
+  return response.data;
+};
+
+export const getSavedSchemesAPI = async (userId) => {
+  const response = await API.get(`/saved-schemes/${userId}`);
+  return response.data;
+};
+
+export const removeSavedSchemeAPI = async (savedId) => {
+  const response = await API.delete(`/saved-schemes/remove/${savedId}`);
+  return response.data;
+};
+
+export const checkSavedSchemeAPI = async (userId, schemeName) => {
+  const response = await API.get(
+    `/saved-schemes/check/${userId}/${encodeURIComponent(schemeName)}`
+  );
+  return response.data;
+};
+
+// ======================================================
+// APPLICATION AGENT APIs
+// ======================================================
+
+/**
+ * Ask the Application Agent to build an ApplicationPlan
+ * for the given scheme and user.
+ * Returns { success, user_name, plan }.
+ */
+export const prepareApplicationAPI = async (userId, scheme) => {
+  const response = await API.post("/application/prepare", {
+    user_id: Number(userId),
+    scheme: {
+      name:         scheme.name || scheme.scheme_name || "",
+      category:     scheme.category || null,
+      description:  scheme.description || null,
+      benefits:     scheme.benefits || null,
+      eligibility:  scheme.eligibility || null,
+      documents:    Array.isArray(scheme.documents) ? scheme.documents : [],
+      deadline:     scheme.deadline || null,
+      official_url: scheme.official_url || null,
+    },
+  });
+  return response.data;
+};
+
+/**
+ * Submit a demo application form.
+ * Issues a local DEMO- reference ID.
+ * Does NOT submit to any real government portal.
+ */
+export const submitDemoApplicationAPI = async (userId, schemeName, formValues) => {
+  const response = await API.post("/application/submit-demo", {
+    user_id:     Number(userId),
+    scheme_name: schemeName,
+    form_values: formValues,
+  });
+  return response.data;
+};
+
+/**
+ * Get honest application status for a scheme.
+ * Always returns "not tracked" — no fake states.
+ */
+export const getApplicationStatusAPI = async (schemeName) => {
+  const response = await API.get(
+    `/application/status/${encodeURIComponent(schemeName)}`
+  );
   return response.data;
 };
 

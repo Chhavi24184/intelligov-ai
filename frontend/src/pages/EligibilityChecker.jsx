@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   FaUser,
@@ -17,7 +18,37 @@ import {
 
 import { eligibilityAPI } from "../services/api";
 
+// ── All Indian states + UTs ──────────────────────────────
+const ALL_STATES = [
+  "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh",
+  "Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka",
+  "Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram",
+  "Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana",
+  "Tripura","Uttar Pradesh","Uttarakhand","West Bengal",
+  "Andaman and Nicobar Islands","Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi","Jammu and Kashmir","Ladakh","Lakshadweep","Puducherry",
+];
+
+// ── Income ranges matching Profile page ─────────────────
+const INCOME_OPTIONS = [
+  "Below ₹1 lakh",
+  "₹1–2.5 lakh",
+  "₹2.5–5 lakh",
+  "₹5–8 lakh",
+  "Above ₹8 lakh",
+];
+
+// ── Occupation options matching Profile page ─────────────
+const OCCUPATION_OPTIONS = [
+  "Farmer","Agricultural Labourer","Self-Employed / Business",
+  "Private Sector Employee","Government Employee","Student",
+  "Daily Wage Worker","Artisan / Craftsperson","Street Vendor",
+  "Unemployed","Homemaker","Other",
+];
+
 function EligibilityChecker() {
+  const navigate = useNavigate();
 
   // =====================================================
   // STORAGE KEY
@@ -263,17 +294,12 @@ function EligibilityChecker() {
 
 
       const payload = {
-
-        age: Number(formData.age),
-
+        age:        Number(formData.age),
         occupation: formData.occupation,
-
-        gender: formData.gender,
-
-        income: Number(formData.income),
-
-        state: formData.state,
-
+        gender:     formData.gender,
+        // income is now a string range — pass as-is, backend handles it
+        income:     formData.income || "0",
+        state:      formData.state,
       };
 
 
@@ -737,44 +763,31 @@ function EligibilityChecker() {
 
                   <label
                     className="
-                      text-xs
-                      font-semibold
-                      text-slate-700
-                      uppercase
-                      tracking-wider
-                      flex
-                      items-center
-                      gap-2
+                      text-xs font-semibold text-slate-700 uppercase
+                      tracking-wider flex items-center gap-2
                     "
                   >
                     <FaBriefcase className="text-blue-500" />
                     Occupation
                   </label>
 
-
-                  <input
-                    type="text"
+                  <select
                     name="occupation"
                     value={formData.occupation}
                     onChange={handleChange}
-                    placeholder="e.g. Farmer, Student, Artisan"
                     required
                     className="
-                      w-full
-                      bg-sky-50/50
-                      border border-sky-200
-                      focus:border-sky-400
-                      focus:ring-2
-                      focus:ring-sky-100
-                      outline-none
-                      p-3.5
-                      rounded-xl
-                      text-sm
-                      text-slate-900
-                      placeholder-slate-400
+                      w-full bg-sky-50/50 border border-sky-200
+                      focus:border-sky-400 focus:ring-2 focus:ring-sky-100
+                      outline-none p-3.5 rounded-xl text-sm text-slate-900
                       transition-all
                     "
-                  />
+                  >
+                    <option value="">Select occupation</option>
+                    {OCCUPATION_OPTIONS.map((o) => (
+                      <option key={o} value={o}>{o}</option>
+                    ))}
+                  </select>
 
                 </div>
 
@@ -848,45 +861,31 @@ function EligibilityChecker() {
 
                   <label
                     className="
-                      text-xs
-                      font-semibold
-                      text-slate-700
-                      uppercase
-                      tracking-wider
-                      flex
-                      items-center
-                      gap-2
+                      text-xs font-semibold text-slate-700 uppercase
+                      tracking-wider flex items-center gap-2
                     "
                   >
                     <FaMoneyBillWave className="text-emerald-500" />
-                    Annual Income
+                    Annual Family Income
                   </label>
 
-
-                  <input
-                    type="number"
+                  <select
                     name="income"
                     value={formData.income}
                     onChange={handleChange}
-                    placeholder="e.g. 250000"
-                    min="0"
                     required
                     className="
-                      w-full
-                      bg-sky-50/50
-                      border border-sky-200
-                      focus:border-sky-400
-                      focus:ring-2
-                      focus:ring-sky-100
-                      outline-none
-                      p-3.5
-                      rounded-xl
-                      text-sm
-                      text-slate-900
-                      placeholder-slate-400
+                      w-full bg-sky-50/50 border border-sky-200
+                      focus:border-sky-400 focus:ring-2 focus:ring-sky-100
+                      outline-none p-3.5 rounded-xl text-sm text-slate-900
                       transition-all
                     "
-                  />
+                  >
+                    <option value="">Select income range</option>
+                    {INCOME_OPTIONS.map((i) => (
+                      <option key={i} value={i}>{i}</option>
+                    ))}
+                  </select>
 
                 </div>
 
@@ -932,43 +931,10 @@ function EligibilityChecker() {
                       transition-all
                     "
                   >
-
-                    <option value="">
-                      Select State
-                    </option>
-
-                    <option value="Haryana">
-                      Haryana
-                    </option>
-
-                    <option value="Punjab">
-                      Punjab
-                    </option>
-
-                    <option value="Delhi">
-                      Delhi
-                    </option>
-
-                    <option value="Uttar Pradesh">
-                      Uttar Pradesh
-                    </option>
-
-                    <option value="Rajasthan">
-                      Rajasthan
-                    </option>
-
-                    <option value="Maharashtra">
-                      Maharashtra
-                    </option>
-
-                    <option value="Gujarat">
-                      Gujarat
-                    </option>
-
-                    <option value="Other">
-                      Other State
-                    </option>
-
+                    <option value="">Select State / UT</option>
+                    {ALL_STATES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
                   </select>
 
                 </div>
@@ -1514,35 +1480,30 @@ function EligibilityChecker() {
                         </button>
 
 
-                        <a
-                          href={getApplyUrl(scheme)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="
-                            px-4
-                            py-2
-                            rounded-xl
-                            bg-gradient-to-r
-                            from-sky-500
-                            to-blue-600
-                            text-white
-                            text-xs
-                            font-semibold
-                            hover:scale-[1.02]
-                            transition-all
-                            flex
-                            items-center
-                            gap-2
-                            shadow-md
-                            shadow-sky-200/50
-                          "
-                        >
-
-                          Apply Now
-
-                          <FaExternalLinkAlt className="text-[9px]" />
-
-                        </a>
+                        <div className="flex gap-2 flex-wrap">
+                          {/* Apply with AI Agent */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const encoded = encodeURIComponent(JSON.stringify(scheme));
+                              navigate(`/apply?scheme=${encoded}`);
+                            }}
+                            className="px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-600 text-white text-xs font-semibold hover:scale-[1.02] transition-all shadow-sm"
+                          >
+                            Apply with AI Agent ✦
+                          </button>
+                          {/* Direct portal */}
+                          {(scheme.official_url || getApplyUrl(scheme) !== "https://www.myscheme.gov.in/") && (
+                            <a
+                              href={scheme.official_url || getApplyUrl(scheme)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-semibold hover:border-sky-300 hover:text-sky-600 transition-all flex items-center gap-1"
+                            >
+                              Portal <FaExternalLinkAlt className="text-[9px]" />
+                            </a>
+                          )}
+                        </div>
 
                       </div>
 

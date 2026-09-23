@@ -3,390 +3,330 @@
     "id": 1,
     "name": "PM Kisan Samman Nidhi",
     "category": "Farmer",
-    "description": "Income support scheme for eligible farmer families.",
+    "description": "Income support scheme for eligible farmer families providing ₹6,000 per year in three equal installments.",
+    "benefits": "₹6,000 per year (₹2,000 per installment, 3 installments) directly to bank account.",
     "eligibility": "Eligible landholding farmer families, subject to scheme conditions.",
-    "documents": [
-      "Aadhaar Card",
-      "Bank Passbook",
-      "Land Records"
-    ]
+    "documents": ["Aadhaar Card", "Bank Passbook", "Land Records"],
+    "deadline": "Ongoing — apply anytime",
+    "official_url": "https://pmkisan.gov.in"
   },
-
   {
     "id": 2,
     "name": "Ayushman Bharat PM-JAY",
     "category": "Healthcare",
-    "description": "Health assurance scheme for eligible families.",
-    "eligibility": "Families identified under applicable government eligibility criteria.",
-    "documents": [
-      "Aadhaar Card",
-      "Ration Card",
-      "Family ID or Eligibility Proof"
-    ]
+    "description": "Health assurance scheme providing ₹5 lakh per family per year for hospitalisation.",
+    "benefits": "₹5 lakh health cover per family per year for secondary and tertiary care hospitalisation.",
+    "eligibility": "Families identified under applicable government eligibility criteria (SECC database).",
+    "documents": ["Aadhaar Card", "Ration Card", "Family ID or Eligibility Proof"],
+    "deadline": "Ongoing — check eligibility anytime",
+    "official_url": "https://pmjay.gov.in"
   },
-
   {
     "id": 3,
     "name": "Pradhan Mantri Awas Yojana",
     "category": "Housing",
-    "description": "Housing assistance scheme for eligible households.",
+    "description": "Housing assistance scheme providing financial support to construct or buy a pucca house.",
+    "benefits": "Subsidy up to ₹2.67 lakh for EWS/LIG; construction assistance for rural households.",
     "eligibility": "Eligible EWS, LIG, or other beneficiary categories under the applicable PMAY component.",
-    "documents": [
-      "Aadhaar Card",
-      "Income Certificate",
-      "Address Proof"
-    ]
+    "documents": ["Aadhaar Card", "Income Certificate", "Address Proof"],
+    "deadline": "Ongoing — apply at nearest CSC or bank",
+    "official_url": "https://pmaymis.gov.in"
   },
-
   {
     "id": 4,
     "name": "Pradhan Mantri Mudra Yojana",
     "category": "Business",
     "description": "Credit support scheme for micro enterprises and small businesses.",
+    "benefits": "Collateral-free loans: Shishu (up to ₹50,000), Kishore (₹50,001–₹5 lakh), Tarun (₹5–₹10 lakh).",
     "eligibility": "Eligible non-corporate small business owners and entrepreneurs.",
-    "documents": [
-      "PAN Card",
-      "Aadhaar Card",
-      "Business Proof"
-    ]
+    "documents": ["PAN Card", "Aadhaar Card", "Business Proof"],
+    "deadline": "Ongoing — apply at any bank or NBFC",
+    "official_url": "https://mudra.org.in"
   },
-
   {
     "id": 5,
     "name": "PM Vishwakarma",
     "category": "Artisan",
-    "description": "Support programme for traditional artisans and craftspeople.",
+    "description": "Support programme for traditional artisans and craftspeople covering skill training, toolkit, and credit.",
+    "benefits": "₹15,000 toolkit incentive; skill training stipend ₹500/day; collateral-free credit up to ₹3 lakh.",
     "eligibility": "Eligible artisans engaged in notified traditional trades.",
-    "documents": [
-      "Aadhaar Card",
-      "Occupation Proof",
-      "Bank Account Details"
-    ]
+    "documents": ["Aadhaar Card", "Occupation Proof", "Bank Account Details"],
+    "deadline": "Ongoing — registration at Common Service Centres",
+    "official_url": "https://pmvishwakarma.gov.in"
   },
-
   {
     "id": 6,
     "name": "Sukanya Samriddhi Yojana",
     "category": "Girl Child",
-    "description": "Small-savings scheme for a girl child.",
-    "eligibility": "Account may be opened for an eligible girl child below the prescribed age limit.",
-    "documents": [
-      "Birth Certificate",
-      "Aadhaar Card",
-      "Parent or Guardian ID Proof"
-    ]
+    "description": "Small-savings scheme for a girl child with tax benefits.",
+    "benefits": "High interest rate (currently ~8.2% p.a.) with tax exemption under Section 80C; maturity at 21 years.",
+    "eligibility": "Account may be opened for an eligible girl child below 10 years of age.",
+    "documents": ["Birth Certificate", "Aadhaar Card", "Parent or Guardian ID Proof"],
+    "deadline": "Ongoing — open account at post office or bank",
+    "official_url": "https://www.india.gov.in/sukanya-samriddhi-yojna"
   },
-
   {
     "id": 7,
     "name": "Atal Pension Yojana",
     "category": "Pension",
     "description": "Pension scheme for eligible citizens, especially workers in the unorganised sector.",
-    "eligibility": "Eligible bank-account holders within the prescribed age range.",
-    "documents": [
-      "Aadhaar Card",
-      "Bank Account Details",
-      "Mobile Number"
-    ]
+    "benefits": "Guaranteed monthly pension of ₹1,000–₹5,000 after age 60 based on contribution.",
+    "eligibility": "Indian citizens aged 18–40 with a savings bank account.",
+    "documents": ["Aadhaar Card", "Bank Account Details", "Mobile Number"],
+    "deadline": "Ongoing — enrol via bank or net banking",
+    "official_url": "https://npscra.nsdl.co.in/nps-lite-atal-pension-yojana-apy.php"
   },
-
   {
     "id": 8,
     "name": "Pradhan Mantri Kaushal Vikas Yojana",
     "category": "Skill Development",
     "description": "Industry-relevant skill training, certification, upskilling, and reskilling programme.",
+    "benefits": "Free short-term skill training; certification; placement assistance; monetary reward on certification.",
     "eligibility": "Eligible Indian youth seeking approved skill training.",
-    "documents": [
-      "Aadhaar Card",
-      "Educational Certificate",
-      "Bank Account Details"
-    ]
+    "documents": ["Aadhaar Card", "Educational Certificate", "Bank Account Details"],
+    "deadline": "Ongoing — check skill centres near you",
+    "official_url": "https://www.pmkvyofficial.org"
   },
-
   {
     "id": 9,
     "name": "Central Sector Scholarship Scheme",
     "category": "Education",
     "description": "Scholarship support for eligible students pursuing higher education.",
-    "eligibility": "Eligible students meeting academic, income, and other notified criteria.",
-    "documents": [
-      "Aadhaar Card",
-      "Income Certificate",
-      "Marksheet"
-    ]
+    "benefits": "₹10,000/year for undergraduate students; ₹20,000/year for postgraduate students.",
+    "eligibility": "Students who scored above 80th percentile in 10+2; family income below ₹8 lakh per year.",
+    "documents": ["Aadhaar Card", "Income Certificate", "Marksheet"],
+    "deadline": "Annual — applications typically open in August–September",
+    "official_url": "https://scholarships.gov.in"
   },
-
   {
     "id": 10,
     "name": "Prime Minister's Employment Generation Programme",
     "category": "Employment",
     "description": "Credit-linked subsidy support for setting up eligible micro-enterprises.",
-    "eligibility": "Eligible entrepreneurs and self-employment project applicants.",
-    "documents": [
-      "Aadhaar Card",
-      "Project Report",
-      "Educational Certificate"
-    ]
+    "benefits": "25–35% subsidy on project cost for eligible beneficiaries; project cost up to ₹50 lakh (manufacturing) / ₹20 lakh (service).",
+    "eligibility": "Individuals aged 18+ with at least Class VIII education for projects above ₹10 lakh.",
+    "documents": ["Aadhaar Card", "Project Report", "Educational Certificate"],
+    "deadline": "Ongoing — apply through KVIC/KVIB or banks",
+    "official_url": "https://www.kviconline.gov.in/pmegpeportal"
   },
-
   {
     "id": 11,
     "name": "Mahatma Gandhi National Rural Employment Guarantee Scheme",
     "category": "Rural Employment",
     "description": "Provides demand-driven wage employment to rural households.",
+    "benefits": "100 days of guaranteed wage employment per year; minimum wages paid; social security.",
     "eligibility": "Adult members of rural households willing to do unskilled manual work.",
-    "documents": [
-      "Job Card",
-      "Aadhaar Card",
-      "Bank Account Details"
-    ]
+    "documents": ["Job Card", "Aadhaar Card", "Bank Account Details"],
+    "deadline": "Ongoing — register at Gram Panchayat",
+    "official_url": "https://nrega.nic.in"
   },
-
   {
     "id": 12,
     "name": "Pradhan Mantri Ujjwala Yojana",
     "category": "Women Welfare",
     "description": "Provides LPG connection support to eligible households.",
-    "eligibility": "Eligible adult women from qualifying households.",
-    "documents": [
-      "Aadhaar Card",
-      "Ration Card",
-      "Bank Account Details"
-    ]
+    "benefits": "Free LPG connection with a deposit waiver; first refill and hotplate at subsidised cost.",
+    "eligibility": "Eligible adult women from BPL or notified qualifying households.",
+    "documents": ["Aadhaar Card", "Ration Card", "Bank Account Details"],
+    "deadline": "Ongoing — apply at LPG distributor or online",
+    "official_url": "https://pmuy.gov.in"
   },
-
   {
     "id": 13,
     "name": "PM Surya Ghar Muft Bijli Yojana",
     "category": "Energy",
     "description": "Supports installation of rooftop solar systems for eligible households.",
+    "benefits": "Up to 300 units free electricity per month; subsidy up to ₹78,000 for 3 kW system.",
     "eligibility": "Eligible residential electricity consumers with suitable rooftop space.",
-    "documents": [
-      "Aadhaar Card",
-      "Electricity Bill",
-      "Bank Account Details"
-    ]
+    "documents": ["Aadhaar Card", "Electricity Bill", "Bank Account Details"],
+    "deadline": "Ongoing — apply on official portal",
+    "official_url": "https://pmsuryaghar.gov.in"
   },
-
   {
     "id": 14,
     "name": "Pradhan Mantri Fasal Bima Yojana",
     "category": "Farmer",
     "description": "Crop insurance scheme that helps protect farmers against specified crop losses.",
+    "benefits": "Insurance cover for crop losses due to natural calamities, pests, and diseases; premium as low as 1.5–5%.",
     "eligibility": "Eligible farmers growing notified crops in notified areas.",
-    "documents": [
-      "Aadhaar Card",
-      "Land Records",
-      "Bank Account Details"
-    ]
+    "documents": ["Aadhaar Card", "Land Records", "Bank Account Details"],
+    "deadline": "Seasonal — Rabi/Kharif season deadlines apply; check with bank/CSC",
+    "official_url": "https://pmfby.gov.in"
   },
-
   {
     "id": 15,
     "name": "Kisan Credit Card Scheme",
     "category": "Farmer",
     "description": "Provides timely short-term credit support for agricultural and allied activities.",
+    "benefits": "Flexible credit up to ₹3 lakh at subsidised interest (4% after subvention); crop insurance coverage.",
     "eligibility": "Eligible farmers, tenant farmers, sharecroppers, and allied-sector applicants.",
-    "documents": [
-      "Aadhaar Card",
-      "Land Records or Cultivation Proof",
-      "Bank Account Details"
-    ]
+    "documents": ["Aadhaar Card", "Land Records or Cultivation Proof", "Bank Account Details"],
+    "deadline": "Ongoing — apply at nearest bank branch",
+    "official_url": "https://www.nabard.org/content.aspx?id=580"
   },
-
   {
     "id": 16,
     "name": "Soil Health Card Scheme",
     "category": "Agriculture",
     "description": "Provides soil nutrient information and fertilizer-use recommendations to farmers.",
+    "benefits": "Free soil testing; personalised fertilizer recommendations to increase crop productivity.",
     "eligibility": "Farmers with agricultural land or cultivation activity.",
-    "documents": [
-      "Aadhaar Card",
-      "Land Records",
-      "Mobile Number"
-    ]
+    "documents": ["Aadhaar Card", "Land Records", "Mobile Number"],
+    "deadline": "Ongoing — contact nearest Krishi Vigyan Kendra",
+    "official_url": "https://soilhealth.dac.gov.in"
   },
-
   {
     "id": 17,
     "name": "PM KUSUM",
     "category": "Agriculture Energy",
     "description": "Supports solar pumps and solarisation solutions for eligible agricultural users.",
+    "benefits": "Subsidy of 30–60% on solar pump installation; reduces irrigation costs significantly.",
     "eligibility": "Eligible farmers and agricultural consumers, subject to state implementation rules.",
-    "documents": [
-      "Aadhaar Card",
-      "Land Records",
-      "Electricity Connection Details"
-    ]
+    "documents": ["Aadhaar Card", "Land Records", "Electricity Connection Details"],
+    "deadline": "Ongoing — apply via state DISCOM or agriculture department",
+    "official_url": "https://mnre.gov.in/solar/schemes"
   },
-
   {
     "id": 18,
     "name": "Pradhan Mantri Matru Vandana Yojana",
     "category": "Maternity",
     "description": "Maternity benefit programme for eligible pregnant women and lactating mothers.",
-    "eligibility": "Eligible beneficiaries under current programme conditions.",
-    "documents": [
-      "Aadhaar Card",
-      "Bank Account Details",
-      "Pregnancy Registration Record"
-    ]
+    "benefits": "₹5,000 in three instalments for first live birth; additional benefit for second girl child birth.",
+    "eligibility": "Pregnant women and lactating mothers meeting scheme eligibility conditions.",
+    "documents": ["Aadhaar Card", "Bank Account Details", "Pregnancy Registration Record"],
+    "deadline": "Ongoing — register at Anganwadi Centre or health facility",
+    "official_url": "https://wcd.nic.in/schemes/pradhan-mantri-matru-vandana-yojana"
   },
-
   {
     "id": 19,
     "name": "Pradhan Mantri Jeevan Jyoti Bima Yojana",
     "category": "Insurance",
     "description": "Renewable life-insurance cover for eligible bank or post-office account holders.",
-    "eligibility": "Eligible account holders within the prescribed age range.",
-    "documents": [
-      "Aadhaar Card",
-      "Bank Account Details",
-      "Consent Form"
-    ]
+    "benefits": "₹2 lakh life insurance cover at just ₹436/year premium.",
+    "eligibility": "Bank/post office account holders aged 18–50 years.",
+    "documents": ["Aadhaar Card", "Bank Account Details", "Consent Form"],
+    "deadline": "Ongoing — enrol via bank or net banking annually",
+    "official_url": "https://jansuraksha.gov.in/Forms-PMJJBY.aspx"
   },
-
   {
     "id": 20,
     "name": "Pradhan Mantri Suraksha Bima Yojana",
     "category": "Insurance",
     "description": "Renewable accidental-death and disability insurance cover.",
-    "eligibility": "Eligible bank or post-office account holders within the prescribed age range.",
-    "documents": [
-      "Aadhaar Card",
-      "Bank Account Details",
-      "Consent Form"
-    ]
+    "benefits": "₹2 lakh for accidental death/total disability; ₹1 lakh for partial disability; premium only ₹20/year.",
+    "eligibility": "Bank/post-office account holders aged 18–70 years.",
+    "documents": ["Aadhaar Card", "Bank Account Details", "Consent Form"],
+    "deadline": "Ongoing — enrol via bank or net banking annually",
+    "official_url": "https://jansuraksha.gov.in/Forms-PMSBY.aspx"
   },
-
   {
     "id": 21,
     "name": "PM SVANidhi",
     "category": "Street Vendors",
     "description": "Provides working-capital support for eligible street vendors.",
+    "benefits": "Collateral-free working capital loan of ₹10,000 → ₹20,000 → ₹50,000 on timely repayment.",
     "eligibility": "Eligible street vendors identified under applicable scheme rules.",
-    "documents": [
-      "Aadhaar Card",
-      "Vendor Certificate or ID Card",
-      "Bank Account Details"
-    ]
+    "documents": ["Aadhaar Card", "Vendor Certificate or ID Card", "Bank Account Details"],
+    "deadline": "Ongoing — apply via PM SVANidhi portal or nearest bank",
+    "official_url": "https://pmsvanidhi.mohua.gov.in"
   },
-
   {
     "id": 22,
     "name": "Stand-Up India",
     "category": "Entrepreneurship",
     "description": "Facilitates bank loans for eligible women and SC/ST entrepreneurs.",
-    "eligibility": "Eligible women or SC/ST entrepreneurs starting a greenfield enterprise.",
-    "documents": [
-      "PAN Card",
-      "Aadhaar Card",
-      "Business Plan"
-    ]
+    "benefits": "Loans between ₹10 lakh and ₹1 crore for greenfield enterprises; 7-year repayment period.",
+    "eligibility": "Women or SC/ST entrepreneurs setting up a new (greenfield) enterprise in manufacturing, services, or trading.",
+    "documents": ["PAN Card", "Aadhaar Card", "Business Plan"],
+    "deadline": "Ongoing — apply through bank branches or standupmitra.in",
+    "official_url": "https://www.standupmitra.in"
   },
-
   {
     "id": 23,
     "name": "National Apprenticeship Promotion Scheme",
     "category": "Apprenticeship",
     "description": "Promotes apprenticeship training and workplace learning opportunities.",
-    "eligibility": "Eligible candidates and establishments under apprenticeship rules.",
-    "documents": [
-      "Aadhaar Card",
-      "Educational Certificate",
-      "Bank Account Details"
-    ]
+    "benefits": "Monthly stipend reimbursement to establishments; candidates earn while learning on the job.",
+    "eligibility": "Eligible candidates and establishments under apprenticeship rules; age 14+.",
+    "documents": ["Aadhaar Card", "Educational Certificate", "Bank Account Details"],
+    "deadline": "Ongoing — register at apprenticeshipindia.gov.in",
+    "official_url": "https://www.apprenticeshipindia.gov.in"
   },
-
   {
     "id": 24,
     "name": "Jan Shikshan Sansthan Scheme",
     "category": "Skill Development",
     "description": "Provides non-formal vocational training, especially for disadvantaged groups.",
-    "eligibility": "Eligible youth and adults, with priority for women and disadvantaged communities.",
-    "documents": [
-      "Aadhaar Card",
-      "Address Proof",
-      "Educational Certificate if Available"
-    ]
+    "benefits": "Free vocational skill training; certificate by NCVT; livelihood improvement support.",
+    "eligibility": "Youth and adults aged 15–45; priority for women, SC/ST, minorities, and rural areas.",
+    "documents": ["Aadhaar Card", "Address Proof", "Educational Certificate if Available"],
+    "deadline": "Ongoing — contact nearest JSS centre",
+    "official_url": "https://jss.gov.in"
   },
-
   {
     "id": 25,
     "name": "Deen Dayal Upadhyaya Grameen Kaushalya Yojana",
     "category": "Rural Skill Development",
     "description": "Skill training and placement support for rural youth from poor households.",
-    "eligibility": "Eligible rural youth under programme guidelines.",
-    "documents": [
-      "Aadhaar Card",
-      "Ration Card or Rural Household Proof",
-      "Educational Certificate"
-    ]
+    "benefits": "Free residential training; placement guarantee; post-placement support; foreign placement for select trades.",
+    "eligibility": "Rural youth aged 15–35 from poor households; up to 45 for SC/ST/PWD/women.",
+    "documents": ["Aadhaar Card", "Ration Card or Rural Household Proof", "Educational Certificate"],
+    "deadline": "Ongoing — contact DDU-GKY Project Implementing Agency",
+    "official_url": "https://ddugky.gov.in"
   },
-
   {
     "id": 26,
     "name": "Deendayal Antyodaya Yojana National Rural Livelihoods Mission",
     "category": "Rural Livelihood",
     "description": "Supports rural livelihoods through self-help groups, financial inclusion, and enterprise development.",
-    "eligibility": "Eligible rural households, particularly women members of self-help groups.",
-    "documents": [
-      "Aadhaar Card",
-      "Bank Account Details",
-      "Self-Help Group Details"
-    ]
+    "benefits": "Revolving fund for SHGs; Community Investment Fund; bank linkage support; livelihood training.",
+    "eligibility": "Rural households, particularly women members of self-help groups.",
+    "documents": ["Aadhaar Card", "Bank Account Details", "Self-Help Group Details"],
+    "deadline": "Ongoing — contact Block Mission Management Unit",
+    "official_url": "https://aajeevika.gov.in"
   },
-
   {
     "id": 27,
     "name": "National Social Assistance Programme",
     "category": "Social Security",
     "description": "Provides social assistance support through pension and family-benefit components.",
-    "eligibility": "Eligible elderly persons, widows, persons with disabilities, or bereaved families under notified conditions.",
-    "documents": [
-      "Aadhaar Card",
-      "Income or BPL Certificate",
-      "Bank Account Details"
-    ]
+    "benefits": "Monthly pension ₹200–₹500 for elderly/widows/disabled; ₹20,000 lump sum on BPL death.",
+    "eligibility": "BPL elderly (60+), widows (40–79), persons with disabilities (18–79), or bereaved families.",
+    "documents": ["Aadhaar Card", "Income or BPL Certificate", "Bank Account Details"],
+    "deadline": "Ongoing — apply at Gram Panchayat or Urban Local Body",
+    "official_url": "https://nsap.nic.in"
   },
-
   {
     "id": 28,
     "name": "Pradhan Mantri Jan Dhan Yojana",
     "category": "Financial Inclusion",
     "description": "Promotes access to basic banking services and financial inclusion.",
-    "eligibility": "Individuals without access to a suitable bank account, subject to bank rules.",
-    "documents": [
-      "Aadhaar Card",
-      "PAN Card if Available",
-      "Address Proof"
-    ]
+    "benefits": "Zero-balance bank account; RuPay debit card; ₹2 lakh accident insurance; ₹30,000 life cover.",
+    "eligibility": "Any Indian citizen without access to a bank account; no minimum balance required.",
+    "documents": ["Aadhaar Card", "PAN Card if Available", "Address Proof"],
+    "deadline": "Ongoing — open account at any bank branch or BCA",
+    "official_url": "https://pmjdy.gov.in"
   },
-
   {
     "id": 29,
     "name": "PM YASASVI Scholarship Scheme",
     "category": "Education",
-    "description": "Scholarship support for eligible students from specified social categories.",
-    "eligibility": "Eligible students from notified OBC, EBC, DNT, or other categories meeting academic and income conditions.",
-    "documents": [
-      "Aadhaar Card",
-      "Caste Certificate",
-      "Income Certificate",
-      "Marksheet"
-    ]
+    "description": "Scholarship support for eligible students from OBC, EBC, DNT, and other specified categories.",
+    "benefits": "₹75,000/year for Class 9–10 students; ₹1,25,000/year for Class 11–12 students.",
+    "eligibility": "Students from OBC/EBC/DNT categories; family income below ₹2.5 lakh; Class 9 or 11.",
+    "documents": ["Aadhaar Card", "Caste Certificate", "Income Certificate", "Marksheet"],
+    "deadline": "Annual — NTA releases notification; typically August–September",
+    "official_url": "https://scholarships.gov.in"
   },
-  
   {
     "id": 30,
     "name": "National Career Service",
     "category": "Employment",
     "description": "Digital career platform offering job search, career counselling, job fairs, and skill information.",
-    "eligibility": "Job seekers, students, employers, and career-service users.",
-    "documents": [
-      "Aadhaar Card",
-      "Educational Certificate",
-      "Resume or Employment Details"
-    ]
+    "benefits": "Free job matching; career counselling; access to government job vacancies; skill gap information.",
+    "eligibility": "Job seekers, students, employers, and career-service users; free registration for all.",
+    "documents": ["Aadhaar Card", "Educational Certificate", "Resume or Employment Details"],
+    "deadline": "Ongoing — register at NCS portal",
+    "official_url": "https://www.ncs.gov.in"
   }
 ]

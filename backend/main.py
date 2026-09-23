@@ -1,17 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
-from api.notifications import router as notifications_router
 from database import engine, Base
 from core.logger import logger
 
 # =========================================================
-# Models
+# Models  (must be imported before create_all)
 # =========================================================
 
 from models.user import User
 from models.chat_history import ChatHistory
 from models.notification import Notification
+from models.saved_scheme import SavedScheme
 
 
 # =========================================================
@@ -25,20 +25,34 @@ from api.schemes import router as schemes_router
 from api.auth import router as auth_router
 from api.chat_history import router as chat_history_router
 from api.notifications import router as notifications_router
+from api.profile import router as profile_router
+from api.saved_schemes import router as saved_schemes_router
+from api.application import router as application_router
 
 
 # =========================================================
-# Create Database Tables
+# Create Database Tables (new tables only — never drops)
 # =========================================================
 
 Base.metadata.create_all(bind=engine)
 
 
 # =========================================================
+# Safe column migration — adds missing profile columns
+# to the existing users table without touching any data.
+# Uses ADD COLUMN IF NOT EXISTS so it is idempotent.
+# =========================================================
+
+try:
+    from migrate import run_migration
+    run_migration()
+    logger.info("Schema migration completed successfully.")
+except Exception as _me:
+    logger.warning(f"Schema migration skipped: {_me}")
+
+
+# =========================================================
 # Ensure ChromaDB is indexed on startup
-# If the vector store is empty (e.g. fresh Render deployment
-# or ephemeral filesystem), index all schemes now so that
-# RAG queries work immediately without a separate script.
 # =========================================================
 
 try:
@@ -46,19 +60,17 @@ try:
     from services.scheme_service import get_all_schemes as _get_all_schemes
     _chroma_count = get_collection_count()
     _scheme_count = len(_get_all_schemes())
-    if _chroma_count == 0:
-        logger.info("ChromaDB collection empty — indexing schemes now...")
-        index_schemes()
-        logger.info(f"ChromaDB indexed: {get_collection_count()} documents")
-    elif _chroma_count != _scheme_count:
+    if _chroma_count == 0 or _chroma_count != _scheme_count:
         logger.info(
-            f"ChromaDB count ({_chroma_count}) does not match "
-            f"schemes.json ({_scheme_count}) — re-indexing..."
+            f"ChromaDB count ({_chroma_count}) vs schemes ({_scheme_count}) — re-indexing..."
         )
         index_schemes()
         logger.info(f"ChromaDB re-indexed: {get_collection_count()} documents")
     else:
-        logger.info(f"ChromaDB ready: {_chroma_count} documents already indexed")
+        # Force re-index on startup to pick up enriched scheme fields (benefits, deadline, official_url)
+        logger.info(f"ChromaDB: re-indexing to pick up enriched scheme data...")
+        index_schemes()
+        logger.info(f"ChromaDB re-indexed: {get_collection_count()} documents")
 except Exception as _e:
     logger.warning(f"ChromaDB startup indexing skipped: {_e}")
 
@@ -98,6 +110,9 @@ app.include_router(schemes_router)
 app.include_router(auth_router)
 app.include_router(chat_history_router)
 app.include_router(notifications_router)
+app.include_router(profile_router)
+app.include_router(saved_schemes_router)
+app.include_router(application_router)
 
 
 # =========================================================

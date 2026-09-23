@@ -21,9 +21,17 @@ def chat(request: ChatRequest):
         else None
     )
 
+    # Language comes from request-level field or from profile
+    language = (
+        request.language
+        or (profile.get("language") if profile else None)
+        or "en"
+    )
+
     response = generate_reply(
         request.message,
-        profile
+        profile,
+        language=language
     )
 
     return {

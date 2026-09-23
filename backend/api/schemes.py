@@ -7,7 +7,8 @@ from core.logger import logger
 from services.scheme_service import (
     get_all_schemes,
     get_schemes_by_category,
-    search_schemes
+    get_schemes_source,
+    search_schemes,
 )
 
 router = APIRouter()
@@ -28,6 +29,12 @@ def schemes(category: Optional[str] = None):
         "message": "Schemes fetched successfully.",
         "data": data
     }
+
+
+@router.get("/schemes/source")
+def schemes_source():
+    """Returns which data source is active (static JSON vs live API)."""
+    return get_schemes_source()
 
 
 @router.get("/schemes/search")

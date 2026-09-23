@@ -81,10 +81,10 @@ function Login() {
     } catch (error) {
       console.error("Login error:", error);
 
-      alert(
-        error.message ||
-        "Invalid email or password"
-      );
+      // Extract the server's detail message if available,
+      // otherwise show a friendly fallback instead of the raw Axios message.
+      const serverMsg = error?.response?.data?.detail;
+      alert(serverMsg || "Invalid email or password. Please check your credentials.");
 
     } finally {
       setLoading(false);

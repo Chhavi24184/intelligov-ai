@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models.user import User
 from services.eligibility_service import check_eligibility
+from services.personalization_service import personalise
 from core.logger import logger
 
 
@@ -20,7 +21,7 @@ class EligibilityRequest(BaseModel):
     gender: str = Field(default="")
     state: str = Field(..., min_length=2)
     # optional enriched fields — used when called from the profile pipeline
-    category:  Optional[str] = None
+    category: Optional[str] = None
     education: Optional[str] = None
 
 
@@ -41,7 +42,7 @@ def eligibility(request: EligibilityRequest):
     schemes = check_eligibility(
         age=request.age,
         occupation=request.occupation,
-        income=request.income,   # string or float — service handles both
+        income=request.income,
         gender=request.gender,
         state=request.state,
         category=request.category or "",
@@ -52,9 +53,79 @@ def eligibility(request: EligibilityRequest):
         "success": True,
         "message": "Eligibility checked successfully.",
         "data": {
-            "eligible":           len(schemes) > 0,
-            "total_matches":      len(schemes),
+            "eligible": len(schemes) > 0,
+            "total_matches": len(schemes),
             "recommended_schemes": schemes,
+        }
+    }
+
+
+# ============================================================
+# MATCH-SCHEMES endpoint
+# Dashboard "Match Scheme" flow.
+# Uses the existing RAG + profile personalisation pipeline so
+# the frontend receives matched/recommended schemes rather than
+# the generic /schemes catalogue.
+# ============================================================
+
+@router.get("/match-schemes/{user_id}")
+def match_schemes(user_id: int, db: Session = Depends(get_db)):
+    """
+    Load the user's saved profile and return personalised scheme
+    matches for the Dashboard Match Scheme action.
+    """
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    profile = {
+        "age": user.age,
+        "state": user.state,
+        "district": user.district,
+        "education": user.education,
+        "occupation": user.occupation,
+        "income": user.income,
+        "category": user.category,
+        "interests": user.interests,
+        "language": user.language,
+    }
+
+    if not profile.get("occupation") or not profile.get("state"):
+        return {
+            "success": False,
+            "message": "Profile incomplete — please fill in occupation and state first.",
+            "data": {
+                "total_matches": 0,
+                "schemes": [],
+                "profile_missing": True,
+                "missing_fields": [
+                    field for field in ("age", "state", "occupation", "income", "category")
+                    if not profile.get(field)
+                ],
+            }
+        }
+
+    logger.info(
+        f"Match Schemes | user={user_id} age={user.age} "
+        f"occ={user.occupation!r} state={user.state!r}"
+    )
+
+    result = personalise(
+        query="government schemes suitable for my profile",
+        intent="eligibility",
+        profile=profile,
+    )
+
+    return {
+        "success": True,
+        "message": "Matched schemes fetched successfully.",
+        "data": {
+            "total_matches": len(result.get("schemes", [])),
+            "schemes": result.get("schemes", []),
+            "profile_missing": result.get("profile_missing", False),
+            "missing_fields": result.get("missing_fields", []),
+            "total_candidates": result.get("total_candidates", 0),
         }
     }
 
@@ -96,7 +167,7 @@ def eligibility_by_profile(user_id: int, db: Session = Depends(get_db)):
         age=user.age,
         occupation=user.occupation,
         income=user.income or "0",
-        gender="",                   # not in profile schema
+        gender="",
         state=user.state,
         category=user.category or "",
         education=user.education or "",

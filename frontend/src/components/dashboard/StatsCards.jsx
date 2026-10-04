@@ -253,7 +253,7 @@ function StatsCards() {
       title:     "Matched Schemes",
       value:     matchedSchemes,
       subtitle:  "Check your eligibility",
-      link:      "/eligibility",
+      link:      "/matched-schemes",
       linkLabel: "Check now →",
       icon:      <FaGraduationCap size={22} />,
       gradient:  "from-emerald-500 to-green-400",

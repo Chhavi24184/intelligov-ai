@@ -18,6 +18,7 @@ import {
 import {
   schemesAPI,
   searchSchemesAPI,
+  eligibilityByProfileAPI,
   saveSchemeAPI,
   removeSavedSchemeAPI,
   getSavedSchemesAPI,
@@ -31,7 +32,7 @@ const fetchSchemesSource = () =>
     .then((r) => (r.ok ? r.json() : null))
     .catch(() => null);
 
-function SchemeRecommendation() {
+function SchemeRecommendation({ profileOnly = false }) {
   const navigate = useNavigate();
 
   const [schemes, setSchemes] = useState([]);
@@ -232,6 +233,19 @@ function SchemeRecommendation() {
       setLoading(true);
       setError("");
 
+      if (profileOnly) {
+        if (!userId) {
+          setSchemes([]);
+          return;
+        }
+
+        const response = await eligibilityByProfileAPI(userId);
+        const matched = response?.data?.recommended_schemes;
+
+        setSchemes(Array.isArray(matched) ? matched : []);
+        return;
+      }
+
       const response = await schemesAPI();
       const list = extractSchemes(response);
 
@@ -256,7 +270,7 @@ function SchemeRecommendation() {
     // Source endpoint is intentionally kept for backend functionality,
     // but no fallback/source information is shown to the user.
     fetchSchemesSource().catch(() => null);
-  }, []);
+  }, [profileOnly]);
 
   // =========================================================
   // SEARCH

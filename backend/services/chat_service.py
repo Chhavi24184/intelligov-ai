@@ -1,3 +1,4 @@
+import re
 from agents.orchestrator import OrchestratorAgent
 from services.granite_service import granite_client
 from services.rag_service import search_full_schemes, _MAX_RELEVANT_DISTANCE
@@ -7,6 +8,247 @@ from services.personalization_service import (
     build_profile_missing_prompt,
 )
 from core.logger import logger
+from agents.document_agent import DocumentAssistanceAgent
+from services.scheme_service import get_all_schemes
+
+
+
+# ============================================================
+# Conversational Missing Profile Prompt
+# ============================================================
+
+def _build_conversational_missing_prompt(
+    missing_fields: list,
+    language: str = "en",
+) -> str:
+    """
+    Ask only for the profile fields needed to continue
+    a conversational eligibility query.
+    """
+
+    labels = {
+        "age": {
+            "en": "age",
+            "hi": "उम्र",
+            "pa": "ਉਮਰ",
+        },
+        "occupation": {
+            "en": "occupation",
+            "hi": "पेशा",
+            "pa": "ਪੇਸ਼ਾ",
+        },
+        "income": {
+            "en": "annual family income",
+            "hi": "वार्षिक पारिवारिक आय",
+            "pa": "ਸਾਲਾਨਾ ਪਰਿਵਾਰਕ ਆਮਦਨ",
+        },
+        "gender": {
+            "en": "gender",
+            "hi": "लिंग",
+            "pa": "ਲਿੰਗ",
+        },
+        "state": {
+            "en": "state",
+            "hi": "राज्य",
+            "pa": "ਰਾਜ",
+        },
+        "education": {
+            "en": "education",
+            "hi": "शिक्षा",
+            "pa": "ਸਿੱਖਿਆ",
+        },
+        "category": {
+            "en": "social category",
+            "hi": "सामाजिक श्रेणी",
+            "pa": "ਸਮਾਜਿਕ ਸ਼੍ਰੇਣੀ",
+        },
+        "district": {
+            "en": "district",
+            "hi": "जिला",
+            "pa": "ਜ਼ਿਲ੍ਹਾ",
+        },
+    }
+
+    # Remove duplicates and keep only useful fields.
+    missing = list(dict.fromkeys(missing_fields))
+
+    if not missing:
+        return ""
+
+    if language == "hi":
+        names = [
+            labels.get(field, {}).get("hi", field)
+            for field in missing
+        ]
+
+        if len(names) == 1:
+            return (
+                f"पात्रता जाँचने के लिए कृपया अपनी "
+                f"{names[0]} बताएं।"
+            )
+
+        return (
+            "पात्रता जाँचने के लिए कृपया ये जानकारी दें: "
+            + ", ".join(names)
+            + "।"
+        )
+
+    if language == "pa":
+        names = [
+            labels.get(field, {}).get("pa", field)
+            for field in missing
+        ]
+
+        if len(names) == 1:
+            return (
+                f"ਯੋਗਤਾ ਦੀ ਜਾਂਚ ਕਰਨ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ "
+                f"{names[0]} ਦੱਸੋ।"
+            )
+
+        return (
+            "ਯੋਗਤਾ ਦੀ ਜਾਂਚ ਕਰਨ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਇਹ ਜਾਣਕਾਰੀ ਦਿਓ: "
+            + ", ".join(names)
+            + "।"
+        )
+
+    names = [
+        labels.get(field, {}).get("en", field)
+        for field in missing
+    ]
+
+    if len(names) == 1:
+        return (
+            f"To check your eligibility, please provide your "
+            f"{names[0]}."
+        )
+
+    if len(names) == 2:
+        requested = f"{names[0]} and {names[1]}"
+    else:
+        requested = ", ".join(names[:-1]) + f", and {names[-1]}"
+
+    return (
+        "To check your eligibility, please provide "
+        f"your {requested}."
+    )
+
+
+
+# ============================================================
+# Scheme Comparison
+# ============================================================
+
+def _compare_schemes(message: str, language: str = "en") -> dict:
+    """
+    Identify up to two schemes mentioned in the user's query
+    and return a structured comparison using the existing
+    government scheme database.
+    """
+
+    schemes = get_all_schemes()
+
+    if not schemes:
+        return {
+            "success": False,
+            "message": "No scheme data is currently available.",
+            "schemes": [],
+        }
+
+    query = message.lower()
+
+    matched = []
+
+    # --------------------------------------------------------
+    # Match scheme names mentioned in the query
+    # --------------------------------------------------------
+
+    for scheme in schemes:
+        name = str(scheme.get("name", "")).strip()
+
+        if not name:
+            continue
+
+        name_lower = name.lower()
+
+        # Exact full-name match
+        if name_lower in query:
+            matched.append(scheme)
+            continue
+
+        # Token-based match for names like PM-KISAN
+        tokens = [
+            token
+            for token in name_lower.replace("-", " ").split()
+            if len(token) >= 4
+        ]
+
+        if tokens and all(token in query for token in tokens):
+            matched.append(scheme)
+
+    # --------------------------------------------------------
+    # Keep unique schemes
+    # --------------------------------------------------------
+
+    unique = []
+    seen = set()
+
+    for scheme in matched:
+        scheme_id = str(scheme.get("id", scheme.get("name", "")))
+
+        if scheme_id in seen:
+            continue
+
+        seen.add(scheme_id)
+        unique.append(scheme)
+
+    matched = unique[:2]
+
+    # --------------------------------------------------------
+    # If fewer than 2 schemes are identified
+    # --------------------------------------------------------
+
+    if len(matched) < 2:
+        return {
+            "success": False,
+            "message": (
+                "Please mention the names of two government schemes "
+                "you want to compare."
+            ),
+            "schemes": matched,
+        }
+
+    first = matched[0]
+    second = matched[1]
+
+    comparison = {
+        "scheme_1": {
+            "name": first.get("name", ""),
+            "category": first.get("category", ""),
+            "description": first.get("description", ""),
+            "benefits": first.get("benefits", ""),
+            "eligibility": first.get("eligibility", ""),
+            "documents": first.get("documents", []),
+            "deadline": first.get("deadline", ""),
+            "official_url": first.get("official_url", ""),
+        },
+        "scheme_2": {
+            "name": second.get("name", ""),
+            "category": second.get("category", ""),
+            "description": second.get("description", ""),
+            "benefits": second.get("benefits", ""),
+            "eligibility": second.get("eligibility", ""),
+            "documents": second.get("documents", []),
+            "deadline": second.get("deadline", ""),
+            "official_url": second.get("official_url", ""),
+        },
+    }
+
+    return {
+        "success": True,
+        "message": "Scheme comparison generated successfully.",
+        "schemes": matched,
+        "comparison": comparison,
+    }
 
 
 # ============================================================
@@ -14,6 +256,188 @@ from core.logger import logger
 # ============================================================
 
 orchestrator = OrchestratorAgent()
+document_agent = DocumentAssistanceAgent()
+
+
+
+# ============================================================
+# Conversational Profile Extraction
+# ============================================================
+
+def _extract_profile_from_message(message: str, profile: dict | None = None) -> dict:
+    """
+    Extract common eligibility details directly from a natural-language
+    user message and merge them with the existing profile.
+
+    This allows queries such as:
+    "I am 22, a student from Haryana, female, income 2 lakh"
+    to participate in the existing eligibility flow.
+    """
+
+    result = dict(profile or {})
+    text = message.lower()
+
+    # --------------------------------------------------------
+    # Age
+    # --------------------------------------------------------
+    age_match = re.search(
+        r"\b(?:age\s*(?:is|:)?\s*|i\s*am\s+|i'm\s+)(\d{1,3})\s*(?:years?|yrs?)?\b",
+        text
+    )
+
+    if age_match:
+        age = int(age_match.group(1))
+        if 1 <= age <= 120:
+            result["age"] = age
+
+    # --------------------------------------------------------
+    # Income
+    # --------------------------------------------------------
+    income_match = re.search(
+        r"(?:income|family income|annual income|yearly income)"
+        r"\s*(?:is|of|:)?\s*"
+        r"(?:rs\.?|₹)?\s*([\d,.]+)\s*(lakh|lakhs|lacs|crore|crores)?",
+        text
+    )
+
+    if income_match:
+        amount = income_match.group(1).replace(",", "")
+        unit = (income_match.group(2) or "").lower()
+
+        try:
+            value = float(amount)
+
+            if unit in ("lakh", "lakhs", "lacs"):
+                value *= 100000
+            elif unit in ("crore", "crores"):
+                value *= 10000000
+
+            result["income"] = str(int(value))
+        except ValueError:
+            pass
+
+    # --------------------------------------------------------
+    # Gender
+    # --------------------------------------------------------
+    if re.search(r"\b(female|woman|women|girl|lady)\b", text):
+        result["gender"] = "female"
+    elif re.search(r"\b(male|man|men|boy)\b", text):
+        result["gender"] = "male"
+
+    # --------------------------------------------------------
+    # Occupation
+    # --------------------------------------------------------
+    occupation_map = {
+        "student": "student",
+        "students": "student",
+        "farmer": "farmer",
+        "farmers": "farmer",
+        "teacher": "teacher",
+        "teachers": "teacher",
+        "job seeker": "job seeker",
+        "jobseeker": "job seeker",
+        "unemployed": "unemployed",
+        "business owner": "business owner",
+        "businessman": "business owner",
+        "businesswoman": "business owner",
+        "entrepreneur": "entrepreneur",
+        "artisan": "artisan",
+        "street vendor": "street vendor",
+        "vendor": "street vendor",
+        "worker": "worker",
+    }
+
+    for keyword, occupation in occupation_map.items():
+        if re.search(r"\b" + re.escape(keyword) + r"\b", text):
+            result["occupation"] = occupation
+            break
+
+    # --------------------------------------------------------
+
+    # Available Documents
+    # --------------------------------------------------------
+    document_map = {
+        "aadhaar": "Aadhaar Card",
+        "aadhar": "Aadhaar Card",
+        "aadhaar card": "Aadhaar Card",
+        "aadhar card": "Aadhaar Card",
+        "pan": "PAN Card",
+        "pan card": "PAN Card",
+        "bank account": "Bank Account",
+        "bank passbook": "Bank Passbook",
+        "passbook": "Bank Passbook",
+        "income certificate": "Income Certificate",
+        "income proof": "Income Certificate",
+        "land records": "Land Records",
+        "land record": "Land Records",
+        "ration card": "Ration Card",
+        "address proof": "Address Proof",
+        "educational certificate": "Educational Certificate",
+        "education certificate": "Educational Certificate",
+        "marksheet": "Marksheet",
+        "voter id": "Voter ID",
+        "voter card": "Voter ID",
+        "disability certificate": "Disability Certificate",
+    }
+
+    detected_documents = list(
+        result.get("available_documents")
+        or result.get("documents")
+        or []
+    )
+
+    for keyword, document_name in document_map.items():
+        if re.search(r"\b" + re.escape(keyword) + r"\b", text):
+            if document_name not in detected_documents:
+                detected_documents.append(document_name)
+
+    if detected_documents:
+        result["available_documents"] = detected_documents
+
+    # Indian States / UTs
+    # --------------------------------------------------------
+    states = [
+        "andhra pradesh",
+        "arunachal pradesh",
+        "assam",
+        "bihar",
+        "chhattisgarh",
+        "goa",
+        "gujarat",
+        "haryana",
+        "himachal pradesh",
+        "jharkhand",
+        "karnataka",
+        "kerala",
+        "madhya pradesh",
+        "maharashtra",
+        "manipur",
+        "meghalaya",
+        "mizoram",
+        "nagaland",
+        "odisha",
+        "punjab",
+        "rajasthan",
+        "sikkim",
+        "tamil nadu",
+        "telangana",
+        "tripura",
+        "uttar pradesh",
+        "uttarakhand",
+        "west bengal",
+        "delhi",
+        "jammu and kashmir",
+        "ladakh",
+        "chandigarh",
+        "puducherry",
+    ]
+
+    for state in sorted(states, key=len, reverse=True):
+        if re.search(r"\b" + re.escape(state) + r"\b", text):
+            result["state"] = state.title()
+            break
+
+    return result
 
 
 # ============================================================
@@ -54,6 +478,9 @@ def generate_reply(
             "intent_type": "scheme",
             "agent_flow": [],
         }
+
+    # Extract eligibility details mentioned directly in the conversation.
+    profile = _extract_profile_from_message(message, profile)
 
     logger.info("=" * 60)
     logger.info(f"USER QUERY: {message}")
@@ -103,24 +530,149 @@ def generate_reply(
         }
 
     # --------------------------------------------------------
-    # Step 3: Profile completeness check
+    # Step 3: Scheme Comparison
+    # Comparison does not require a user profile.
+    # --------------------------------------------------------
+
+    if intent == "comparison":
+
+        comparison_result = _compare_schemes(
+            message,
+            language,
+        )
+
+        if not comparison_result["success"]:
+            return {
+                "reply": comparison_result["message"],
+                "recommended_scheme": None,
+                "recommended_schemes": comparison_result.get(
+                    "schemes",
+                    []
+                ),
+                "intent_type": "comparison",
+                "comparison": comparison_result,
+                "agent_flow": [
+                    "OrchestratorAgent",
+                    "IntentDetectionAgent",
+                    "SchemeComparisonAgent",
+                ],
+            }
+
+        comparison_context = comparison_result["schemes"]
+
+        granite_query = (
+            "Compare these two government schemes clearly. "
+            "Explain the main differences in eligibility, benefits, "
+            "documents, target beneficiaries, and application/deadline "
+            "information. Do not invent facts. Use only the supplied "
+            "scheme data.\n\n"
+            f"User query: {message}"
+        )
+
+        try:
+            reply = granite_client.generate(
+                query=granite_query,
+                context=comparison_context,
+                language=language,
+                intent_type="comparison",
+            )
+        except Exception as e:
+            logger.error(f"COMPARISON GRANITE ERROR: {e}")
+
+            reply = (
+                f"{comparison_context[0].get('name', 'Scheme 1')} "
+                "vs "
+                f"{comparison_context[1].get('name', 'Scheme 2')}\n\n"
+                f"Eligibility:\n"
+                f"• {comparison_context[0].get('eligibility', 'Not available')}\n"
+                f"• {comparison_context[1].get('eligibility', 'Not available')}\n\n"
+                f"Benefits:\n"
+                f"• {comparison_context[0].get('benefits', 'Not available')}\n"
+                f"• {comparison_context[1].get('benefits', 'Not available')}"
+            )
+
+        return {
+            "reply": reply,
+            "recommended_scheme": comparison_context[0],
+            "recommended_schemes": comparison_context,
+            "intent_type": "comparison",
+            "comparison": comparison_result["comparison"],
+            "agent_flow": [
+                "OrchestratorAgent",
+                "IntentDetectionAgent",
+                "SchemeComparisonAgent",
+                "IBMGranite",
+            ],
+        }
+
+    # --------------------------------------------------------
+    # Step 4: Profile completeness check
     # If profile has NO minimum fields and the user is asking
     # something profile-dependent, nudge them to fill it first
     # rather than returning irrelevant results.
     # --------------------------------------------------------
+    # --------------------------------------------------------
+    # Document assistance / document eligibility
+    # --------------------------------------------------------
+    if intent == "document":
+        available_documents = (
+            profile.get("available_documents")
+            or profile.get("documents")
+            or _extract_profile_from_message(message).get("available_documents", [])
+        )
+
+        document_result = document_agent.run(
+            query=message,
+            available_documents=available_documents,
+        )
+
+        schemes = document_result.get("schemes", [])
+
+        return {
+            "reply": document_result.get(
+                "message",
+                "Document information retrieved successfully."
+            ),
+            "recommended_scheme": schemes[0] if schemes else None,
+            "recommended_schemes": schemes,
+            "intent_type": "document",
+            "document_eligibility": document_result.get(
+                "document_eligibility", []
+            ),
+            "available_documents": document_result.get(
+                "available_documents", []
+            ),
+            "agent_flow": [
+                "OrchestratorAgent",
+                "IntentDetectionAgent",
+                "DocumentAssistanceAgent",
+            ],
+        }
+
     pc = get_profile_completeness(profile)
     profile_dependent = intent in ("eligibility", "scheme", "career")
 
     if profile_dependent and not pc["has_minimum"]:
-        logger.info("PROFILE INCOMPLETE — sending fill-profile prompt")
-        nudge = build_profile_missing_prompt(pc["missing"], language)
+        logger.info(
+            "PROFILE INCOMPLETE — asking for missing conversational fields"
+        )
+
+        nudge = _build_conversational_missing_prompt(
+            pc["missing"],
+            language,
+        )
+
         return {
             "reply": nudge,
             "recommended_scheme": None,
             "recommended_schemes": [],
             "intent_type": "scheme",
             "profile_missing": True,
-            "agent_flow": ["OrchestratorAgent", "IntentDetectionAgent"],
+            "missing_fields": pc["missing"],
+            "agent_flow": [
+                "OrchestratorAgent",
+                "IntentDetectionAgent",
+            ],
         }
 
     # --------------------------------------------------------

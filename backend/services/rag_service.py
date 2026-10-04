@@ -159,6 +159,168 @@ def index_schemes():
     )
 
 
+
+# ============================================================
+# QUERY REWRITING
+# ============================================================
+
+def rewrite_query(query: str) -> str:
+    """
+    Expand common natural-language terms into government-scheme
+    search concepts before semantic retrieval.
+
+    This does not replace the user's original query.
+    It simply adds useful search context.
+    """
+
+    if not query or not query.strip():
+        return query
+
+    original = query.strip()
+    text = original.lower()
+
+    expansions = []
+
+    keyword_groups = {
+        "education": [
+            "education",
+            "study",
+            "studies",
+            "padhai",
+            "school",
+            "college",
+            "student",
+            "students",
+            "scholarship",
+            "scholarships",
+            "पढ़ाई",
+            "शिक्षा",
+            "छात्र",
+            "स्कॉलरशिप",
+        ],
+
+        "employment": [
+            "job",
+            "jobs",
+            "employment",
+            "career",
+            "rojgar",
+            "naukri",
+            "नौकरी",
+            "रोजगार",
+            "employment",
+        ],
+
+        "skill development": [
+            "skill",
+            "skills",
+            "training",
+            "course",
+            "courses",
+            "upskill",
+            "skill development",
+            "कौशल",
+            "प्रशिक्षण",
+        ],
+
+        "business entrepreneurship": [
+            "business",
+            "startup",
+            "entrepreneur",
+            "entrepreneurship",
+            "shop",
+            "small business",
+            "msme",
+            "व्यवसाय",
+            "उद्यम",
+            "स्टार्टअप",
+        ],
+
+        "agriculture farming": [
+            "farmer",
+            "farmers",
+            "farming",
+            "agriculture",
+            "kisan",
+            "खेती",
+            "किसान",
+            "कृषि",
+        ],
+
+        "housing": [
+            "house",
+            "housing",
+            "home",
+            "ghar",
+            "आवास",
+            "घर",
+        ],
+
+        "healthcare": [
+            "health",
+            "medical",
+            "hospital",
+            "treatment",
+            "medicine",
+            "स्वास्थ्य",
+            "इलाज",
+            "अस्पताल",
+        ],
+
+        "women empowerment": [
+            "woman",
+            "women",
+            "female",
+            "girl",
+            "girls",
+            "mahila",
+            "महिला",
+            "बालिका",
+        ],
+
+        "financial assistance": [
+            "money",
+            "financial help",
+            "financial assistance",
+            "income support",
+            "benefit",
+            "benefits",
+            "paisa",
+            "madad",
+            "वित्तीय सहायता",
+            "आर्थिक सहायता",
+            "पैसे",
+        ],
+
+        "senior citizens": [
+            "senior citizen",
+            "senior citizens",
+            "elderly",
+            "old age",
+            "vridh",
+            "वृद्ध",
+            "वरिष्ठ नागरिक",
+        ],
+    }
+
+    for concept, keywords in keyword_groups.items():
+        if any(keyword in text for keyword in keywords):
+            expansions.append(concept)
+
+    # Remove duplicates while preserving order.
+    expansions = list(dict.fromkeys(expansions))
+
+    if not expansions:
+        return original
+
+    rewritten = (
+        f"{original}. "
+        f"Government schemes related to: {', '.join(expansions)}."
+    )
+
+    return rewritten
+
+
 # ============================================================
 # RAW CHROMADB SEARCH
 # ============================================================
@@ -181,8 +343,10 @@ def search_schemes(
     # ChromaDB automatically generates query embedding
     # --------------------------------------------------------
 
+    rewritten_query = rewrite_query(query)
+
     results = collection.query(
-        query_texts=[query],
+        query_texts=[rewritten_query],
         n_results=top_k
     )
 

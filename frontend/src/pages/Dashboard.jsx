@@ -64,7 +64,7 @@ function Dashboard() {
     {
       title: "Check Eligibility",
       desc: "Check your eligibility for available government schemes.",
-      link: "/eligibility",
+      link: "/schemes",
       icon: <FaUserCheck className="text-emerald-500 text-xl" />,
     },
   ];

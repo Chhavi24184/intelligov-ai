@@ -126,7 +126,27 @@ class IntentDetectionAgent:
         ]
 
         # ============================================================
-        # 7. Scheme Related
+        # 7. Comparison Related
+        # ============================================================
+
+        comparison_keywords = [
+            "compare",
+            "comparison",
+            "difference",
+            "differences",
+            "vs",
+            "versus",
+            "better than",
+            "which is better",
+            "compare schemes",
+            "compare these schemes",
+            "difference between",
+            "तुलना",
+            "अंतर",
+        ]
+
+        # ============================================================
+        # 8. Scheme Related
         # ============================================================
 
         scheme_keywords = [
@@ -200,7 +220,7 @@ class IntentDetectionAgent:
         ]
 
         # ============================================================
-        # 8. Intent Priority
+        # 9. Intent Priority
         # ============================================================
         #
         # More specific intents are checked first.
@@ -227,6 +247,17 @@ class IntentDetectionAgent:
         ):
 
             intent = "notification"
+
+        # ------------------------------------------------------------
+        # Comparison
+        # ------------------------------------------------------------
+
+        elif any(
+            keyword in query_lower
+            for keyword in comparison_keywords
+        ):
+
+            intent = "comparison"
 
         # ------------------------------------------------------------
         # Eligibility

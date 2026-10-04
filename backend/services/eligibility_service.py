@@ -170,6 +170,81 @@ def _parse_scheme_income_ceiling(scheme: dict) -> int:
 # ELIGIBILITY CHECKER
 # ============================================================
 
+
+def _build_eligibility_checklist(scheme: dict, profile: dict) -> dict:
+    """
+    Build a simple explainable eligibility checklist from the
+    existing profile + scheme matching information.
+
+    Does not change the existing eligibility score.
+    """
+
+    matched = list(scheme.get("eligibility_reasons", []))
+    missing = []
+
+    eligibility_text = str(
+        scheme.get("eligibility", "")
+    ).lower()
+
+    # Required profile information
+    age = profile.get("age")
+    occupation = str(profile.get("occupation") or "").strip()
+    income = profile.get("income")
+    state = str(profile.get("state") or "").strip()
+    category = str(profile.get("category") or "").strip()
+    education = str(profile.get("education") or "").strip()
+    gender = str(profile.get("gender") or "").strip()
+
+    # Profile completeness checks
+    if not age:
+        missing.append("Age information")
+    if not occupation:
+        missing.append("Occupation information")
+    if not state:
+        missing.append("State information")
+    if not income:
+        missing.append("Income information")
+
+    # Scheme-specific category requirement
+    if any(k in eligibility_text for k in [
+        "obc", "sc/st", "scheduled caste",
+        "scheduled tribe", "ews", "minority",
+        "backward class", "dnt", "ebc"
+    ]):
+        if not category:
+            missing.append("Category information")
+
+    # Scheme-specific education requirement
+    if any(k in eligibility_text for k in [
+        "10th", "12th", "graduate", "graduation",
+        "bachelor", "degree", "diploma", "iti"
+    ]):
+        if not education:
+            missing.append("Education information")
+
+    # Gender-specific requirement
+    if any(k in eligibility_text for k in [
+        "women", "woman", "female", "girl", "girls"
+    ]):
+        if not gender:
+            missing.append("Gender information")
+
+    # Remove duplicates while preserving order
+    matched = list(dict.fromkeys(matched))
+    missing = list(dict.fromkeys(missing))
+
+    if missing:
+        status = "Partially Matched"
+    else:
+        status = "Matched"
+
+    return {
+        "eligibility_status": status,
+        "matched_requirements": matched,
+        "missing_requirements": missing,
+    }
+
+
 def check_eligibility(
     age,
     occupation,
@@ -408,6 +483,22 @@ def check_eligibility(
             scheme_result = scheme.copy()
             scheme_result["match_score"]         = score
             scheme_result["eligibility_reasons"] = reasons
+
+            checklist = _build_eligibility_checklist(
+                scheme_result,
+                {
+                    "age": age,
+                    "occupation": occupation,
+                    "income": income,
+                    "state": state,
+                    "category": category,
+                    "education": education,
+                    "gender": gender,
+                },
+            )
+
+            scheme_result.update(checklist)
+
             recommended.append(scheme_result)
 
     # Highest relevance first

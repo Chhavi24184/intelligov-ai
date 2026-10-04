@@ -98,6 +98,16 @@ function App() {
           }
         />
 
+        {/* Matched Schemes - Profile Based */}
+        <Route
+          path="/matched-schemes"
+          element={
+            <ProtectedRoute>
+              <SchemeRecommendation profileOnly />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Eligibility */}
         <Route
           path="/eligibility"

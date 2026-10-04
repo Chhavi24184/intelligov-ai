@@ -85,6 +85,13 @@ export const eligibilityByProfileAPI = async (userId) => {
   return response.data;
 };
 
+
+// Fetch personalized scheme matches for a user's saved profile.
+export const matchSchemesAPI = async (userId) => {
+  const response = await API.get(`/eligibility/match-schemes/${userId}`);
+  return response.data;
+};
+
 // ======================================================
 // SCHEMES API
 // ======================================================

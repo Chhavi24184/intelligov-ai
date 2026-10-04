@@ -7,6 +7,7 @@ import {
   FaCopy,
   FaCheck,
   FaPaperPlane,
+  FaMicrophone,
   FaShieldAlt,
   FaSearch,
   FaGraduationCap,
@@ -36,59 +37,99 @@ import robot from "../assets/robot.png";
 
 
 // =====================================================
-// INLINE SCHEME CARD (shown inside AI chat messages)
+// INLINE SCHEME CARD
 // =====================================================
 
 function InlineSchemCard({ scheme, userId, navigate }) {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const name         = scheme.name || scheme.scheme_name || "Government Scheme";
-  const category     = scheme.category || "";
-  const description  = scheme.description || "";
-  const benefits     = scheme.benefits || "";
-  const eligibility  = scheme.eligibility || "";
-  const deadline     = scheme.deadline || "";
-  const officialUrl  = (() => {
+  const name =
+    scheme.name ||
+    scheme.scheme_name ||
+    "Government Scheme";
+
+  const category = scheme.category || "";
+
+  const description =
+    scheme.description || "";
+
+  const benefits =
+    scheme.benefits || "";
+
+  const eligibility =
+    scheme.eligibility || "";
+
+  const deadline =
+    scheme.deadline || "";
+
+  const officialUrl = (() => {
     const raw = scheme.official_url || "";
+
     if (!raw) return "";
-    if (/^https?:\/\//i.test(raw)) return raw;
+
+    if (/^https?:\/\//i.test(raw)) {
+      return raw;
+    }
+
     return "https://" + raw;
   })();
-  const documents    = Array.isArray(scheme.documents) ? scheme.documents : [];
-  const reasons      = Array.isArray(scheme.eligibility_reasons) ? scheme.eligibility_reasons : [];
+
+  const documents = Array.isArray(scheme.documents)
+    ? scheme.documents
+    : [];
+
+  const reasons = Array.isArray(scheme.eligibility_reasons)
+    ? scheme.eligibility_reasons
+    : [];
+
 
   const handleSave = async () => {
     if (!userId || saving || saved) return;
+
     setSaving(true);
+
     try {
       await saveSchemeAPI(userId, scheme);
       setSaved(true);
     } catch {
-      /* ignore */
+      // ignore
     } finally {
       setSaving(false);
     }
   };
 
+
   const handleApplyWithAgent = () => {
-    const encoded = encodeURIComponent(JSON.stringify(scheme));
+    const encoded = encodeURIComponent(
+      JSON.stringify(scheme)
+    );
+
     navigate(`/apply?scheme=${encoded}`);
   };
+
 
   return (
     <div className="p-3 rounded-xl bg-white border border-slate-200 shadow-sm text-xs space-y-2">
 
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
+
         <div>
-          <div className="font-bold text-slate-800 text-sm">{name}</div>
+
+          <div className="font-bold text-slate-800 text-sm">
+            {name}
+          </div>
+
           {category && (
             <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200 text-[10px] font-semibold">
               {category}
             </span>
           )}
+
         </div>
+
+
         {userId && (
           <button
             onClick={handleSave}
@@ -101,65 +142,109 @@ function InlineSchemCard({ scheme, userId, navigate }) {
             }`}
           >
             <FaBookmark className="text-[9px]" />
-            {saved ? "Saved" : saving ? "…" : "Save"}
+
+            {saved
+              ? "Saved"
+              : saving
+              ? "…"
+              : "Save"}
           </button>
         )}
+
       </div>
+
 
       {/* Description */}
       {description && (
-        <p className="text-slate-600 leading-relaxed">{description}</p>
+        <p className="text-slate-600 leading-relaxed">
+          {description}
+        </p>
       )}
+
 
       {/* Benefits */}
       {benefits && (
         <div>
-          <span className="font-semibold text-slate-700">Benefits: </span>
-          <span className="text-slate-600">{benefits}</span>
-        </div>
-      )}
+          <span className="font-semibold text-slate-700">
+            Benefits:{" "}
+          </span>
 
-      {/* Eligibility */}
-      {eligibility && (
-        <div>
-          <span className="font-semibold text-slate-700">Eligibility: </span>
-          <span className="text-slate-600">{eligibility}</span>
-        </div>
-      )}
-
-      {/* Why relevant */}
-      {reasons.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {reasons.map((r, i) => (
-            <span key={i} className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px]">
-              ✓ {r}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Deadline */}
-      {deadline && (
-        <div className="flex items-center gap-1 text-amber-700">
-          <FaCalendarAlt className="text-[9px]" />
-          <span>Deadline: {deadline}</span>
-        </div>
-      )}
-
-      {/* Documents */}
-      {documents.length > 0 && (
-        <div className="flex items-start gap-1 text-slate-600">
-          <FaFileAlt className="text-[9px] mt-0.5 shrink-0" />
-          <span>
-            <span className="font-semibold text-slate-700">Documents: </span>
-            {documents.join(", ")}
+          <span className="text-slate-600">
+            {benefits}
           </span>
         </div>
       )}
 
+
+      {/* Eligibility */}
+      {eligibility && (
+        <div>
+          <span className="font-semibold text-slate-700">
+            Eligibility:{" "}
+          </span>
+
+          <span className="text-slate-600">
+            {eligibility}
+          </span>
+        </div>
+      )}
+
+
+      {/* Why relevant */}
+      {reasons.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+
+          {reasons.map((r, i) => (
+            <span
+              key={i}
+              className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px]"
+            >
+              ✓ {r}
+            </span>
+          ))}
+
+        </div>
+      )}
+
+
+      {/* Deadline */}
+      {deadline && (
+        <div className="flex items-center gap-1 text-amber-700">
+
+          <FaCalendarAlt className="text-[9px]" />
+
+          <span>
+            Deadline: {deadline}
+          </span>
+
+        </div>
+      )}
+
+
+      {/* Documents */}
+      {documents.length > 0 && (
+        <div className="flex items-start gap-1 text-slate-600">
+
+          <FaFileAlt className="text-[9px] mt-0.5 shrink-0" />
+
+          <span>
+
+            <span className="font-semibold text-slate-700">
+              Documents:{" "}
+            </span>
+
+            {documents.join(", ")}
+
+          </span>
+
+        </div>
+      )}
+
+
       {/* Action buttons */}
       <div className="flex flex-wrap gap-2 pt-1">
-        {/* Apply with Agent — primary CTA */}
+
+        {/* Apply with Agent */}
         {userId && (
           <button
             onClick={handleApplyWithAgent}
@@ -175,7 +260,9 @@ function InlineSchemCard({ scheme, userId, navigate }) {
             Apply with AI Agent ✦
           </button>
         )}
-        {/* Apply Now — direct portal link */}
+
+
+        {/* Official Portal */}
         {officialUrl && (
           <a
             href={officialUrl}
@@ -190,9 +277,11 @@ function InlineSchemCard({ scheme, userId, navigate }) {
               hover:border-cyan-300 hover:text-cyan-600 transition
             "
           >
-            Official Portal <FaExternalLinkAlt className="text-[9px]" />
+            Official Portal
+            <FaExternalLinkAlt className="text-[9px]" />
           </a>
         )}
+
       </div>
 
     </div>
@@ -200,32 +289,149 @@ function InlineSchemCard({ scheme, userId, navigate }) {
 }
 
 
+// =====================================================
+// AI CHAT
+// =====================================================
+
 function AIChat() {
 
   const navigate = useNavigate();
 
+
+  // =====================================================
+  // STATES
+  // =====================================================
+
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [copiedIndex, setCopiedIndex] = useState(null);
-  const [showChatBottomButton, setShowChatBottomButton] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
 
-  const chatContainerRef = useRef(null);
+  const [isListening, setIsListening] =
+    useState(false);
 
-  const userId = localStorage.getItem("userId");
-  const language = localStorage.getItem("userLanguage") || "en";
+  const [loading, setLoading] =
+    useState(false);
 
-  // Load profile on mount so chat can send it with each message
+  const [messages, setMessages] =
+    useState([]);
+
+  const [copiedIndex, setCopiedIndex] =
+    useState(null);
+
+  const [showChatBottomButton, setShowChatBottomButton] =
+    useState(false);
+
+  const [userProfile, setUserProfile] =
+    useState(null);
+
+
+  const chatContainerRef =
+    useRef(null);
+
+
+  const userId =
+    localStorage.getItem("userId");
+
+  const language =
+    localStorage.getItem("userLanguage") || "en";
+
+
+  // =====================================================
+  // LOAD PROFILE
+  // =====================================================
+
   useEffect(() => {
+
     if (userId) {
+
       getProfileAPI(userId)
         .then((data) => {
-          if (data?.profile) setUserProfile(data.profile);
+
+          if (data?.profile) {
+            setUserProfile(data.profile);
+          }
+
         })
         .catch(() => {});
+
     }
+
   }, [userId]);
+
+
+  // =====================================================
+  // VOICE INPUT
+  // =====================================================
+
+  const handleVoiceInput = () => {
+
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+
+    if (!SpeechRecognition) {
+
+      alert(
+        "Voice input is not supported in this browser."
+      );
+
+      return;
+    }
+
+
+    if (isListening) {
+      return;
+    }
+
+
+    const recognition =
+      new SpeechRecognition();
+
+
+    recognition.lang = "en-IN";
+
+    recognition.continuous = false;
+
+    recognition.interimResults = false;
+
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+
+    recognition.onresult = (event) => {
+
+      const transcript =
+        event.results[0][0].transcript;
+
+
+      setMessage((prev) =>
+        prev
+          ? `${prev} ${transcript}`
+          : transcript
+      );
+
+    };
+
+
+    recognition.onerror = (event) => {
+
+      console.error(
+        "Speech recognition error:",
+        event.error
+      );
+
+      setIsListening(false);
+    };
+
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+
+    recognition.start();
+  };
 
 
   // =====================================================
@@ -234,42 +440,59 @@ function AIChat() {
 
   const handleSend = async () => {
 
-    if (!message.trim() || loading) return;
+    if (!message.trim() || loading) {
+      return;
+    }
 
-    const userMessage = message.trim();
+
+    const userMessage =
+      message.trim();
 
 
-    // =================================================
-    // SHOW USER MESSAGE IMMEDIATELY
-    // =================================================
-
+    // User message
     setMessages((prev) => [
+
       ...prev,
+
       {
         type: "user",
+
         text: userMessage,
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+
+        timestamp:
+          new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
       },
+
     ]);
 
 
     setMessage("");
+
     setLoading(true);
 
 
     try {
 
-      console.log("Sending message:", userMessage);
+      console.log(
+        "Sending message:",
+        userMessage
+      );
 
 
       // =================================================
       // CALL AI CHAT API
       // =================================================
 
-      const response = await chatAPI(userMessage, userProfile, language);
+      const response =
+        await chatAPI(
+          userMessage,
+          userProfile,
+          language
+        );
+
 
       console.log(
         "FULL CHAT API RESPONSE:",
@@ -284,7 +507,7 @@ function AIChat() {
 
 
       // =================================================
-      // EXTRACT AI REPLY
+      // AI REPLY
       // =================================================
 
       const reply =
@@ -300,7 +523,7 @@ function AIChat() {
 
 
       // =================================================
-      // EXTRACT RECOMMENDED SCHEMES + METADATA
+      // SCHEMES
       // =================================================
 
       const recommendedScheme =
@@ -310,15 +533,20 @@ function AIChat() {
         response?.recommendedScheme ||
         null;
 
+
       const recommendedSchemes =
         chatData?.recommended_schemes ||
         response?.recommended_schemes ||
-        (recommendedScheme ? [recommendedScheme] : []);
+        (recommendedScheme
+          ? [recommendedScheme]
+          : []);
+
 
       const intentType =
         chatData?.intent_type ||
         response?.intent_type ||
         "scheme";
+
 
       const profileMissing =
         chatData?.profile_missing ||
@@ -327,11 +555,30 @@ function AIChat() {
 
 
       // =================================================
-      // SAVE CHAT HISTORY TO DATABASE
+      // DOCUMENT ELIGIBILITY
       // =================================================
 
-      // userId already available from outer scope
+      const documentEligibilityRaw =
+        chatData?.document_eligibility ||
+        response?.document_eligibility ||
+        null;
 
+
+      const documentEligibility =
+        Array.isArray(documentEligibilityRaw)
+          ? documentEligibilityRaw[0] || null
+          : documentEligibilityRaw;
+
+
+      const availableDocuments =
+        chatData?.available_documents ||
+        response?.available_documents ||
+        [];
+
+
+      // =================================================
+      // SAVE CHAT HISTORY
+      // =================================================
 
       if (userId) {
 
@@ -343,13 +590,12 @@ function AIChat() {
             reply
           );
 
+
           console.log(
             "Chat history saved successfully."
           );
 
         } catch (historyError) {
-
-          // History failure should NOT break AI chat
 
           console.error(
             "Chat history save failed:",
@@ -372,19 +618,33 @@ function AIChat() {
       // =================================================
 
       setMessages((prev) => [
+
         ...prev,
+
         {
           type: "ai",
+
           text: reply,
+
           scheme: recommendedScheme,
+
           schemes: recommendedSchemes,
+
           intentType,
+
           profileMissing,
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
+
+          documentEligibility,
+
+          availableDocuments,
+
+          timestamp:
+            new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
         },
+
       ]);
 
 
@@ -397,17 +657,24 @@ function AIChat() {
 
 
       setMessages((prev) => [
+
         ...prev,
+
         {
           type: "ai",
+
           text:
             "Sorry, I couldn't connect to the server. Please make sure the backend server is running and try again.",
+
           error: true,
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
+
+          timestamp:
+            new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
         },
+
       ]);
 
     } finally {
@@ -440,14 +707,18 @@ function AIChat() {
 
 
   // =====================================================
-  // CHAT SCROLL DETECTION
+  // CHAT SCROLL
   // =====================================================
 
   useEffect(() => {
 
-    const container = chatContainerRef.current;
+    const container =
+      chatContainerRef.current;
 
-    if (!container) return;
+
+    if (!container) {
+      return;
+    }
 
 
     const handleScroll = () => {
@@ -492,9 +763,13 @@ function AIChat() {
 
   useEffect(() => {
 
-    const container = chatContainerRef.current;
+    const container =
+      chatContainerRef.current;
 
-    if (!container) return;
+
+    if (!container) {
+      return;
+    }
 
 
     setTimeout(() => {
@@ -518,9 +793,13 @@ function AIChat() {
 
   const scrollToChatBottom = () => {
 
-    const container = chatContainerRef.current;
+    const container =
+      chatContainerRef.current;
 
-    if (!container) return;
+
+    if (!container) {
+      return;
+    }
 
 
     container.scrollTo({
@@ -530,7 +809,6 @@ function AIChat() {
 
 
     setShowChatBottomButton(false);
-
   };
 
 
@@ -583,6 +861,7 @@ function AIChat() {
 
       }, 2000);
 
+
     } catch (error) {
 
       console.error(
@@ -603,33 +882,45 @@ function AIChat() {
 
     {
       icon: <FaTractor />,
+
       title: "Farmer Schemes",
+
       question:
         "What agricultural schemes are available for farmers?",
+
       color: "text-cyan-500",
     },
 
     {
       icon: <PiStudentFill />,
+
       title: "Scholarships",
+
       question:
         "Tell me about scholarships for college students.",
+
       color: "text-blue-500",
     },
 
     {
       icon: <FaShieldAlt />,
+
       title: "Health Benefits",
+
       question:
         "How to check eligibility for health schemes?",
+
       color: "text-emerald-500",
     },
 
     {
       icon: <HiBriefcase />,
+
       title: "Jobs & Internships",
+
       question:
         "Show government job vacancies and internships.",
+
       color: "text-amber-500",
     },
 
@@ -637,15 +928,16 @@ function AIChat() {
 
 
   // =====================================================
+  // PART 1 ENDS HERE
+  // =====================================================
+    // =====================================================
   // RETURN UI
   // =====================================================
 
   return (
-
     <div className="min-h-screen bg-slate-50 text-slate-800">
 
       <section className="relative max-w-6xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
-
 
         {/* =================================================
             CHAT HEADER
@@ -667,7 +959,6 @@ function AIChat() {
         >
 
           <div className="flex items-center justify-between gap-3">
-
 
             {/* =================================================
                 AI INFORMATION
@@ -796,7 +1087,6 @@ function AIChat() {
 
             <div className="flex items-center gap-2 shrink-0">
 
-
               {/* CHAT HISTORY */}
 
               <button
@@ -897,7 +1187,6 @@ function AIChat() {
           "
         >
 
-
           {/* =================================================
               INTERNAL CHAT AREA
           ================================================= */}
@@ -915,7 +1204,6 @@ function AIChat() {
               scroll-smooth
             "
           >
-
 
             {/* =================================================
                 EMPTY STATE
@@ -1086,7 +1374,6 @@ function AIChat() {
 
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
 
                       {/* FARMER */}
 
@@ -1300,7 +1587,6 @@ function AIChat() {
 
               <div key={idx}>
 
-
                 {/* =================================================
                     USER MESSAGE
                 ================================================= */}
@@ -1380,7 +1666,7 @@ function AIChat() {
                 ) : (
 
                   /* =================================================
-                      AI MESSAGE
+                     AI MESSAGE
                   ================================================= */
 
                   <div
@@ -1417,7 +1703,6 @@ function AIChat() {
 
 
                     <div className="w-full min-w-0">
-
 
                       {/* AI RESPONSE */}
 
@@ -1485,27 +1770,47 @@ function AIChat() {
                       ================================================= */}
 
                       {msg.profileMissing && (
+
                         <div
                           className="
-                            mt-3 p-3
+                            mt-3
+                            p-3
                             rounded-xl
                             bg-amber-50
-                            border border-amber-200
-                            flex items-center gap-3
+                            border
+                            border-amber-200
+                            flex
+                            items-center
+                            gap-3
                           "
                         >
+
                           <FaUserEdit className="text-amber-500 shrink-0" />
+
                           <span className="text-xs text-amber-800">
+
                             Fill in your{" "}
+
                             <button
-                              onClick={() => navigate("/profile")}
-                              className="underline font-semibold hover:text-amber-600"
+                              onClick={() =>
+                                navigate("/profile")
+                              }
+                              className="
+                                underline
+                                font-semibold
+                                hover:text-amber-600
+                              "
                             >
                               Profile
-                            </button>{" "}
+                            </button>
+
+                            {" "}
                             for personalised scheme recommendations.
+
                           </span>
+
                         </div>
+
                       )}
 
 
@@ -1516,9 +1821,19 @@ function AIChat() {
                       {!msg.profileMissing &&
                         msg.schemes &&
                         msg.schemes.length > 0 && (
+
                           <div className="mt-3 space-y-3">
 
-                            <div className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
+                            <div
+                              className="
+                                text-xs
+                                text-slate-500
+                                font-semibold
+                                uppercase
+                                tracking-wider
+                              "
+                            >
+
                               {msg.intentType === "job"
                                 ? "🏢 Job Opportunities"
                                 : msg.intentType === "scholarship"
@@ -1526,34 +1841,359 @@ function AIChat() {
                                 : msg.intentType === "internship"
                                 ? "💼 Internships"
                                 : "📋 Recommended Schemes"}
+
                               {" "}({msg.schemes.length})
+
                             </div>
 
-                            {msg.schemes.map((scheme, si) => (
-                              <InlineSchemCard
-                                key={si}
-                                scheme={scheme}
-                                userId={userId}
-                                navigate={navigate}
-                              />
-                            ))}
+
+                            {msg.schemes.map(
+                              (scheme, si) => (
+
+                                <InlineSchemCard
+                                  key={si}
+                                  scheme={scheme}
+                                  userId={userId}
+                                  navigate={navigate}
+                                />
+
+                              )
+                            )}
 
                           </div>
+
                         )}
 
 
-                      {/* TIMESTAMP */}
+                      {/* =================================================
+                          DOCUMENT ELIGIBILITY
+                      ================================================= */}
 
-                      <div
-                        className="
-                          text-[10px]
-                          text-slate-400
-                          mt-1
-                          px-1
-                        "
-                      >
-                        {msg.timestamp}
-                      </div>
+                      {msg.documentEligibility && (
+
+                        <div
+                          className="
+                            mt-4
+                            rounded-2xl
+                            border
+                            border-slate-200
+                            bg-white
+                            shadow-sm
+                            overflow-hidden
+                          "
+                        >
+
+                          {/* HEADER */}
+
+                          <div
+                            className="
+                              px-4
+                              py-3
+                              bg-gradient-to-r
+                              from-emerald-50
+                              to-cyan-50
+                              border-b
+                              border-slate-200
+                              flex
+                              items-center
+                              justify-between
+                              gap-3
+                            "
+                          >
+
+                            <div className="flex items-center gap-2">
+
+                              <div
+                                className="
+                                  w-9
+                                  h-9
+                                  rounded-xl
+                                  bg-white
+                                  border
+                                  border-emerald-200
+                                  flex
+                                  items-center
+                                  justify-center
+                                  text-emerald-600
+                                "
+                              >
+                                <FaFileAlt />
+                              </div>
+
+
+                              <div>
+
+                                <div
+                                  className="
+                                    text-sm
+                                    font-bold
+                                    text-slate-800
+                                  "
+                                >
+                                  Document Eligibility
+                                </div>
+
+
+                                <div
+                                  className="
+                                    text-[11px]
+                                    text-slate-500
+                                  "
+                                >
+                                  {msg.documentEligibility.scheme_name ||
+                                    "Scheme Document Check"}
+                                </div>
+
+                              </div>
+
+                            </div>
+
+
+                            {/* MATCH PERCENTAGE */}
+
+                            <div
+                              className="
+                                shrink-0
+                                px-3
+                                py-1.5
+                                rounded-full
+                                bg-emerald-100
+                                text-emerald-700
+                                text-xs
+                                font-bold
+                                border
+                                border-emerald-200
+                              "
+                            >
+                              {msg.documentEligibility.document_match_percentage ?? 0}% Match
+                            </div>
+
+                          </div>
+
+
+                          {/* CONTENT */}
+
+                          <div className="p-4 space-y-4">
+
+                            {/* AVAILABLE DOCUMENTS */}
+
+                            {msg.availableDocuments &&
+                              msg.availableDocuments.length > 0 && (
+
+                                <div>
+
+                                  <div
+                                    className="
+                                      text-xs
+                                      font-semibold
+                                      text-slate-700
+                                      mb-2
+                                    "
+                                  >
+                                    Your Available Documents
+                                  </div>
+
+
+                                  <div className="flex flex-wrap gap-2">
+
+                                    {msg.availableDocuments.map(
+                                      (doc, i) => (
+
+                                        <span
+                                          key={i}
+                                          className="
+                                            inline-flex
+                                            items-center
+                                            gap-1
+                                            px-2.5
+                                            py-1
+                                            rounded-full
+                                            bg-blue-50
+                                            border
+                                            border-blue-200
+                                            text-blue-700
+                                            text-[11px]
+                                            font-medium
+                                          "
+                                        >
+                                          ✓ {doc}
+                                        </span>
+
+                                      )
+                                    )}
+
+                                  </div>
+
+                                </div>
+
+                              )}
+
+
+                            {/* MATCHED DOCUMENTS */}
+
+                            {msg.documentEligibility.matched_documents &&
+                              msg.documentEligibility.matched_documents.length > 0 && (
+
+                                <div>
+
+                                  <div
+                                    className="
+                                      text-xs
+                                      font-semibold
+                                      text-emerald-700
+                                      mb-2
+                                    "
+                                  >
+                                    Matched Documents
+                                  </div>
+
+
+                                  <div className="space-y-1.5">
+
+                                    {msg.documentEligibility.matched_documents.map(
+                                      (doc, i) => (
+
+                                        <div
+                                          key={i}
+                                          className="
+                                            flex
+                                            items-center
+                                            gap-2
+                                            text-xs
+                                            text-emerald-700
+                                            bg-emerald-50
+                                            border
+                                            border-emerald-100
+                                            rounded-lg
+                                            px-3
+                                            py-2
+                                          "
+                                        >
+                                          <FaCheck className="shrink-0" />
+                                          <span>{doc}</span>
+                                        </div>
+
+                                      )
+                                    )}
+
+                                  </div>
+
+                                </div>
+
+                              )}
+
+
+                            {/* MISSING DOCUMENTS */}
+
+                            {msg.documentEligibility.missing_documents &&
+                              msg.documentEligibility.missing_documents.length > 0 && (
+
+                                <div>
+
+                                  <div
+                                    className="
+                                      text-xs
+                                      font-semibold
+                                      text-red-600
+                                      mb-2
+                                    "
+                                  >
+                                    Missing Documents
+                                  </div>
+
+
+                                  <div className="space-y-1.5">
+
+                                    {msg.documentEligibility.missing_documents.map(
+                                      (doc, i) => (
+
+                                        <div
+                                          key={i}
+                                          className="
+                                            flex
+                                            items-center
+                                            gap-2
+                                            text-xs
+                                            text-red-600
+                                            bg-red-50
+                                            border
+                                            border-red-100
+                                            rounded-lg
+                                            px-3
+                                            py-2
+                                          "
+                                        >
+                                          <span className="font-bold">
+                                            ✕
+                                          </span>
+
+                                          <span>{doc}</span>
+
+                                        </div>
+
+                                      )
+                                    )}
+
+                                  </div>
+
+                                </div>
+
+                              )}
+
+
+                            {/* STATUS */}
+
+                            <div
+                              className="
+                                flex
+                                items-center
+                                justify-between
+                                pt-2
+                                border-t
+                                border-slate-100
+                              "
+                            >
+
+                              <span
+                                className="
+                                  text-xs
+                                  font-semibold
+                                  text-slate-600
+                                "
+                              >
+                                Status
+                              </span>
+
+
+                              <span
+                                className={`
+                                  px-2.5
+                                  py-1
+                                  rounded-full
+                                  text-[11px]
+                                  font-bold
+                                  ${
+                                    msg.documentEligibility.document_status ===
+                                    "Complete"
+                                      ? "bg-emerald-100 text-emerald-700"
+                                      : msg.documentEligibility.document_status ===
+                                        "Partially Complete"
+                                      ? "bg-amber-100 text-amber-700"
+                                      : "bg-slate-100 text-slate-600"
+                                  }
+                                `}
+                              >
+                                {msg.documentEligibility.document_status ||
+                                  "Not Available"}
+                              </span>
+
+                            </div>
+
+                          </div>
+
+                        </div>
+
+                      )}
 
                     </div>
 
@@ -1567,12 +2207,12 @@ function AIChat() {
 
 
             {/* =================================================
-                THINKING / LOADING
+                LOADING
             ================================================= */}
 
             {loading && (
 
-              <div className="flex gap-3 sm:gap-4">
+              <div className="flex gap-2 sm:gap-4 max-w-[95%] sm:max-w-2xl">
 
                 <div
                   className="
@@ -1591,74 +2231,43 @@ function AIChat() {
                     shrink-0
                   "
                 >
-
-                  <FaRobot className="animate-pulse" />
-
+                  <FaRobot />
                 </div>
 
 
                 <div
                   className="
                     bg-slate-50
+                    border
+                    border-slate-200
+                    rounded-2xl
                     px-4
                     py-3
-                    rounded-2xl
-                    text-xs
-                    sm:text-sm
-                    text-cyan-600
-                    flex
-                    items-center
-                    gap-3
-                    border
-                    border-cyan-200
+                    text-sm
+                    text-slate-500
                   "
                 >
+                  <div className="flex items-center gap-1">
 
-                  <span className="flex gap-1">
-
-                    <span
-                      className="
-                        w-1.5
-                        h-1.5
-                        rounded-full
-                        bg-cyan-500
-                        animate-bounce
-                      "
-                    />
+                    <span className="animate-bounce">
+                      •
+                    </span>
 
                     <span
-                      className="
-                        w-1.5
-                        h-1.5
-                        rounded-full
-                        bg-cyan-500
-                        animate-bounce
-                      "
-                      style={{
-                        animationDelay: "150ms",
-                      }}
-                    />
+                      className="animate-bounce"
+                      style={{ animationDelay: "0.15s" }}
+                    >
+                      •
+                    </span>
 
                     <span
-                      className="
-                        w-1.5
-                        h-1.5
-                        rounded-full
-                        bg-cyan-500
-                        animate-bounce
-                      "
-                      style={{
-                        animationDelay: "300ms",
-                      }}
-                    />
+                      className="animate-bounce"
+                      style={{ animationDelay: "0.3s" }}
+                    >
+                      •
+                    </span>
 
-                  </span>
-
-
-                  <span>
-                    🤖 IntelliGov AI is thinking...
-                  </span>
-
+                  </div>
                 </div>
 
               </div>
@@ -1666,40 +2275,36 @@ function AIChat() {
             )}
 
           </div>
-
-
-          {/* =================================================
-              GO TO LATEST MESSAGE
+                    {/* =================================================
+              SCROLL TO BOTTOM BUTTON
           ================================================= */}
 
           {showChatBottomButton && (
 
             <button
+              type="button"
               onClick={scrollToChatBottom}
               className="
                 absolute
+                right-4
                 bottom-24
-                left-1/2
-                -translate-x-1/2
-                z-30
+                z-20
                 w-10
                 h-10
                 rounded-full
-                bg-blue-600
-                hover:bg-blue-500
+                bg-white
                 border
-                border-cyan-300
-                shadow-lg
+                border-slate-200
+                shadow-md
+                text-cyan-600
+                hover:bg-cyan-50
+                hover:border-cyan-300
+                transition
                 flex
                 items-center
                 justify-center
-                text-white
-                transition-all
-                duration-300
-                hover:scale-110
               "
-              title="Go to latest message"
-              aria-label="Go to latest message"
+              title="Scroll to latest message"
             >
               ↓
             </button>
@@ -1715,198 +2320,167 @@ function AIChat() {
             className="
               border-t
               border-slate-200
+              bg-white
               p-3
               sm:p-4
-              bg-white
             "
           >
 
-            <div className="flex gap-2 sm:gap-3">
+            <div
+              className="
+                flex
+                items-end
+                gap-2
+                max-w-4xl
+                mx-auto
+              "
+            >
 
-              <textarea
-                value={message}
-                onChange={(e) =>
-                  setMessage(e.target.value)
-                }
-                onKeyDown={handleKeyDown}
-                placeholder="Ask IntelliGov AI about government schemes..."
-                rows={1}
-                disabled={loading}
-                className="
-                  flex-1
-                  min-w-0
-                  resize-none
-                  bg-slate-50
-                  border
-                  border-slate-200
-                  rounded-xl
-                  px-4
-                  py-3
-                  text-sm
-                  text-slate-800
-                  placeholder:text-slate-400
-                  focus:outline-none
-                  focus:border-cyan-400
-                  focus:ring-2
-                  focus:ring-cyan-100
-                  disabled:opacity-50
-                "
-              />
+              {/* MESSAGE TEXTAREA */}
+
+              <div className="flex-1 relative">
+
+                <textarea
+                  value={message}
+                  onChange={(e) =>
+                    setMessage(e.target.value)
+                  }
+                  onKeyDown={handleKeyDown}
+                  placeholder={
+                    "Ask IntelliGov AI about schemes, scholarships, jobs, internships..."
+                  }
+                  rows={1}
+                  disabled={loading}
+                  className="
+                    w-full
+                    resize-none
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-slate-50
+                    px-4
+                    py-3
+                    pr-4
+                    text-sm
+                    text-slate-700
+                    placeholder:text-slate-400
+                    outline-none
+                    focus:border-cyan-400
+                    focus:ring-2
+                    focus:ring-cyan-100
+                    disabled:opacity-60
+                    transition
+                  "
+                />
+
+              </div>
 
 
-              <button
-                onClick={handleSend}
-                disabled={
-                  !message.trim() ||
-                  loading
-                }
-                className="
-                  px-4
-                  sm:px-5
-                  py-3
-                  rounded-xl
-                  bg-gradient-to-r
-                  from-cyan-500
-                  to-blue-600
-                  text-white
-                  text-sm
-                  font-semibold
-                  flex
-                  items-center
-                  justify-center
-                  gap-2
-                  disabled:opacity-40
-                  disabled:cursor-not-allowed
-                  hover:shadow-lg
-                  hover:shadow-cyan-500/20
-                  transition
-                  shrink-0
-                "
-              >
+              {/* MIC + SEND */}
 
-                <span className="hidden sm:inline">
-                  Send
-                </span>
+              <div className="flex gap-2">
 
-                <FaPaperPlane className="text-xs" />
+                {/* VOICE INPUT */}
 
-              </button>
+                <button
+                  type="button"
+                  onClick={handleVoiceInput}
+                  disabled={loading}
+                  title={
+                    isListening
+                      ? "Listening..."
+                      : "Voice input"
+                  }
+                  className={`
+                    flex
+                    items-center
+                    justify-center
+                    w-11
+                    h-11
+                    rounded-xl
+                    border
+                    transition
+                    ${
+                      isListening
+                        ? "bg-red-50 border-red-300 text-red-600"
+                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-cyan-300 hover:text-cyan-600"
+                    }
+                    disabled:opacity-50
+                  `}
+                >
+
+                  <FaMicrophone className="text-sm" />
+
+                </button>
+
+
+                {/* SEND */}
+
+                <button
+                  type="button"
+                  onClick={handleSend}
+                  disabled={
+                    !message.trim() ||
+                    loading
+                  }
+                  title="Send message"
+                  className="
+                    flex
+                    items-center
+                    justify-center
+                    w-11
+                    h-11
+                    rounded-xl
+                    bg-cyan-600
+                    text-white
+                    shadow-sm
+                    hover:bg-cyan-700
+                    disabled:bg-slate-200
+                    disabled:text-slate-400
+                    disabled:cursor-not-allowed
+                    transition
+                  "
+                >
+
+                  <FaPaperPlane className="text-sm" />
+
+                </button>
+
+              </div>
 
             </div>
 
 
-            <p
+            {/* INPUT HINT */}
+
+            <div
               className="
-                text-[10px]
-                text-slate-400
+                max-w-4xl
+                mx-auto
                 mt-2
+                px-1
+                text-[10px]
+                sm:text-[11px]
+                text-slate-400
                 text-center
               "
             >
-              IntelliGov AI provides guidance based on available scheme data.
-            </p>
+              Press Enter to send • Shift + Enter for a new line
+            </div>
 
           </div>
 
         </div>
 
-
-        {/* =================================================
-            SUGGESTED QUESTIONS
-        ================================================= */}
-
-        {messages.length > 0 && (
-
-          <div className="space-y-3 mt-6">
-
-            <span
-              className="
-                text-xs
-                uppercase
-                tracking-wider
-                text-slate-500
-                font-semibold
-                block
-              "
-            >
-              💡 Suggested Questions
-            </span>
-
-
-            <div
-              className="
-                grid
-                grid-cols-2
-                sm:grid-cols-4
-                gap-3
-              "
-            >
-
-              {suggestions.map(
-                (item, index) => (
-
-                  <button
-                    key={index}
-                    onClick={() =>
-                      useSuggestion(
-                        item.question
-                      )
-                    }
-                    className="
-                      bg-white
-                      p-3
-                      rounded-2xl
-                      text-left
-                      border
-                      border-slate-200
-                      hover:border-cyan-300
-                      hover:shadow-sm
-                      transition
-                      group
-                    "
-                  >
-
-                    <div
-                      className={`
-                        ${item.color}
-                        text-xl
-                        mb-1
-                        group-hover:scale-110
-                        transition-transform
-                      `}
-                    >
-                      {item.icon}
-                    </div>
-
-
-                    <div
-                      className="
-                        text-xs
-                        font-bold
-                        text-slate-700
-                      "
-                    >
-                      {item.title}
-                    </div>
-
-                  </button>
-
-                )
-              )}
-
-            </div>
-
-          </div>
-
-        )}
-
       </section>
 
     </div>
-
   );
-
 }
 
+
+// =====================================================
+// EXPORT
+// =====================================================
 
 export default AIChat;

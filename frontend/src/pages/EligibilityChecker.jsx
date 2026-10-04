@@ -555,6 +555,30 @@ function EligibilityChecker() {
   };
 
 
+  const getWhyMatched = (scheme) => {
+    if (Array.isArray(scheme?.why_matched)) {
+      return scheme.why_matched;
+    }
+
+    if (Array.isArray(scheme?.eligibility_reasons)) {
+      return scheme.eligibility_reasons;
+    }
+
+    return [];
+  };
+
+  const getMatchedRequirements = (scheme) => {
+    return Array.isArray(scheme?.matched_requirements)
+      ? scheme.matched_requirements
+      : [];
+  };
+
+  const getMissingRequirements = (scheme) => {
+    return Array.isArray(scheme?.missing_requirements)
+      ? scheme.missing_requirements
+      : [];
+  };
+
   const getApplyUrl = (scheme) =>
 
     scheme.application_link ||
@@ -1424,6 +1448,63 @@ function EligibilityChecker() {
 
                         <p className="text-xs text-slate-600 leading-relaxed">
                           {getEligibility(scheme)}
+
+                          {/* Why This Scheme */}
+                          {getWhyMatched(scheme).length > 0 && (
+                            <div className="mt-4 rounded-xl bg-emerald-50 border border-emerald-100 p-4">
+                              <h4 className="text-sm font-bold text-emerald-800 mb-2">
+                                Why This Scheme Matches You
+                              </h4>
+
+                              <div className="space-y-1.5">
+                                {getWhyMatched(scheme).map((reason, reasonIndex) => (
+                                  <div
+                                    key={reasonIndex}
+                                    className="flex items-start gap-2 text-xs text-emerald-700"
+                                  >
+                                    <span>✓</span>
+                                    <span>{reason}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Eligibility Checklist */}
+                          {(getMatchedRequirements(scheme).length > 0 ||
+                            getMissingRequirements(scheme).length > 0) && (
+                            <div className="mt-4 rounded-xl bg-sky-50 border border-sky-100 p-4">
+                              <h4 className="text-sm font-bold text-sky-800 mb-2">
+                                Eligibility Checklist
+                              </h4>
+
+                              <div className="space-y-1.5">
+                                {getMatchedRequirements(scheme).map(
+                                  (item, itemIndex) => (
+                                    <div
+                                      key={`matched-${itemIndex}`}
+                                      className="flex items-start gap-2 text-xs text-emerald-700"
+                                    >
+                                      <span>✓</span>
+                                      <span>{item}</span>
+                                    </div>
+                                  )
+                                )}
+
+                                {getMissingRequirements(scheme).map(
+                                  (item, itemIndex) => (
+                                    <div
+                                      key={`missing-${itemIndex}`}
+                                      className="flex items-start gap-2 text-xs text-red-600"
+                                    >
+                                      <span>✗</span>
+                                      <span>{item}</span>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </p>
 
                       </div>

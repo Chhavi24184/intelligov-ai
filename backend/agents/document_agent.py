@@ -1,4 +1,5 @@
 from services.rag_service import search_full_schemes
+from services.document_eligibility_service import check_documents_for_schemes
 from core.logger import logger
 
 
@@ -15,7 +16,11 @@ class DocumentAssistanceAgent:
     All document information comes from the scheme database.
     """
 
-    def run(self, query: str) -> dict:
+    def run(
+        self,
+        query: str,
+        available_documents: list[str] | None = None,
+    ) -> dict:
 
         if not query or not query.strip():
             logger.warning("DocumentAssistanceAgent: empty query")
@@ -119,8 +124,36 @@ class DocumentAssistanceAgent:
         # Use the top scheme as the "primary" scheme for legacy field
         top_scheme = clean_schemes[0]
         top_documents = top_scheme.get("documents", [])
-        
-        logger.info(f"DocumentAssistanceAgent: returning {len(clean_schemes)} schemes, top scheme: {top_scheme.get('name')}")
+
+        # ============================================================
+        # 6. Optional document eligibility check
+        # ============================================================
+
+        document_check = []
+
+        if available_documents:
+            try:
+                document_check = check_documents_for_schemes(
+                    schemes=clean_schemes,
+                    available_documents=available_documents,
+                )
+
+                logger.info(
+                    f"DocumentAssistanceAgent: document eligibility checked "
+                    f"for {len(document_check)} schemes"
+                )
+
+            except Exception as e:
+                logger.error(
+                    f"Document eligibility check error: {e}"
+                )
+                document_check = []
+
+        logger.info(
+            f"DocumentAssistanceAgent: returning "
+            f"{len(clean_schemes)} schemes, "
+            f"top scheme: {top_scheme.get('name')}"
+        )
 
         return {
             "agent": "DocumentAssistanceAgent",
@@ -128,6 +161,8 @@ class DocumentAssistanceAgent:
             "scheme": top_scheme.get("name"),
             "schemes": clean_schemes,
             "documents": top_documents,
+            "available_documents": available_documents or [],
+            "document_eligibility": document_check,
             "message": (
                 f"Document information retrieved from {len(clean_schemes)} "
                 "relevant scheme(s) in the database."

@@ -16,10 +16,10 @@ router = APIRouter()
 class EligibilityRequest(BaseModel):
     age: int = Field(..., ge=1, le=120)
     occupation: str = Field(..., min_length=2)
-    # accepts both numeric (legacy) and string range (new profile format)
     income: Union[float, str] = Field(default=0)
     gender: str = Field(default="")
     state: str = Field(..., min_length=2)
+
     # optional enriched fields — used when called from the profile pipeline
     category: Optional[str] = None
     education: Optional[str] = None
@@ -27,17 +27,24 @@ class EligibilityRequest(BaseModel):
 
 @router.post("/eligibility")
 def eligibility(request: EligibilityRequest):
-
     logger.info(
-        f"Eligibility API | age={request.age} occ={request.occupation!r} "
-        f"income={request.income!r} state={request.state!r}"
+        f"Eligibility API | age={request.age} "
+        f"occ={request.occupation!r} "
+        f"income={request.income!r} "
+        f"state={request.state!r}"
     )
 
     if not request.occupation.strip():
-        raise HTTPException(status_code=400, detail="Occupation is required.")
+        raise HTTPException(
+            status_code=400,
+            detail="Occupation is required."
+        )
 
     if not request.state.strip():
-        raise HTTPException(status_code=400, detail="State is required.")
+        raise HTTPException(
+            status_code=400,
+            detail="State is required."
+        )
 
     schemes = check_eligibility(
         age=request.age,
@@ -76,8 +83,12 @@ def match_schemes(user_id: int, db: Session = Depends(get_db)):
     """
 
     user = db.query(User).filter(User.id == user_id).first()
+
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
 
     profile = {
         "age": user.age,
@@ -94,21 +105,33 @@ def match_schemes(user_id: int, db: Session = Depends(get_db)):
     if not profile.get("occupation") or not profile.get("state"):
         return {
             "success": False,
-            "message": "Profile incomplete — please fill in occupation and state first.",
+            "message": (
+                "Profile incomplete — please fill in "
+                "occupation and state first."
+            ),
             "data": {
                 "total_matches": 0,
                 "schemes": [],
                 "profile_missing": True,
                 "missing_fields": [
-                    field for field in ("age", "state", "occupation", "income", "category")
+                    field
+                    for field in (
+                        "age",
+                        "state",
+                        "occupation",
+                        "income",
+                        "category"
+                    )
                     if not profile.get(field)
                 ],
             }
         }
 
     logger.info(
-        f"Match Schemes | user={user_id} age={user.age} "
-        f"occ={user.occupation!r} state={user.state!r}"
+        f"Match Schemes | user={user_id} "
+        f"age={user.age} "
+        f"occ={user.occupation!r} "
+        f"state={user.state!r}"
     )
 
     result = personalise(
@@ -123,9 +146,18 @@ def match_schemes(user_id: int, db: Session = Depends(get_db)):
         "data": {
             "total_matches": len(result.get("schemes", [])),
             "schemes": result.get("schemes", []),
-            "profile_missing": result.get("profile_missing", False),
-            "missing_fields": result.get("missing_fields", []),
-            "total_candidates": result.get("total_candidates", 0),
+            "profile_missing": result.get(
+                "profile_missing",
+                False
+            ),
+            "missing_fields": result.get(
+                "missing_fields",
+                []
+            ),
+            "total_candidates": result.get(
+                "total_candidates",
+                0
+            ),
         }
     }
 
@@ -137,20 +169,25 @@ def match_schemes(user_id: int, db: Session = Depends(get_db)):
 # ============================================================
 
 @router.get("/eligibility/by-profile/{user_id}")
-def eligibility_by_profile(user_id: int, db: Session = Depends(get_db)):
-    """
-    Load the user's DB profile and run eligibility check.
-    Returns matched schemes based on saved profile fields.
-    """
-
+def eligibility_by_profile(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
     user = db.query(User).filter(User.id == user_id).first()
+
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
 
     if not user.age or not user.occupation or not user.state:
         return {
             "success": False,
-            "message": "Profile incomplete — please fill in age, occupation, and state first.",
+            "message": (
+                "Profile incomplete — please fill in age, "
+                "occupation, and state first."
+            ),
             "data": {
                 "eligible": False,
                 "total_matches": 0,
@@ -159,8 +196,11 @@ def eligibility_by_profile(user_id: int, db: Session = Depends(get_db)):
         }
 
     logger.info(
-        f"Eligibility by-profile | user={user_id} age={user.age} "
-        f"occ={user.occupation!r} state={user.state!r} category={user.category!r}"
+        f"Eligibility by-profile | user={user_id} "
+        f"age={user.age} "
+        f"occ={user.occupation!r} "
+        f"state={user.state!r} "
+        f"category={user.category!r}"
     )
 
     schemes = check_eligibility(
@@ -177,8 +217,8 @@ def eligibility_by_profile(user_id: int, db: Session = Depends(get_db)):
         "success": True,
         "message": "Eligibility checked from profile.",
         "data": {
-            "eligible":            len(schemes) > 0,
-            "total_matches":       len(schemes),
+            "eligible": len(schemes) > 0,
+            "total_matches": len(schemes),
             "recommended_schemes": schemes,
         }
     }

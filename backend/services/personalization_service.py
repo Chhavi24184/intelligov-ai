@@ -297,6 +297,14 @@ def personalise(
     # ----------------------------------------------------------
     # Step 3 — Hard eligibility filter + score each candidate
     # ----------------------------------------------------------
+    # For explicit scholarship queries, keep the result set focused on
+    # scholarship-type categories instead of filling it with jobs/skills.
+    if intent_type == "scholarship":
+        rag_results = [
+            s for s in rag_results
+            if str(s.get("category", "")).lower().strip() in {"education", "girl child"}
+        ]
+
     scored = []
     excluded_count = 0
     for s in rag_results:

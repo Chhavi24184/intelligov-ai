@@ -50,6 +50,20 @@ class MockGraniteClient:
 
         # Hindi translations for common structured labels/categories.
         # Scheme names and source facts remain unchanged to preserve grounding.
+        _HI_TEXT = {
+            "Scholarship support for eligible students pursuing higher education.": "उच्च शिक्षा प्राप्त करने वाले पात्र छात्रों के लिए छात्रवृत्ति सहायता।",
+            "₹10,000/year for undergraduate students; ₹20,000/year for postgraduate students.": "स्नातक छात्रों के लिए ₹10,000 प्रति वर्ष और स्नातकोत्तर छात्रों के लिए ₹20,000 प्रति वर्ष।",
+            "Students who scored above 80th percentile in 10+2; family income below ₹8 lakh per year.": "वे छात्र जिन्होंने 10+2 में 80वें प्रतिशतक से अधिक अंक प्राप्त किए हों; परिवार की वार्षिक आय ₹8 लाख से कम हो।",
+            "Annual — applications typically open in August–September": "वार्षिक — आवेदन आमतौर पर अगस्त–सितंबर में शुरू होते हैं।",
+            "Scholarship support for eligible students from OBC, EBC, DNT, and other specified categories.": "OBC, EBC, DNT और अन्य निर्दिष्ट श्रेणियों के पात्र छात्रों के लिए छात्रवृत्ति सहायता।",
+            "₹75,000/year for Class 9–10 students; ₹1,25,000/year for Class 11–12 students.": "कक्षा 9–10 के छात्रों के लिए ₹75,000 प्रति वर्ष और कक्षा 11–12 के छात्रों के लिए ₹1,25,000 प्रति वर्ष।",
+            "Students from OBC/EBC/DNT categories; family income below ₹2.5 lakh; Class 9 or 11.": "OBC/EBC/DNT श्रेणी के छात्र; परिवार की वार्षिक आय ₹2.5 लाख से कम; कक्षा 9 या 11 में अध्ययनरत।",
+            "Annual — NTA releases notification; typically August–September": "वार्षिक — NTA अधिसूचना जारी करता है; आमतौर पर अगस्त–सितंबर में।",
+            "Industry-relevant skill training, certification, upskilling, and reskilling programme.": "उद्योग-उपयुक्त कौशल प्रशिक्षण, प्रमाणन, अपस्किलिंग और रीस्किलिंग कार्यक्रम।",
+            "Free short-term skill training; certification; placement assistance; monetary reward on certification.": "निःशुल्क अल्पकालिक कौशल प्रशिक्षण, प्रमाणन, प्लेसमेंट सहायता और प्रमाणन पर मौद्रिक प्रोत्साहन।",
+            "Eligible Indian youth seeking approved skill training.": "स्वीकृत कौशल प्रशिक्षण की तलाश करने वाले पात्र भारतीय युवा।",
+        }
+
         _HI_LABELS = {
             "Category": "श्रेणी",
             "Benefits": "लाभ",

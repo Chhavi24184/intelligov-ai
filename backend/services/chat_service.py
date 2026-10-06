@@ -12,6 +12,27 @@ from agents.document_agent import DocumentAssistanceAgent
 from services.scheme_service import get_all_schemes
 
 
+# ============================================================
+# Language Detection
+# ============================================================
+
+def _detect_language_from_text(text: str, requested_language: str = "en") -> str:
+    """
+    Automatically detect common Indian scripts when the frontend
+    sends the default English language.
+
+    This keeps the existing language pipeline unchanged while
+    ensuring Hindi/Punjabi messages reach Granite with the
+    correct language instruction.
+    """
+    if re.search(r"[\u0900-\u097F]", text):
+        return "hi"
+
+    if re.search(r"[\u0A00-\u0A7F]", text):
+        return "pa"
+
+    return requested_language or "en"
+
 
 # ============================================================
 # Conversational Missing Profile Prompt
@@ -21,117 +42,41 @@ def _build_conversational_missing_prompt(
     missing_fields: list,
     language: str = "en",
 ) -> str:
-    """
-    Ask only for the profile fields needed to continue
-    a conversational eligibility query.
-    """
-
     labels = {
-        "age": {
-            "en": "age",
-            "hi": "उम्र",
-            "pa": "ਉਮਰ",
-        },
-        "occupation": {
-            "en": "occupation",
-            "hi": "पेशा",
-            "pa": "ਪੇਸ਼ਾ",
-        },
-        "income": {
-            "en": "annual family income",
-            "hi": "वार्षिक पारिवारिक आय",
-            "pa": "ਸਾਲਾਨਾ ਪਰਿਵਾਰਕ ਆਮਦਨ",
-        },
-        "gender": {
-            "en": "gender",
-            "hi": "लिंग",
-            "pa": "ਲਿੰਗ",
-        },
-        "state": {
-            "en": "state",
-            "hi": "राज्य",
-            "pa": "ਰਾਜ",
-        },
-        "education": {
-            "en": "education",
-            "hi": "शिक्षा",
-            "pa": "ਸਿੱਖਿਆ",
-        },
-        "category": {
-            "en": "social category",
-            "hi": "सामाजिक श्रेणी",
-            "pa": "ਸਮਾਜਿਕ ਸ਼੍ਰੇਣੀ",
-        },
-        "district": {
-            "en": "district",
-            "hi": "जिला",
-            "pa": "ਜ਼ਿਲ੍ਹਾ",
-        },
+        "age": {"en": "age", "hi": "उम्र", "pa": "ਉਮਰ"},
+        "occupation": {"en": "occupation", "hi": "पेशा", "pa": "ਪੇਸ਼ਾ"},
+        "income": {"en": "annual family income", "hi": "वार्षिक पारिवारिक आय", "pa": "ਸਾਲਾਨਾ ਪਰਿਵਾਰਕ ਆਮਦਨ"},
+        "gender": {"en": "gender", "hi": "लिंग", "pa": "ਲਿੰਗ"},
+        "state": {"en": "state", "hi": "राज्य", "pa": "ਰਾਜ"},
+        "education": {"en": "education", "hi": "शिक्षा", "pa": "ਸਿੱਖਿਆ"},
+        "category": {"en": "social category", "hi": "सामाजिक श्रेणी", "pa": "ਸਮਾਜਿਕ ਸ਼੍ਰੇਣੀ"},
+        "district": {"en": "district", "hi": "जिला", "pa": "ਜ਼ਿਲ੍ਹਾ"},
     }
 
-    # Remove duplicates and keep only useful fields.
     missing = list(dict.fromkeys(missing_fields))
-
     if not missing:
         return ""
 
     if language == "hi":
-        names = [
-            labels.get(field, {}).get("hi", field)
-            for field in missing
-        ]
-
+        names = [labels.get(field, {}).get("hi", field) for field in missing]
         if len(names) == 1:
-            return (
-                f"पात्रता जाँचने के लिए कृपया अपनी "
-                f"{names[0]} बताएं।"
-            )
-
-        return (
-            "पात्रता जाँचने के लिए कृपया ये जानकारी दें: "
-            + ", ".join(names)
-            + "।"
-        )
+            return f"पात्रता जाँचने के लिए कृपया अपनी {names[0]} बताएं।"
+        return "पात्रता जाँचने के लिए कृपया ये जानकारी दें: " + ", ".join(names) + "।"
 
     if language == "pa":
-        names = [
-            labels.get(field, {}).get("pa", field)
-            for field in missing
-        ]
-
+        names = [labels.get(field, {}).get("pa", field) for field in missing]
         if len(names) == 1:
-            return (
-                f"ਯੋਗਤਾ ਦੀ ਜਾਂਚ ਕਰਨ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ "
-                f"{names[0]} ਦੱਸੋ।"
-            )
+            return f"ਯੋਗਤਾ ਦੀ ਜਾਂਚ ਕਰਨ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ {names[0]} ਦੱਸੋ।"
+        return "ਯੋਗਤਾ ਦੀ ਜਾਂਚ ਕਰਨ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਇਹ ਜਾਣਕਾਰੀ ਦਿਓ: " + ", ".join(names) + "।"
 
-        return (
-            "ਯੋਗਤਾ ਦੀ ਜਾਂਚ ਕਰਨ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਇਹ ਜਾਣਕਾਰੀ ਦਿਓ: "
-            + ", ".join(names)
-            + "।"
-        )
-
-    names = [
-        labels.get(field, {}).get("en", field)
-        for field in missing
-    ]
-
+    names = [labels.get(field, {}).get("en", field) for field in missing]
     if len(names) == 1:
-        return (
-            f"To check your eligibility, please provide your "
-            f"{names[0]}."
-        )
-
+        return f"To check your eligibility, please provide your {names[0]}."
     if len(names) == 2:
         requested = f"{names[0]} and {names[1]}"
     else:
         requested = ", ".join(names[:-1]) + f", and {names[-1]}"
-
-    return (
-        "To check your eligibility, please provide "
-        f"your {requested}."
-    )
-
+    return f"To check your eligibility, please provide your {requested}."
 
 
 # ============================================================
@@ -139,87 +84,45 @@ def _build_conversational_missing_prompt(
 # ============================================================
 
 def _compare_schemes(message: str, language: str = "en") -> dict:
-    """
-    Identify up to two schemes mentioned in the user's query
-    and return a structured comparison using the existing
-    government scheme database.
-    """
-
     schemes = get_all_schemes()
 
     if not schemes:
-        return {
-            "success": False,
-            "message": "No scheme data is currently available.",
-            "schemes": [],
-        }
+        return {"success": False, "message": "No scheme data is currently available.", "schemes": []}
 
     query = message.lower()
-
     matched = []
-
-    # --------------------------------------------------------
-    # Match scheme names mentioned in the query
-    # --------------------------------------------------------
 
     for scheme in schemes:
         name = str(scheme.get("name", "")).strip()
-
         if not name:
             continue
-
         name_lower = name.lower()
-
-        # Exact full-name match
         if name_lower in query:
             matched.append(scheme)
             continue
-
-        # Token-based match for names like PM-KISAN
-        tokens = [
-            token
-            for token in name_lower.replace("-", " ").split()
-            if len(token) >= 4
-        ]
-
+        tokens = [token for token in name_lower.replace("-", " ").split() if len(token) >= 4]
         if tokens and all(token in query for token in tokens):
             matched.append(scheme)
 
-    # --------------------------------------------------------
-    # Keep unique schemes
-    # --------------------------------------------------------
-
     unique = []
     seen = set()
-
     for scheme in matched:
         scheme_id = str(scheme.get("id", scheme.get("name", "")))
-
         if scheme_id in seen:
             continue
-
         seen.add(scheme_id)
         unique.append(scheme)
 
     matched = unique[:2]
 
-    # --------------------------------------------------------
-    # If fewer than 2 schemes are identified
-    # --------------------------------------------------------
-
     if len(matched) < 2:
         return {
             "success": False,
-            "message": (
-                "Please mention the names of two government schemes "
-                "you want to compare."
-            ),
+            "message": "Please mention the names of two government schemes you want to compare.",
             "schemes": matched,
         }
 
-    first = matched[0]
-    second = matched[1]
-
+    first, second = matched
     comparison = {
         "scheme_1": {
             "name": first.get("name", ""),
@@ -251,13 +154,8 @@ def _compare_schemes(message: str, language: str = "en") -> dict:
     }
 
 
-# ============================================================
-# Create orchestrator once
-# ============================================================
-
 orchestrator = OrchestratorAgent()
 document_agent = DocumentAssistanceAgent()
-
 
 
 # ============================================================
@@ -265,173 +163,86 @@ document_agent = DocumentAssistanceAgent()
 # ============================================================
 
 def _extract_profile_from_message(message: str, profile: dict | None = None) -> dict:
-    """
-    Extract common eligibility details directly from a natural-language
-    user message and merge them with the existing profile.
-
-    This allows queries such as:
-    "I am 22, a student from Haryana, female, income 2 lakh"
-    to participate in the existing eligibility flow.
-    """
-
     result = dict(profile or {})
     text = message.lower()
 
-    # --------------------------------------------------------
-    # Age
-    # --------------------------------------------------------
     age_match = re.search(
         r"\b(?:age\s*(?:is|:)?\s*|i\s*am\s+|i'm\s+)(\d{1,3})\s*(?:years?|yrs?)?\b",
         text
     )
-
     if age_match:
         age = int(age_match.group(1))
         if 1 <= age <= 120:
             result["age"] = age
 
-    # --------------------------------------------------------
-    # Income
-    # --------------------------------------------------------
     income_match = re.search(
-        r"(?:income|family income|annual income|yearly income)"
-        r"\s*(?:is|of|:)?\s*"
-        r"(?:rs\.?|₹)?\s*([\d,.]+)\s*(lakh|lakhs|lacs|crore|crores)?",
+        r"(?:income|family income|annual income|yearly income)\s*(?:is|of|:)?\s*(?:rs\.?|₹)?\s*([\d,.]+)\s*(lakh|lakhs|lacs|crore|crores)?",
         text
     )
-
     if income_match:
         amount = income_match.group(1).replace(",", "")
         unit = (income_match.group(2) or "").lower()
-
         try:
             value = float(amount)
-
             if unit in ("lakh", "lakhs", "lacs"):
                 value *= 100000
             elif unit in ("crore", "crores"):
                 value *= 10000000
-
             result["income"] = str(int(value))
         except ValueError:
             pass
 
-    # --------------------------------------------------------
-    # Gender
-    # --------------------------------------------------------
     if re.search(r"\b(female|woman|women|girl|lady)\b", text):
         result["gender"] = "female"
     elif re.search(r"\b(male|man|men|boy)\b", text):
         result["gender"] = "male"
 
-    # --------------------------------------------------------
-    # Occupation
-    # --------------------------------------------------------
     occupation_map = {
-        "student": "student",
-        "students": "student",
-        "farmer": "farmer",
-        "farmers": "farmer",
-        "teacher": "teacher",
-        "teachers": "teacher",
-        "job seeker": "job seeker",
-        "jobseeker": "job seeker",
-        "unemployed": "unemployed",
-        "business owner": "business owner",
-        "businessman": "business owner",
-        "businesswoman": "business owner",
-        "entrepreneur": "entrepreneur",
-        "artisan": "artisan",
-        "street vendor": "street vendor",
-        "vendor": "street vendor",
+        "student": "student", "students": "student", "farmer": "farmer",
+        "farmers": "farmer", "teacher": "teacher", "teachers": "teacher",
+        "job seeker": "job seeker", "jobseeker": "job seeker",
+        "unemployed": "unemployed", "business owner": "business owner",
+        "businessman": "business owner", "businesswoman": "business owner",
+        "entrepreneur": "entrepreneur", "artisan": "artisan",
+        "street vendor": "street vendor", "vendor": "street vendor",
         "worker": "worker",
     }
-
     for keyword, occupation in occupation_map.items():
         if re.search(r"\b" + re.escape(keyword) + r"\b", text):
             result["occupation"] = occupation
             break
 
-    # --------------------------------------------------------
-
-    # Available Documents
-    # --------------------------------------------------------
     document_map = {
-        "aadhaar": "Aadhaar Card",
-        "aadhar": "Aadhaar Card",
-        "aadhaar card": "Aadhaar Card",
-        "aadhar card": "Aadhaar Card",
-        "pan": "PAN Card",
-        "pan card": "PAN Card",
-        "bank account": "Bank Account",
-        "bank passbook": "Bank Passbook",
-        "passbook": "Bank Passbook",
-        "income certificate": "Income Certificate",
-        "income proof": "Income Certificate",
-        "land records": "Land Records",
-        "land record": "Land Records",
-        "ration card": "Ration Card",
-        "address proof": "Address Proof",
-        "educational certificate": "Educational Certificate",
-        "education certificate": "Educational Certificate",
-        "marksheet": "Marksheet",
-        "voter id": "Voter ID",
-        "voter card": "Voter ID",
+        "aadhaar": "Aadhaar Card", "aadhar": "Aadhaar Card",
+        "aadhaar card": "Aadhaar Card", "aadhar card": "Aadhaar Card",
+        "pan": "PAN Card", "pan card": "PAN Card",
+        "bank account": "Bank Account", "bank passbook": "Bank Passbook",
+        "passbook": "Bank Passbook", "income certificate": "Income Certificate",
+        "income proof": "Income Certificate", "land records": "Land Records",
+        "land record": "Land Records", "ration card": "Ration Card",
+        "address proof": "Address Proof", "educational certificate": "Educational Certificate",
+        "education certificate": "Educational Certificate", "marksheet": "Marksheet",
+        "voter id": "Voter ID", "voter card": "Voter ID",
         "disability certificate": "Disability Certificate",
     }
 
-    detected_documents = list(
-        result.get("available_documents")
-        or result.get("documents")
-        or []
-    )
-
+    detected_documents = list(result.get("available_documents") or result.get("documents") or [])
     for keyword, document_name in document_map.items():
         if re.search(r"\b" + re.escape(keyword) + r"\b", text):
             if document_name not in detected_documents:
                 detected_documents.append(document_name)
-
     if detected_documents:
         result["available_documents"] = detected_documents
 
-    # Indian States / UTs
-    # --------------------------------------------------------
     states = [
-        "andhra pradesh",
-        "arunachal pradesh",
-        "assam",
-        "bihar",
-        "chhattisgarh",
-        "goa",
-        "gujarat",
-        "haryana",
-        "himachal pradesh",
-        "jharkhand",
-        "karnataka",
-        "kerala",
-        "madhya pradesh",
-        "maharashtra",
-        "manipur",
-        "meghalaya",
-        "mizoram",
-        "nagaland",
-        "odisha",
-        "punjab",
-        "rajasthan",
-        "sikkim",
-        "tamil nadu",
-        "telangana",
-        "tripura",
-        "uttar pradesh",
-        "uttarakhand",
-        "west bengal",
-        "delhi",
-        "jammu and kashmir",
-        "ladakh",
-        "chandigarh",
-        "puducherry",
+        "andhra pradesh", "arunachal pradesh", "assam", "bihar", "chhattisgarh",
+        "goa", "gujarat", "haryana", "himachal pradesh", "jharkhand",
+        "karnataka", "kerala", "madhya pradesh", "maharashtra", "manipur",
+        "meghalaya", "mizoram", "nagaland", "odisha", "punjab", "rajasthan",
+        "sikkim", "tamil nadu", "telangana", "tripura", "uttar pradesh",
+        "uttarakhand", "west bengal", "delhi", "jammu and kashmir", "ladakh",
+        "chandigarh", "puducherry",
     ]
-
     for state in sorted(states, key=len, reverse=True):
         if re.search(r"\b" + re.escape(state) + r"\b", text):
             result["state"] = state.title()
@@ -449,25 +260,6 @@ def generate_reply(
     profile: dict | None = None,
     language: str = "en",
 ) -> dict:
-    """
-    Full pipeline:
-
-    USER QUERY + PROFILE
-        ↓
-    Profile completeness check
-        ↓ (if minimum fields missing → ask user to fill profile)
-    Intent detection  (OrchestratorAgent → IntentDetectionAgent)
-        ↓
-    Personalized RAG retrieval  (personalization_service)
-        → profile scoring + re-ranking → 3–5 results
-        ↓
-    Intent-type classification  (scheme / job / internship / scholarship)
-        ↓
-    IBM Granite grounded explanation  (language-aware, profile-context)
-        ↓
-    Response  (reply + recommended_scheme + recommended_schemes + intent_type)
-    """
-
     message = message.strip()
 
     if not message:
@@ -479,21 +271,22 @@ def generate_reply(
             "agent_flow": [],
         }
 
-    # Extract eligibility details mentioned directly in the conversation.
+    # Detect script before any early return so every downstream
+    # response/agent receives the correct language.
+    language = _detect_language_from_text(message, language)
+
     profile = _extract_profile_from_message(message, profile)
 
     logger.info("=" * 60)
     logger.info(f"USER QUERY: {message}")
+    logger.info(f"DETECTED LANGUAGE: {language}")
     logger.info(f"PROFILE: {_summarise_profile(profile)}")
     logger.info("=" * 60)
 
-    # --------------------------------------------------------
-    # Step 1: Intent detection
-    # --------------------------------------------------------
     orchestration_result = orchestrator.run(query=message, profile=profile)
     intent_result = orchestration_result.get("intent", {})
-    agent_result  = orchestration_result.get("agent_result", {})
-    intent        = intent_result.get("intent", "general")
+    agent_result = orchestration_result.get("agent_result", {})
+    intent = intent_result.get("intent", "general")
 
     logger.info(f"INTENT: {intent}")
 
@@ -510,9 +303,6 @@ def generate_reply(
             "agent_flow": ["OrchestratorAgent", "IntentDetectionAgent"],
         }
 
-    # --------------------------------------------------------
-    # Step 2: Notification — no scheme context needed
-    # --------------------------------------------------------
     if intent == "notification":
         notification = agent_result.get("notification", {})
         reply = (
@@ -529,26 +319,14 @@ def generate_reply(
             "agent_flow": ["OrchestratorAgent", "IntentDetectionAgent", "NotificationAgent"],
         }
 
-    # --------------------------------------------------------
-    # Step 3: Scheme Comparison
-    # Comparison does not require a user profile.
-    # --------------------------------------------------------
-
     if intent == "comparison":
-
-        comparison_result = _compare_schemes(
-            message,
-            language,
-        )
+        comparison_result = _compare_schemes(message, language)
 
         if not comparison_result["success"]:
             return {
                 "reply": comparison_result["message"],
                 "recommended_scheme": None,
-                "recommended_schemes": comparison_result.get(
-                    "schemes",
-                    []
-                ),
+                "recommended_schemes": comparison_result.get("schemes", []),
                 "intent_type": "comparison",
                 "comparison": comparison_result,
                 "agent_flow": [
@@ -559,7 +337,6 @@ def generate_reply(
             }
 
         comparison_context = comparison_result["schemes"]
-
         granite_query = (
             "Compare these two government schemes clearly. "
             "Explain the main differences in eligibility, benefits, "
@@ -578,10 +355,8 @@ def generate_reply(
             )
         except Exception as e:
             logger.error(f"COMPARISON GRANITE ERROR: {e}")
-
             reply = (
-                f"{comparison_context[0].get('name', 'Scheme 1')} "
-                "vs "
+                f"{comparison_context[0].get('name', 'Scheme 1')} vs "
                 f"{comparison_context[1].get('name', 'Scheme 2')}\n\n"
                 f"Eligibility:\n"
                 f"• {comparison_context[0].get('eligibility', 'Not available')}\n"
@@ -605,43 +380,22 @@ def generate_reply(
             ],
         }
 
-    # --------------------------------------------------------
-    # Step 4: Profile completeness check
-    # If profile has NO minimum fields and the user is asking
-    # something profile-dependent, nudge them to fill it first
-    # rather than returning irrelevant results.
-    # --------------------------------------------------------
-    # --------------------------------------------------------
-    # Document assistance / document eligibility
-    # --------------------------------------------------------
     if intent == "document":
         available_documents = (
             profile.get("available_documents")
             or profile.get("documents")
             or _extract_profile_from_message(message).get("available_documents", [])
         )
-
-        document_result = document_agent.run(
-            query=message,
-            available_documents=available_documents,
-        )
-
+        document_result = document_agent.run(query=message, available_documents=available_documents)
         schemes = document_result.get("schemes", [])
 
         return {
-            "reply": document_result.get(
-                "message",
-                "Document information retrieved successfully."
-            ),
+            "reply": document_result.get("message", "Document information retrieved successfully."),
             "recommended_scheme": schemes[0] if schemes else None,
             "recommended_schemes": schemes,
             "intent_type": "document",
-            "document_eligibility": document_result.get(
-                "document_eligibility", []
-            ),
-            "available_documents": document_result.get(
-                "available_documents", []
-            ),
+            "document_eligibility": document_result.get("document_eligibility", []),
+            "available_documents": document_result.get("available_documents", []),
             "agent_flow": [
                 "OrchestratorAgent",
                 "IntentDetectionAgent",
@@ -653,15 +407,8 @@ def generate_reply(
     profile_dependent = intent in ("eligibility", "scheme", "career")
 
     if profile_dependent and not pc["has_minimum"]:
-        logger.info(
-            "PROFILE INCOMPLETE — asking for missing conversational fields"
-        )
-
-        nudge = _build_conversational_missing_prompt(
-            pc["missing"],
-            language,
-        )
-
+        logger.info("PROFILE INCOMPLETE — asking for missing conversational fields")
+        nudge = _build_conversational_missing_prompt(pc["missing"], language)
         return {
             "reply": nudge,
             "recommended_scheme": None,
@@ -669,37 +416,20 @@ def generate_reply(
             "intent_type": "scheme",
             "profile_missing": True,
             "missing_fields": pc["missing"],
-            "agent_flow": [
-                "OrchestratorAgent",
-                "IntentDetectionAgent",
-            ],
+            "agent_flow": ["OrchestratorAgent", "IntentDetectionAgent"],
         }
 
-    # --------------------------------------------------------
-    # Step 4: Personalised retrieval (3–5 ranked results)
-    # --------------------------------------------------------
-    personalisation = personalise(
-        query=message,
-        intent=intent,
-        profile=profile,
-    )
-
-    context      = personalisation["schemes"]
-    intent_type  = personalisation["intent_type"]
+    personalisation = personalise(query=message, intent=intent, profile=profile)
+    context = personalisation["schemes"]
+    intent_type = personalisation["intent_type"]
     missing_flds = personalisation["missing_fields"]
 
     logger.info(
-        f"PERSONALISATION: type={intent_type} "
-        f"results={len(context)} "
+        f"PERSONALISATION: type={intent_type} results={len(context)} "
         f"profile_missing={personalisation['profile_missing']}"
     )
 
-    # --------------------------------------------------------
-    # Step 5: Eligibility agent for explicit eligibility queries
-    # (use agent's recommended_schemes if it found some)
-    # --------------------------------------------------------
     if intent == "eligibility" and agent_result.get("success") is False:
-        # Profile present but agent says incomplete — surface message
         return {
             "reply": agent_result.get(
                 "message",
@@ -714,18 +444,11 @@ def generate_reply(
     if intent == "eligibility" and agent_result.get("recommended_schemes"):
         elig_schemes = agent_result["recommended_schemes"][:5]
         if elig_schemes:
-            context = elig_schemes   # eligibility agent's output takes priority
+            context = elig_schemes
 
-    # --------------------------------------------------------
-    # Step 6: RAG fallback if still empty
-    # --------------------------------------------------------
     if not context:
         try:
-            rag_results = search_full_schemes(
-                query=message,
-                top_k=5,
-                distance_threshold=2.0,
-            )
+            rag_results = search_full_schemes(query=message, top_k=5, distance_threshold=2.0)
             context = [
                 {k: v for k, v in s.items() if not k.startswith("_rag_")}
                 for s in rag_results if s.get("name")
@@ -736,7 +459,6 @@ def generate_reply(
             context = []
 
     if not context:
-        logger.info("NO CONTEXT — returning no-data response")
         return {
             "reply": _no_data_reply(language),
             "recommended_scheme": None,
@@ -745,11 +467,7 @@ def generate_reply(
             "agent_flow": ["OrchestratorAgent", "IntentDetectionAgent"],
         }
 
-    # --------------------------------------------------------
-    # Step 7: IBM Granite — grounded, personalised, language-aware
-    # --------------------------------------------------------
     granite_query = _build_granite_query(message, profile, intent_type)
-
     logger.info(f"GRANITE: {len(context)} scheme(s), lang={language}, type={intent_type}")
 
     try:
@@ -765,25 +483,21 @@ def generate_reply(
 
     logger.info(f"REPLY: {reply[:120]}…")
 
-    # --------------------------------------------------------
-    # Step 8: Pick best single scheme + return all
-    # --------------------------------------------------------
     recommended_scheme = _pick_best_scheme(message, context)
 
-    # Append a soft nudge if important fields missing but results still shown
     if missing_flds and pc["has_minimum"] and not pc["complete"]:
         nudge_fields = [f for f in missing_flds if f not in pc["present"]][:3]
         if nudge_fields:
-            labels = {"education": "education", "district": "district",
-                      "interests": "interests", "age": "age",
-                      "income": "income", "category": "social category"}
-            listed = ", ".join(labels.get(f, f) for f in nudge_fields)
-            suffix = {
-                "en": f"\n\n_Tip: Add {listed} to your Profile for even more accurate results._",
-                "hi": f"\n\n_सुझाव: और सटीक परिणामों के लिए अपनी प्रोफ़ाइल में {listed} जोड़ें।_",
-                "pa": f"\n\n_ਸੁਝਾਅ: ਹੋਰ ਸਟੀਕ ਨਤੀਜਿਆਂ ਲਈ ਆਪਣੀ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ {listed} ਸ਼ਾਮਲ ਕਰੋ।_",
+            labels = {
+                "education": "education", "district": "district",
+                "interests": "interests", "age": "age",
+                "income": "income", "category": "social category",
             }
-            # All other languages fall back to English nudge
+            suffix = {
+                "en": f"\n\n_Tip: Add {', '.join(labels.get(f, f) for f in nudge_fields)} to your Profile for even more accurate results._",
+                "hi": f"\n\n_सुझाव: और सटीक परिणामों के लिए अपनी प्रोफ़ाइल में {', '.join(labels.get(f, f) for f in nudge_fields)} जोड़ें।_",
+                "pa": f"\n\n_ਸੁਝਾਅ: ਹੋਰ ਸਟੀਕ ਨਤੀਜਿਆਂ ਲਈ ਆਪਣੀ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ {', '.join(labels.get(f, f) for f in nudge_fields)} ਸ਼ਾਮਲ ਕਰੋ._",
+            }
             reply = reply + suffix.get(language, suffix["en"])
 
     return {
@@ -813,7 +527,6 @@ def _summarise_profile(profile: dict | None) -> str:
 
 
 def _build_granite_query(message: str, profile: dict | None, intent_type: str) -> str:
-    """Prepend compact profile context to the user query for Granite."""
     if not profile:
         return message
     parts = []
@@ -855,12 +568,10 @@ def _no_data_reply(language: str) -> str:
             "ਆਪਣੀ ਪ੍ਰੋਫਾਈਲ ਭਰੋ ਜਾਂ ਸਵਾਲ ਦੁਬਾਰਾ ਪੁੱਛੋ।"
         ),
     }
-    # All other Indian languages fall back to English (Granite will translate when active)
     return msgs.get(language, msgs["en"])
 
 
 def _safe_context_reply(context: list, language: str = "en") -> str:
-    """Plain-text grounded fallback when Granite fails."""
     if language == "hi":
         header = "उपलब्ध सरकारी डेटा के आधार पर प्रासंगिक योजनाएँ:\n"
     elif language == "pa":
@@ -882,7 +593,6 @@ def _safe_context_reply(context: list, language: str = "en") -> str:
 
 
 def _pick_best_scheme(query: str, context: list) -> dict | None:
-    """Select the single most query-relevant scheme."""
     if not context:
         return None
     if len(context) == 1:
@@ -899,9 +609,9 @@ def _pick_best_scheme(query: str, context: list) -> dict | None:
 
     best, best_score = context[0], -1
     for s in context:
-        name  = s.get("name", "").lower()
-        cat   = s.get("category", "").lower()
-        desc  = s.get("description", "").lower()
+        name = s.get("name", "").lower()
+        cat = s.get("category", "").lower()
+        desc = s.get("description", "").lower()
         score = sum(
             (3 if w in name else 0) + (2 if w in cat else 0) + (1 if w in desc else 0)
             for w in words

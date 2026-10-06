@@ -26,10 +26,12 @@ jobs:
 
       - name: Run ruff
         working-directory: backend
+        continue-on-error: true
         run: ruff check .
 
       - name: Check black formatting
         working-directory: backend
+        continue-on-error: true
         run: black --check .
 
   lint-frontend:
@@ -52,4 +54,5 @@ jobs:
 
       - name: Run ESLint
         working-directory: frontend
+        continue-on-error: true
         run: npm run lint

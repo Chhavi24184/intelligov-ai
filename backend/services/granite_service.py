@@ -142,15 +142,15 @@ class MockGraniteClient:
                 documents_label = _HI_LABELS["Documents"]
                 category_display = _HI_LABELS.get(category, category)
                 response += f"   {category_label}: {category_display}\n"
-                response += f"   विवरण: {description}\n"
+                response += f"   विवरण: {_HI_TEXT.get(description, description)}\n"
                 if benefits:
-                    response += f"   {benefits_label}: {benefits}\n"
+                    response += f"   {benefits_label}: {_HI_TEXT.get(benefits, benefits)}\n"
                 if eligibility:
-                    response += f"   {eligibility_label}: {eligibility}\n"
+                    response += f"   {eligibility_label}: {_HI_TEXT.get(eligibility, eligibility)}\n"
                 if reasons:
                     response += f"   {reasons_label}: {', '.join(reasons)}\n"
                 if deadline:
-                    response += f"   {deadline_label}: {deadline}\n"
+                    response += f"   {deadline_label}: {_HI_TEXT.get(deadline, deadline)}\n"
                 if documents:
                     response += f"   {documents_label}: {', '.join(documents)}\n"
             elif language == "pa":

@@ -382,7 +382,7 @@ def _resolve_intent_type(query: str, intent: str) -> str:
         return "job"
 
     if intent == "scheme":
-        if any(w in q for w in ("scholar", "fellowship", "stipend")):
+        if any(w in q for w in ("scholar", "scholarship", "छात्रवृत्ति", "fellowship", "stipend", "student scholarship")):
             return "scholarship"
         return "scheme"
 
@@ -431,6 +431,13 @@ def _profile_score(
     iw = intent_weights.get(cat, 0)
     if iw:
         score += iw
+
+    # Strongly prioritize education schemes for explicit scholarship queries.
+    if intent_type == "scholarship":
+        if cat == "education":
+            score += 20
+        elif cat != "girl child":
+            score -= 2
 
     if not profile:
         # No profile — return intent-only score

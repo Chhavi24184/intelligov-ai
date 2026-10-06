@@ -309,7 +309,18 @@ def personalise(
 
         rag_score = s.get("_rag_score", 0)
         prof_score, reasons = _profile_score(scheme, profile, intent, intent_type)
+
+        # Prioritize a scheme explicitly named by the user over generic
+        # profile/category matches.
+        query_lower = query.lower()
+        scheme_name = str(scheme.get("name", "")).lower().strip()
+        exact_name_match = bool(scheme_name) and scheme_name in query_lower
+
         total = rag_score * 2 + prof_score
+        if exact_name_match:
+            total += 1000
+            reasons = list(reasons) + ["Specifically requested in your query"]
+
         scored.append((total, prof_score, reasons, scheme))
 
     if excluded_count:

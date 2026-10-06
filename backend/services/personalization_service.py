@@ -440,12 +440,8 @@ def _profile_score(
     if iw:
         score += iw
 
-    # Strongly prioritize education schemes for explicit scholarship queries.
-    scholarship_query = any(w in query.lower() for w in (
-        "scholar", "scholarship", "छात्रवृत्ति", "छात्रवृत्त", "student scholarship",
-        "fellowship", "stipend"
-    ))
-    if intent_type == "scholarship" or scholarship_query:
+    # Strongly prioritize education schemes for scholarship intent.
+    if intent_type == "scholarship":
         if cat == "education":
             score += 20
         elif cat != "girl child":

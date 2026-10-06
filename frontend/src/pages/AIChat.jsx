@@ -37,6 +37,39 @@ import robot from "../assets/robot.png";
 
 
 // =====================================================
+// CLEAN AI RESPONSE / HTML ENTITIES
+// =====================================================
+function cleanAIText(value) {
+  if (value == null) return "";
+
+  let text = String(value);
+
+  // Decode common HTML entities emitted by some model responses.
+  if (typeof document !== "undefined") {
+    const el = document.createElement("textarea");
+    el.innerHTML = text;
+    text = el.value;
+  }
+
+  // Remove escaped markdown markers while keeping readable text.
+  text = text.replace(/\\\\\*\\\\\*/g, "**");
+
+  // Remove icon serialization artifacts if they appear in plain text.
+  text = text.replace(/svg(?=Save|Deadline|Documents|Official Portal)/g, "");
+
+  // Put numbered recommendations and common fields on separate lines.
+  text = text
+    .replace(/\\s+(?=\\d+\\.\\s*\\*\\*)/g, "\\n")
+    .replace(/\\s+(?=(?:श्रेणी|विवरण|लाभ|पात्रता|क्यों प्रासंगिक|अंतिम तिथि|आवश्यक दस्तावेज़):)/g, "\\n")
+    .replace(/\\s+(?=(?:Category|Description|Benefits|Eligibility|Why relevant|Deadline|Documents):)/g, "\\n")
+    .replace(/\\n{3,}/g, "\\n\\n")
+    .trim();
+
+  return text;
+}
+
+
+// =====================================================
 // INLINE SCHEME CARD
 // =====================================================
 

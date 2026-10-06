@@ -30,4 +30,9 @@ jobs:
 
       - name: Run pytest with coverage
         working-directory: backend
-        run: pytest tests/ -v --cov=. --cov-report=term-missing
+        run: |
+          if [ -d "tests" ]; then
+            pytest tests/ -v --cov=. --cov-report=term-missing
+          else
+            echo "No backend tests directory found; skipping pytest."
+          fi

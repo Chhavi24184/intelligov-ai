@@ -52,7 +52,7 @@ function cleanAIText(value) {
   }
 
   // Remove escaped markdown markers while keeping readable text.
-  text = text.replace(/\\\\\*\\\\\*/g, "**");
+  text = text.replace(/\\\*\\\*/g, "**");
 
   // Remove icon serialization artifacts if they appear in plain text.
   text = text.replace(/svg(?=Save|Deadline|Documents|Official Portal)/g, "");

@@ -374,6 +374,14 @@ def _resolve_intent_type(query: str, intent: str) -> str:
     """Map intent + query keywords to a display type."""
     q = query.lower()
 
+    # Explicit scholarship wording should win even when the intent classifier
+    # labels a natural-language query as general/scheme.
+    if any(w in q for w in (
+        "scholar", "scholarship", "छात्रवृत्ति", "छात्रवृत्त", "student scholarship",
+        "fellowship", "stipend"
+    )):
+        return "scholarship"
+
     if intent == "career":
         if any(w in q for w in ("intern", "internship", "apprentice")):
             return "internship"
@@ -433,7 +441,11 @@ def _profile_score(
         score += iw
 
     # Strongly prioritize education schemes for explicit scholarship queries.
-    if intent_type == "scholarship":
+    scholarship_query = any(w in query.lower() for w in (
+        "scholar", "scholarship", "छात्रवृत्ति", "छात्रवृत्त", "student scholarship",
+        "fellowship", "stipend"
+    ))
+    if intent_type == "scholarship" or scholarship_query:
         if cat == "education":
             score += 20
         elif cat != "girl child":

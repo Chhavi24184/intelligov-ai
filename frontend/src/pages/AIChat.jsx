@@ -59,10 +59,10 @@ function cleanAIText(value) {
 
   // Put numbered recommendations and common fields on separate lines.
   text = text
-    .replace(/\\s+(?=\\d+\\.\\s*\\*\\*)/g, "\\n")
-    .replace(/\\s+(?=(?:श्रेणी|विवरण|लाभ|पात्रता|क्यों प्रासंगिक|अंतिम तिथि|आवश्यक दस्तावेज़):)/g, "\\n")
-    .replace(/\\s+(?=(?:Category|Description|Benefits|Eligibility|Why relevant|Deadline|Documents):)/g, "\\n")
-    .replace(/\\n{3,}/g, "\\n\\n")
+    .replace(/\s+(?=\d+\\.\s*\\*\\*)/g, "\n")
+    .replace(/\s+(?=(?:श्रेणी|विवरण|लाभ|पात्रता|क्यों प्रासंगिक|अंतिम तिथि|आवश्यक दस्तावेज़):)/g, "\n")
+    .replace(/\s+(?=(?:Category|Description|Benefits|Eligibility|Why relevant|Deadline|Documents):)/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 
   return text;

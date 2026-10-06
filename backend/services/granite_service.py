@@ -97,18 +97,15 @@ class MockGraniteClient:
 
         if language == "hi":
             header = f"उपलब्ध सरकारी डेटा के आधार पर प्रासंगिक {type_label['hi']}:
-
-"
+\n"
         elif language == "pa":
             header = f"ਉਪਲਬਧ ਸਰਕਾਰੀ ਡੇਟਾ ਦੇ ਆਧਾਰ 'ਤੇ ਸੰਬੰਧਿਤ {type_label['pa']}:
-
-"
+\n"
         else:
             header = (
                 f"Based on the available government data, "
                 f"here are relevant {type_label['en']}s for your query:
-
-"
+\n"
             )
 
         response = header
@@ -123,8 +120,7 @@ class MockGraniteClient:
             documents = scheme.get("documents", [])
             reasons = scheme.get("eligibility_reasons", [])
 
-            response += f"{index}. **{name}**
-"
+            response += f"{index}. **{name}**\n"
 
             if language == "hi":
                 category_label = _HI_LABELS["Category"]
@@ -134,68 +130,46 @@ class MockGraniteClient:
                 deadline_label = _HI_LABELS["Deadline"]
                 documents_label = _HI_LABELS["Documents"]
                 category_display = _HI_LABELS.get(category, category)
-                response += f"   {category_label}: {category_display}
-"
-                response += f"   विवरण: {description}
-"
+                response += f"   {category_label}: {category_display}\n"
+                response += f"   विवरण: {description}\n"
                 if benefits:
-                    response += f"   {benefits_label}: {benefits}
-"
+                    response += f"   {benefits_label}: {benefits}\n"
                 if eligibility:
-                    response += f"   {eligibility_label}: {eligibility}
-"
+                    response += f"   {eligibility_label}: {eligibility}\n"
                 if reasons:
-                    response += f"   {reasons_label}: {', '.join(reasons)}
-"
+                    response += f"   {reasons_label}: {', '.join(reasons)}\n"
                 if deadline:
-                    response += f"   {deadline_label}: {deadline}
-"
+                    response += f"   {deadline_label}: {deadline}\n"
                 if documents:
-                    response += f"   {documents_label}: {', '.join(documents)}
-"
+                    response += f"   {documents_label}: {', '.join(documents)}\n"
             elif language == "pa":
-                response += f"   ਸ਼੍ਰੇਣੀ: {category}
-"
-                response += f"   ਵੇਰਵਾ: {description}
-"
+                response += f"   ਸ਼੍ਰੇਣੀ: {category}\n"
+                response += f"   ਵੇਰਵਾ: {description}\n"
                 if benefits:
-                    response += f"   ਲਾਭ: {benefits}
-"
+                    response += f"   ਲਾਭ: {benefits}\n"
                 if eligibility:
-                    response += f"   ਯੋਗਤਾ: {eligibility}
-"
+                    response += f"   ਯੋਗਤਾ: {eligibility}\n"
                 if reasons:
-                    response += f"   ਕਿਉਂ ਸੰਬੰਧਿਤ: {', '.join(reasons)}
-"
+                    response += f"   ਕਿਉਂ ਸੰਬੰਧਿਤ: {', '.join(reasons)}\n"
                 if deadline:
-                    response += f"   ਅੰਤਿਮ ਤਾਰੀਖ: {deadline}
-"
+                    response += f"   ਅੰਤਿਮ ਤਾਰੀਖ: {deadline}\n"
                 if documents:
-                    response += f"   ਲੋੜੀਂਦੇ ਦਸਤਾਵੇਜ਼: {', '.join(documents)}
-"
+                    response += f"   ਲੋੜੀਂਦੇ ਦਸਤਾਵੇਜ਼: {', '.join(documents)}\n"
             else:
-                response += f"   Category: {category}
-"
-                response += f"   {description}
-"
+                response += f"   Category: {category}\n"
+                response += f"   {description}\n"
                 if benefits:
-                    response += f"   Benefits: {benefits}
-"
+                    response += f"   Benefits: {benefits}\n"
                 if eligibility:
-                    response += f"   Eligibility: {eligibility}
-"
+                    response += f"   Eligibility: {eligibility}\n"
                 if reasons:
-                    response += f"   Why relevant: {', '.join(reasons)}
-"
+                    response += f"   Why relevant: {', '.join(reasons)}\n"
                 if deadline:
-                    response += f"   Deadline: {deadline}
-"
+                    response += f"   Deadline: {deadline}\n"
                 if documents:
-                    response += "   Documents: " + ", ".join(documents) + "
-"
+                    response += "   Documents: " + ", ".join(documents) + "\n"
 
-            response += "
-"
+            response += "\n"
 
         if language == "hi":
             response += (

@@ -96,8 +96,7 @@ class MockGraniteClient:
             )
 
         if language == "hi":
-            header = f"उपलब्ध सरकारी डेटा के आधार पर प्रासंगिक {type_label['hi']}:
-\n"
+            header = "उपलब्ध सरकारी डेटा के आधार पर प्रासंगिक " + type_label['hi'] + ":\\n\\n"
         elif language == "pa":
             header = f"ਉਪਲਬਧ ਸਰਕਾਰੀ ਡੇਟਾ ਦੇ ਆਧਾਰ 'ਤੇ ਸੰਬੰਧਿਤ {type_label['pa']}:
 \n"

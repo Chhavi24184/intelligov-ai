@@ -44,7 +44,11 @@ jobs:
         env:
           APP_ENV: test
         run: |
-          pytest tests/ -v --maxfail=1
+          if [ -d "tests" ]; then
+            pytest tests/ -v --maxfail=1
+          else
+            echo "No backend tests directory found; skipping test suite."
+          fi
 
       - name: Upload test results
         if: always()

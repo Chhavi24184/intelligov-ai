@@ -117,18 +117,17 @@ IntelliGov AI exists to turn government benefit discovery from a manual, fragmen
 
 | Component | IBM Service (Production) | Current Mock Implementation |
 |---|---|---|
-| LLM / Foundation Model | watsonx.ai — `ibm/granite-13b-instruct-v2` | `MockGraniteClient` |
+| LLM / Foundation Model | Google Gemini — `gemini-2.5-flash` / `gemini-1.5-flash` | Direct Gemini SDK (`google-genai` / `google-generativeai`) |
 | Conversational AI | watsonx Assistant | `MockWatsonxAssistant` |
 | Agent Orchestration | watsonx Orchestrate | `MockWatsonxOrchestrate` |
-| Vector Database | watsonx.data / Milvus | ChromaDB (local) |
+| Vector Database | ChromaDB (local ONNX MiniLM embeddings) | ChromaDB persistent vector store |
+| Model Context Protocol | MCP Server (`backend/mcp_server.py`) | Standard Model Context Protocol tools |
 | Knowledge Catalog | IBM Knowledge Catalog | NetworkX (in-memory graph) |
 | AI Governance | IBM OpenScale / AI Factsheets | Confidence scores in `AgentResponse` |
 | Object Storage | IBM Cloud Object Storage | Local file system |
-| API Gateway | IBM API Connect | FastAPI built-in routing |
+| API Gateway | FastAPI built-in routing | FastAPI built-in routing |
 | Event Streaming | IBM Event Streams | In-memory queue |
 | Authentication | IBM App ID | JWT stub |
-
-Every mock component is built to the **exact interface** its real IBM SDK counterpart exposes — see [`docs/deployment-guide.md`](docs/deployment-guide.md) for the full production upgrade path.
 
 ---
 
@@ -136,11 +135,11 @@ Every mock component is built to the **exact interface** its real IBM SDK counte
 
 IntelliGov AI is organized into five logical layers:
 
-1. **Input Layer** — React + Tailwind frontend (Citizen Dashboard, Chat Interface, Opportunity Wallet, AI Life Roadmap)
-2. **Gateway Layer** — FastAPI Gateway exposing `/api/v1/citizen`, `/api/v1/orchestrator`, and `/api/v1/agents`
-3. **Multi-Agent Layer** — Master Orchestrator coordinating 7 fully working agents and 11 stub agents
-4. **Knowledge Layer** — ChromaDB vector store, NetworkX Knowledge Graph, and mock government datasets
-5. **IBM Mock Layer** — `MockGraniteClient` and related mocks, designed as drop-in replacements for real `ibm-watsonx-ai` SDK calls
+1. **Input Layer** — React + Tailwind frontend (Citizen Dashboard, Chat Interface, Matched Schemes, Voice Input)
+2. **Gateway Layer** — FastAPI Gateway exposing `/api/v1/citizen`, `/api/v1/orchestrator`, `/api/v1/agents`, and `/chat`
+3. **Multi-Agent Layer** — Master Orchestrator coordinating agents backed by Google Gemini (`GeminiClient`)
+4. **Knowledge & RAG Layer** — ChromaDB persistent vector store, rule-based Eligibility Service, and NetworkX Knowledge Graph
+5. **Model Context Protocol (MCP)** — Lightweight MCP server (`backend/mcp_server.py`) exposing `search_schemes`, `get_scheme_details`, and `check_eligibility`
 
 ## 🔄 High-Level Workflow
 

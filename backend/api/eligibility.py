@@ -1,0 +1,224 @@
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from typing import Union, Optional
+from sqlalchemy.orm import Session
+
+from database import get_db
+from models.user import User
+from services.eligibility_service import check_eligibility
+from services.personalization_service import personalise
+from core.logger import logger
+
+
+router = APIRouter()
+
+
+class EligibilityRequest(BaseModel):
+    age: int = Field(..., ge=1, le=120)
+    occupation: str = Field(..., min_length=2)
+    income: Union[float, str] = Field(default=0)
+    gender: str = Field(default="")
+    state: str = Field(..., min_length=2)
+
+    # optional enriched fields — used when called from the profile pipeline
+    category: Optional[str] = None
+    education: Optional[str] = None
+
+
+@router.post("/eligibility")
+def eligibility(request: EligibilityRequest):
+    logger.info(
+        f"Eligibility API | age={request.age} "
+        f"occ={request.occupation!r} "
+        f"income={request.income!r} "
+        f"state={request.state!r}"
+    )
+
+    if not request.occupation.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Occupation is required."
+        )
+
+    if not request.state.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="State is required."
+        )
+
+    schemes = check_eligibility(
+        age=request.age,
+        occupation=request.occupation,
+        income=request.income,
+        gender=request.gender,
+        state=request.state,
+        category=request.category or "",
+        education=request.education or "",
+    )
+
+    return {
+        "success": True,
+        "message": "Eligibility checked successfully.",
+        "data": {
+            "eligible": len(schemes) > 0,
+            "total_matches": len(schemes),
+            "recommended_schemes": schemes,
+        }
+    }
+
+
+# ============================================================
+# MATCH-SCHEMES endpoint
+# Dashboard "Match Scheme" flow.
+# Uses the existing RAG + profile personalisation pipeline so
+# the frontend receives matched/recommended schemes rather than
+# the generic /schemes catalogue.
+# ============================================================
+
+@router.get("/match-schemes/{user_id}")
+def match_schemes(user_id: int, db: Session = Depends(get_db)):
+    """
+    Load the user's saved profile and return personalised scheme
+    matches for the Dashboard Match Scheme action.
+    """
+
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    profile = {
+        "age": user.age,
+        "state": user.state,
+        "district": user.district,
+        "education": user.education,
+        "occupation": user.occupation,
+        "income": user.income,
+        "category": user.category,
+        "interests": user.interests,
+        "language": user.language,
+    }
+
+    if not profile.get("occupation") or not profile.get("state"):
+        return {
+            "success": False,
+            "message": (
+                "Profile incomplete — please fill in "
+                "occupation and state first."
+            ),
+            "data": {
+                "total_matches": 0,
+                "schemes": [],
+                "profile_missing": True,
+                "missing_fields": [
+                    field
+                    for field in (
+                        "age",
+                        "state",
+                        "occupation",
+                        "income",
+                        "category"
+                    )
+                    if not profile.get(field)
+                ],
+            }
+        }
+
+    logger.info(
+        f"Match Schemes | user={user_id} "
+        f"age={user.age} "
+        f"occ={user.occupation!r} "
+        f"state={user.state!r}"
+    )
+
+    result = personalise(
+        query="government schemes suitable for my profile",
+        intent="eligibility",
+        profile=profile,
+    )
+
+    return {
+        "success": True,
+        "message": "Matched schemes fetched successfully.",
+        "data": {
+            "total_matches": len(result.get("schemes", [])),
+            "schemes": result.get("schemes", []),
+            "profile_missing": result.get(
+                "profile_missing",
+                False
+            ),
+            "missing_fields": result.get(
+                "missing_fields",
+                []
+            ),
+            "total_candidates": result.get(
+                "total_candidates",
+                0
+            ),
+        }
+    }
+
+
+# ============================================================
+# BY-PROFILE endpoint
+# Reads the user's saved profile from DB and runs eligibility
+# without requiring the frontend to re-send all fields.
+# ============================================================
+
+@router.get("/eligibility/by-profile/{user_id}")
+def eligibility_by_profile(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    if not user.age or not user.occupation or not user.state:
+        return {
+            "success": False,
+            "message": (
+                "Profile incomplete — please fill in age, "
+                "occupation, and state first."
+            ),
+            "data": {
+                "eligible": False,
+                "total_matches": 0,
+                "recommended_schemes": [],
+            }
+        }
+
+    logger.info(
+        f"Eligibility by-profile | user={user_id} "
+        f"age={user.age} "
+        f"occ={user.occupation!r} "
+        f"state={user.state!r} "
+        f"category={user.category!r}"
+    )
+
+    schemes = check_eligibility(
+        age=user.age,
+        occupation=user.occupation,
+        income=user.income or "0",
+        gender="",
+        state=user.state,
+        category=user.category or "",
+        education=user.education or "",
+    )
+
+    return {
+        "success": True,
+        "message": "Eligibility checked from profile.",
+        "data": {
+            "eligible": len(schemes) > 0,
+            "total_matches": len(schemes),
+            "recommended_schemes": schemes,
+        }
+    }

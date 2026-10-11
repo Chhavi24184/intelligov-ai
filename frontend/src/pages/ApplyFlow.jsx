@@ -1,25 +1,3 @@
-/**
- * ApplyFlow.jsx
- * -------------
- * Application Agent flow page for IntelliGov AI.
- *
- * URL:  /apply?scheme=<encoded-json>
- *
- * 5-step demo pipeline:
- *   1. Loading    — "Application Agent is preparing your form…"
- *   2. Form Fill  — all fields rendered; auto-filled highlighted; sensitive blank
- *   3. Doc Check  — document gap analysis; if all clear auto-advance to review
- *   4. Review     — read-only summary; DEMO banner; Confirm & Submit Demo
- *   5. Done       — DEMO- reference ID with clear ⚠ label; Open Portal; Dashboard
- *
- * Design rules:
- *   - NEVER fake submission, NEVER create fake government status
- *   - NEVER invent personal data — only data from the user's own profile
- *   - Sensitive fields (Aadhaar, mobile, bank) NEVER pre-filled
- *   - DEMO- reference IDs are clearly labelled as non-government references
- *   - Apply Now opens real official portals — no form POSTing to any portal
- */
-
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {

@@ -1,12 +1,14 @@
 import json
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List
 
 from database import get_db
 from models.saved_scheme import SavedScheme
+from models.user import User
+from core.security import get_current_user, verify_user_ownership
 
 
 # =========================================================
@@ -41,7 +43,13 @@ class SaveSchemeRequest(BaseModel):
 # =========================================================
 
 @router.post("/save")
-def save_scheme(data: SaveSchemeRequest, db: Session = Depends(get_db)):
+def save_scheme(
+    data: SaveSchemeRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # Enforce user ownership
+    verify_user_ownership(data.user_id, current_user)
 
     # Prevent duplicates (same user + same scheme_name)
     existing = (
@@ -91,7 +99,13 @@ def save_scheme(data: SaveSchemeRequest, db: Session = Depends(get_db)):
 # =========================================================
 
 @router.get("/{user_id}")
-def get_saved_schemes(user_id: int, db: Session = Depends(get_db)):
+def get_saved_schemes(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # Enforce user ownership
+    verify_user_ownership(user_id, current_user)
 
     records = (
         db.query(SavedScheme)
@@ -133,12 +147,18 @@ def get_saved_schemes(user_id: int, db: Session = Depends(get_db)):
 # =========================================================
 
 @router.delete("/remove/{saved_id}")
-def remove_saved_scheme(saved_id: int, db: Session = Depends(get_db)):
-
+def remove_saved_scheme(
+    saved_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     record = db.query(SavedScheme).filter(SavedScheme.id == saved_id).first()
 
     if not record:
         raise HTTPException(status_code=404, detail="Saved scheme not found")
+
+    # Enforce user ownership - prevent deleting other users' saved schemes
+    verify_user_ownership(record.user_id, current_user)
 
     db.delete(record)
     db.commit()
@@ -154,7 +174,14 @@ def remove_saved_scheme(saved_id: int, db: Session = Depends(get_db)):
 # =========================================================
 
 @router.get("/check/{user_id}/{scheme_name}")
-def check_saved(user_id: int, scheme_name: str, db: Session = Depends(get_db)):
+def check_saved(
+    user_id: int,
+    scheme_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # Enforce user ownership
+    verify_user_ownership(user_id, current_user)
 
     record = (
         db.query(SavedScheme)
@@ -169,3 +196,4 @@ def check_saved(user_id: int, scheme_name: str, db: Session = Depends(get_db)):
         "saved": record is not None,
         "saved_id": record.id if record else None
     }
+

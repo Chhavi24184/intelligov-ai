@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from database import get_db
 from models.notification import Notification
 from models.user import User
+from core.security import get_current_user, verify_user_ownership
 
 
 router = APIRouter(
@@ -31,8 +32,12 @@ class NotificationCreate(BaseModel):
 @router.post("")
 def create_notification(
     notification: NotificationCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    # Enforce user ownership
+    verify_user_ownership(notification.user_id, current_user)
+
     user = db.query(User).filter(
         User.id == notification.user_id
     ).first()
@@ -77,8 +82,12 @@ def create_notification(
 @router.get("/{user_id}")
 def get_notifications(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    # Enforce user ownership
+    verify_user_ownership(user_id, current_user)
+
     user = db.query(User).filter(
         User.id == user_id
     ).first()
@@ -125,7 +134,8 @@ def get_notifications(
 @router.patch("/{notification_id}/read")
 def mark_notification_read(
     notification_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     notification = db.query(Notification).filter(
         Notification.id == notification_id
@@ -136,6 +146,9 @@ def mark_notification_read(
             status_code=404,
             detail="Notification not found"
         )
+
+    # Enforce user ownership - prevent marking other users' notifications
+    verify_user_ownership(notification.user_id, current_user)
 
     notification.is_read = True
 
@@ -156,8 +169,12 @@ def mark_notification_read(
 @router.patch("/user/{user_id}/read-all")
 def mark_all_notifications_read(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    # Enforce user ownership
+    verify_user_ownership(user_id, current_user)
+
     user = db.query(User).filter(
         User.id == user_id
     ).first()
@@ -192,8 +209,12 @@ def mark_all_notifications_read(
 @router.delete("/user/{user_id}")
 def clear_notifications(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    # Enforce user ownership
+    verify_user_ownership(user_id, current_user)
+
     user = db.query(User).filter(
         User.id == user_id
     ).first()
@@ -216,4 +237,4 @@ def clear_notifications(
         "status": "success",
         "message": "Notifications cleared",
         "deleted_count": deleted_count
-    }
+    }

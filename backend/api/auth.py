@@ -1,10 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from passlib.context import CryptContext
 
 from database import get_db
 from models.user import User
+from core.security import (
+    verify_password,
+    get_password_hash,
+    create_access_token,
+    get_current_user,
+)
 
 
 # =========================================================
@@ -14,16 +19,6 @@ from models.user import User
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"]
-)
-
-
-# =========================================================
-# Password Hashing
-# =========================================================
-
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
 )
 
 
@@ -66,7 +61,7 @@ def register_user(
         )
 
     # Hash password
-    hashed_password = pwd_context.hash(
+    hashed_password = get_password_hash(
         user_data.password
     )
 
@@ -81,9 +76,16 @@ def register_user(
     db.commit()
     db.refresh(new_user)
 
+    # Issue JWT token
+    access_token = create_access_token(
+        data={"sub": str(new_user.id), "email": new_user.email, "name": new_user.name}
+    )
+
     return {
         "status": "success",
         "message": "User registered successfully",
+        "access_token": access_token,
+        "token_type": "bearer",
         "user": {
             "id": new_user.id,
             "name": new_user.name,
@@ -117,7 +119,7 @@ def login_user(
         )
 
     # Verify password
-    password_correct = pwd_context.verify(
+    password_correct = verify_password(
         user_data.password,
         user.password
     )
@@ -129,12 +131,46 @@ def login_user(
             detail="Invalid email or password"
         )
 
+    # Issue JWT token
+    access_token = create_access_token(
+        data={"sub": str(user.id), "email": user.email, "name": user.name}
+    )
+
     return {
         "status": "success",
         "message": "Login successful",
+        "access_token": access_token,
+        "token_type": "bearer",
         "user": {
             "id": user.id,
             "name": user.name,
             "email": user.email
         }
     }
+
+
+# =========================================================
+# CURRENT AUTHENTICATED USER
+# =========================================================
+
+@router.get("/me")
+def get_current_user_profile(
+    current_user: User = Depends(get_current_user)
+):
+    return {
+        "status": "success",
+        "user": {
+            "id": current_user.id,
+            "name": current_user.name,
+            "email": current_user.email,
+            "age": current_user.age,
+            "state": current_user.state,
+            "district": current_user.district,
+            "education": current_user.education,
+            "occupation": current_user.occupation,
+            "income": current_user.income,
+            "category": current_user.category,
+            "interests": current_user.interests,
+            "language": current_user.language or "en"
+        }
+    }

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import Union, Optional
 from sqlalchemy.orm import Session
@@ -8,6 +8,7 @@ from models.user import User
 from services.eligibility_service import check_eligibility
 from services.personalization_service import personalise
 from core.logger import logger
+from core.security import get_current_user, verify_user_ownership
 
 
 router = APIRouter()
@@ -76,11 +77,17 @@ def eligibility(request: EligibilityRequest):
 # ============================================================
 
 @router.get("/match-schemes/{user_id}")
-def match_schemes(user_id: int, db: Session = Depends(get_db)):
+def match_schemes(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """
     Load the user's saved profile and return personalised scheme
     matches for the Dashboard Match Scheme action.
     """
+    # Enforce user ownership
+    verify_user_ownership(user_id, current_user)
 
     user = db.query(User).filter(User.id == user_id).first()
 
@@ -171,8 +178,12 @@ def match_schemes(user_id: int, db: Session = Depends(get_db)):
 @router.get("/eligibility/by-profile/{user_id}")
 def eligibility_by_profile(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    # Enforce user ownership
+    verify_user_ownership(user_id, current_user)
+
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
@@ -182,6 +193,7 @@ def eligibility_by_profile(
         )
 
     if not user.age or not user.occupation or not user.state:
+
         return {
             "success": False,
             "message": (

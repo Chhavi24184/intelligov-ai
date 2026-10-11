@@ -5,6 +5,7 @@ from typing import Optional
 
 from database import get_db
 from models.user import User
+from core.security import get_current_user, verify_user_ownership
 
 
 # =========================================================
@@ -39,7 +40,13 @@ class ProfileUpdateRequest(BaseModel):
 # =========================================================
 
 @router.get("/{user_id}")
-def get_profile(user_id: int, db: Session = Depends(get_db)):
+def get_profile(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # Enforce user ownership - users can only view their own profile
+    verify_user_ownership(user_id, current_user)
 
     user = db.query(User).filter(User.id == user_id).first()
 
@@ -72,8 +79,11 @@ def get_profile(user_id: int, db: Session = Depends(get_db)):
 @router.put("/update")
 def update_profile(
     data: ProfileUpdateRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    # Enforce user ownership - users can only update their own profile
+    verify_user_ownership(data.user_id, current_user)
 
     user = db.query(User).filter(User.id == data.user_id).first()
 
@@ -120,3 +130,4 @@ def update_profile(
             "language": user.language or "en",
         }
     }
+

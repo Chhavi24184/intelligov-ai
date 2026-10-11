@@ -69,10 +69,15 @@ function Login() {
         );
       }
 
+      if (data.access_token) {
+        localStorage.setItem("token", data.access_token);
+      }
+
       localStorage.setItem(
         "isLoggedIn",
         "true"
       );
+
 
       alert("Login successful!");
 

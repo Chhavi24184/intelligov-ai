@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from database import get_db
 from models.chat_history import ChatHistory
 from models.user import User
+from core.security import get_current_user, verify_user_ownership
 
 
 # =========================================================
@@ -34,8 +35,11 @@ class ChatHistoryCreate(BaseModel):
 @router.post("/save")
 def save_chat_history(
     chat: ChatHistoryCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    # Enforce user ownership
+    verify_user_ownership(chat.user_id, current_user)
 
     # Check whether user exists
     user = db.query(User).filter(
@@ -73,8 +77,11 @@ def save_chat_history(
 @router.get("/{user_id}")
 def get_chat_history(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    # Enforce user ownership
+    verify_user_ownership(user_id, current_user)
 
     # Check whether user exists
     user = db.query(User).filter(
@@ -106,4 +113,4 @@ def get_chat_history(
             }
             for chat in chats
         ]
-    }
+    }

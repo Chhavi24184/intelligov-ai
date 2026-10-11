@@ -31,12 +31,16 @@ function Sidebar() {
 
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userEmail");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("token");
 
     alert("Logged out successfully!");
 
     navigate("/login");
 
   };
+
 
 
   // =====================================================

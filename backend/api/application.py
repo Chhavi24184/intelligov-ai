@@ -15,7 +15,7 @@ GET  /application/status/{scheme_name}
     Always returns "not_tracked" — no fake states.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -24,6 +24,7 @@ from database import get_db
 from models.user import User
 from agents.application_agent import application_agent
 from core.logger import logger
+from core.security import get_current_user, verify_user_ownership
 
 
 router = APIRouter(
@@ -66,11 +67,15 @@ class DemoSubmitRequest(BaseModel):
 def prepare_application(
     data: PrepareRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Build an ApplicationPlan (+ DemoFormSpec) for the given scheme and user.
     Reads full profile from PostgreSQL — frontend only passes user_id + scheme.
     """
+    # Enforce user ownership
+    verify_user_ownership(data.user_id, current_user)
+
     logger.info(
         f"ApplicationAgent.prepare | user_id={data.user_id} "
         f"scheme={data.scheme.name!r}"
@@ -120,6 +125,7 @@ def prepare_application(
 def submit_demo_application(
     data: DemoSubmitRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Process a demo form submission.
@@ -129,6 +135,9 @@ def submit_demo_application(
     - Does NOT submit anything to any government portal
     - Does NOT store any sensitive field values (Aadhaar, mobile, bank)
     """
+    # Enforce user ownership
+    verify_user_ownership(data.user_id, current_user)
+
     logger.info(
         f"ApplicationAgent.submit_demo | user_id={data.user_id} "
         f"scheme={data.scheme_name!r}"
@@ -158,6 +167,7 @@ def submit_demo_application(
         )
 
     return result
+
 
 
 # ============================================================

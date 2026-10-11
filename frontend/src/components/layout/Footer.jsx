@@ -268,7 +268,7 @@ function Footer() {
 
             <p className="font-semibold bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
 
-              © {new Date().getFullYear()} IntelliGov AI Platform. Built for IBM Hackathon.
+              © {new Date().getFullYear()} IntelliGov AI Platform.
 
             </p>
 

@@ -38,6 +38,8 @@ function SchemeRecommendation({ profileOnly = false }) {
   const [schemes, setSchemes] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [visibleCount, setVisibleCount] = useState(50);
+  const PAGE_SIZE = 50;
 
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
@@ -294,6 +296,7 @@ function SchemeRecommendation({ profileOnly = false }) {
       const list = extractSchemes(response);
 
       setSchemes(Array.isArray(list) ? list : []);
+      setVisibleCount(PAGE_SIZE);
     } catch (err) {
       console.error("Scheme search failed:", err);
 
@@ -307,6 +310,7 @@ function SchemeRecommendation({ profileOnly = false }) {
   const handleClearSearch = async () => {
     setSearch("");
     setSelectedCategory("All");
+    setVisibleCount(PAGE_SIZE);
     await loadSchemes();
   };
 
@@ -754,7 +758,10 @@ function SchemeRecommendation({ profileOnly = false }) {
                 <button
                   key={cat}
                   type="button"
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => {
+                    setSelectedCategory(cat);
+                    setVisibleCount(PAGE_SIZE);
+                  }}
                   className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 ${
                     selectedCategory === cat
                       ? "bg-sky-500 text-white border-sky-500"
@@ -781,8 +788,18 @@ function SchemeRecommendation({ profileOnly = false }) {
               Loading schemes...
             </div>
           ) : (
+            <>
+            {!loading && filteredSchemes.length > 0 && (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-5 text-sm text-slate-500">
+                <p>
+                  Showing <span className="font-semibold text-slate-800">{Math.min(visibleCount, filteredSchemes.length)}</span> of{" "}
+                  <span className="font-semibold text-slate-800">{filteredSchemes.length.toLocaleString()}</span> schemes
+                </p>
+                <p className="text-xs">Load 50 schemes at a time for easier browsing</p>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredSchemes.map((scheme, index) => {
+              {filteredSchemes.slice(0, visibleCount).map((scheme, index) => {
                 const normalized = normalizeScheme(scheme);
 
                 const {
@@ -907,6 +924,22 @@ function SchemeRecommendation({ profileOnly = false }) {
                 </div>
               )}
             </div>
+            {!loading && filteredSchemes.length > visibleCount && (
+              <div className="flex flex-col items-center gap-3 mt-10">
+                <p className="text-sm text-slate-500">
+                  {filteredSchemes.length - visibleCount} more schemes available
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((count) => Math.min(count + PAGE_SIZE, filteredSchemes.length))}
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-white border border-sky-300 text-sky-700 text-sm font-bold shadow-sm hover:bg-sky-50 hover:border-sky-400 transition-all"
+                >
+                  Show More Schemes
+                  <span aria-hidden="true">↓</span>
+                </button>
+              </div>
+            )}
+            </>
           )}
 
           {/* AI Chat CTA */}

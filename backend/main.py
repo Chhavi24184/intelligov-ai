@@ -48,11 +48,9 @@ except Exception as _scheme_seed_error:
     logger.warning(f"Government scheme database seeding skipped: {_scheme_seed_error}")
 
 
-
 # =========================================================
 # Safe column migration — adds missing profile columns
 # to the existing users table without touching any data.
-# Uses ADD COLUMN IF NOT EXISTS so it is idempotent.
 # =========================================================
 
 try:
@@ -64,27 +62,33 @@ except Exception as _me:
 
 
 # =========================================================
-# Ensure ChromaDB is indexed on startup
+# Ensure ChromaDB is indexed on startup only when needed.
+# Re-embedding the full catalogue on every restart causes
+# long startup times. Existing complete indexes are reused.
 # =========================================================
 
 try:
     from services.rag_service import get_collection_count, index_schemes
     from services.scheme_service import get_all_schemes as _get_all_schemes
+
     _chroma_count = get_collection_count()
     _scheme_count = len(_get_all_schemes())
+
     if _chroma_count == 0 or _chroma_count != _scheme_count:
         logger.info(
-            f"ChromaDB count ({_chroma_count}) vs schemes ({_scheme_count}) — re-indexing..."
+            "ChromaDB count (%s) vs schemes (%s) — indexing required...",
+            _chroma_count,
+            _scheme_count,
         )
         index_schemes()
-        logger.info(f"ChromaDB re-indexed: {get_collection_count()} documents")
+        logger.info("ChromaDB indexed: %s documents", get_collection_count())
     else:
-        # Force re-index on startup to pick up enriched scheme fields (benefits, deadline, official_url)
-        logger.info(f"ChromaDB: re-indexing to pick up enriched scheme data...")
-        index_schemes()
-        logger.info(f"ChromaDB re-indexed: {get_collection_count()} documents")
+        logger.info(
+            "ChromaDB index already contains %s schemes; skipping re-index.",
+            _chroma_count,
+        )
 except Exception as _e:
-    logger.warning(f"ChromaDB startup indexing skipped: {_e}")
+    logger.warning("ChromaDB startup indexing skipped: %s", _e)
 
 
 # =========================================================
@@ -119,12 +123,11 @@ else:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app|http://localhost:\d+|http://127\.0\.0\.1:\d+",
+    allow_origin_regex=r"https://.*\\.vercel\\.app|http://localhost:\\d+|http://127\\.0\\.0\\.1:\\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 
 # =========================================================
@@ -162,20 +165,16 @@ def root():
 
 @app.get("/db-test")
 def database_test():
-
     try:
-
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
-
         return {
             "status": "success",
             "message": "PostgreSQL connected successfully!"
         }
-
     except Exception as e:
-
         return {
             "status": "error",
             "message": str(e)
         }
+}

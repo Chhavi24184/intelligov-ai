@@ -6,8 +6,12 @@ import axios from "axios";
 // .env.production (build/Render).
 // Falls back to Render so existing production still works.
 // ======================================================
-const BASE_URL =
-  import.meta.env.VITE_API_URL || "https://intelligov-ai.onrender.com";
+const DEFAULT_API_URL =
+  typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname)
+    ? "http://127.0.0.1:8000"
+    : "https://intelligov-ai.onrender.com";
+
+const BASE_URL = import.meta.env.VITE_API_URL || DEFAULT_API_URL;
 
 const API = axios.create({
   baseURL: BASE_URL,

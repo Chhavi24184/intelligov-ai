@@ -137,13 +137,30 @@ def _try_fetch_dynamic() -> list | None:
 
 def get_all_schemes() -> list:
     """
-    Return all schemes.
-    Tries dynamic source first; falls back to schemes.json.
+    Return the bundled catalogue first, then append any new live records.
+    The bundled dataset is the reliable baseline so a live API response with
+    only a small page of results can never hide the full local catalogue.
     """
+    bundled = list(_load_from_json())
     live = _try_fetch_dynamic()
-    if live:
-        return live
-    return _load_from_json()
+    if not live:
+        return bundled
+
+    known = {
+        str(s.get("name", "")).strip().casefold()
+        for s in bundled
+        if s.get("name")
+    }
+    for scheme in live:
+        name = str(scheme.get("name", "")).strip()
+        if name and name.casefold() not in known:
+            scheme = dict(scheme)
+            scheme["id"] = len(bundled) + 1
+            bundled.append(scheme)
+            known.add(name.casefold())
+
+    logger.info("Returning %s bundled schemes plus live additions", len(bundled))
+    return bundled
 
 
 def get_schemes_source() -> dict:
@@ -161,8 +178,8 @@ def get_schemes_source() -> dict:
             "Live data from myscheme.gov.in is active."
             if api_key_set
             else
-            "Using 30 curated and enriched government schemes from schemes.json. "
-            "To enable live data, set MYSCHEME_API_KEY in backend/.env."
+            "Using the bundled deduplicated government-scheme catalogue from backend/data/schemes.json. "
+            "Live API additions are optional; set MYSCHEME_API_KEY in backend/.env."
         ),
     }
 

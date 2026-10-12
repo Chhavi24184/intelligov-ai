@@ -5,6 +5,7 @@ Run from the repository root:
     python scripts/add_extra_schemes.py
 """
 import json
+import subprocess
 from pathlib import Path
 
 EXTRA_SCHEMES = [
@@ -44,54 +45,50 @@ TARGETS = [
     Path("backend/data/schemes.json"),
     Path("Government_Schemes.json"),
 ]
+SOURCE_COMMIT = "1dc3a66"
+TOTAL_EXISTING = 500
 
 def main():
-    total_added = 0
+    source_text = subprocess.check_output(
+        ["git", "show", f"{SOURCE_COMMIT}:backend/data/schemes.json"],
+        text=True, encoding="utf-8"
+    )
+    source_data = json.loads(source_text)
+    preferred_names = {s["name"].strip().casefold() for s in EXTRA_SCHEMES}
+    selected = []
+    seen = set()
+    for scheme in EXTRA_SCHEMES:
+        key = scheme["name"].strip().casefold()
+        if key not in seen:
+            item = dict(scheme)
+            item["id"] = len(selected) + 1
+            selected.append(item)
+            seen.add(key)
+    for item in source_data:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name", "")).strip()
+        key = name.casefold()
+        if not name or key in seen or key in preferred_names:
+            continue
+        selected.append(dict(item))
+        seen.add(key)
+        if len(selected) >= len(EXTRA_SCHEMES) + TOTAL_EXISTING:
+            break
+    for i, item in enumerate(selected, 1):
+        item["id"] = i
+    expected = len(EXTRA_SCHEMES) + TOTAL_EXISTING
+    if len(selected) != expected:
+        raise RuntimeError(f"Expected {expected} schemes, built {len(selected)}; no files written.")
     for path in TARGETS:
         if not path.exists():
-            print(f"SKIP: {path} not found")
-            continue
-        with path.open("r", encoding="utf-8-sig") as f:
-            data = json.load(f)
-        if not isinstance(data, list):
-            raise ValueError(f"{path} must contain a JSON array; no changes written.")
-        existing_names = {
-            str(item.get("name", "")).strip().casefold()
-            for item in data if isinstance(item, dict)
-        }
-        numeric_ids = []
-        for item in data:
-            if isinstance(item, dict):
-                try:
-                    numeric_ids.append(int(item.get("id")))
-                except (TypeError, ValueError):
-                    pass
-        next_id = max(numeric_ids, default=0) + 1
-        added = 0
-        for scheme in EXTRA_SCHEMES:
-            key = scheme["name"].strip().casefold()
-            if key in existing_names:
-                continue
-            new_item = dict(scheme)
-            new_item["id"] = next_id
-            next_id += 1
-            data.append(new_item)
-            existing_names.add(key)
-            added += 1
-        # Keep all curated EXTRA_SCHEMES first, then fill the remaining slots
-        # with existing catalogue entries, capped at 500 for faster startup.
-        preferred_names = {s["name"].strip().casefold() for s in EXTRA_SCHEMES}
-        preferred = [item for item in data if str(item.get("name", "")).strip().casefold() in preferred_names]
-        remaining = [item for item in data if str(item.get("name", "")).strip().casefold() not in preferred_names]
-        data = (preferred + remaining)[:500]
-        if added or len(data) != len(existing_names):
-            with path.open("w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-                f.write("\n")
-        print(f"{path}: added {added}; total kept {len(data)}")
-        total_added = max(total_added, added)
-    print("Done. Existing scheme records were preserved; duplicate names were skipped.")
-    print("Note: verify current benefits/deadlines against official portals before presenting them as definitive.")
-
+            raise FileNotFoundError(f"Required catalogue missing: {path}")
+        with path.open("w", encoding="utf-8") as f:
+            json.dump(selected, f, ensure_ascii=False, indent=2)
+            f.write("\\n")
+        with path.open("r", encoding="utf-8") as f:
+            check = json.load(f)
+        print(f"{path}: valid JSON; total {len(check)}; curated schemes {len(EXTRA_SCHEMES)}")
+    print("Done: 500 existing schemes + 30 curated priority schemes = 530 total.")
 if __name__ == "__main__":
     main()

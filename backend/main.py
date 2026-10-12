@@ -12,6 +12,7 @@ from models.user import User
 from models.chat_history import ChatHistory
 from models.notification import Notification
 from models.saved_scheme import SavedScheme
+from models.scheme import Scheme
 
 
 # =========================================================
@@ -36,6 +37,16 @@ from api.mcp import router as mcp_router
 # =========================================================
 
 Base.metadata.create_all(bind=engine)
+
+# =========================================================
+# Seed the government-scheme catalogue into SQL (idempotent)
+# =========================================================
+try:
+    from services.scheme_service import seed_schemes_database
+    seed_schemes_database()
+except Exception as _scheme_seed_error:
+    logger.warning(f"Government scheme database seeding skipped: {_scheme_seed_error}")
+
 
 
 # =========================================================

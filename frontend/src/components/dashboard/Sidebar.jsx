@@ -85,16 +85,16 @@ function Sidebar() {
   const menu = (
     <>
 
-      {/* ================= DASHBOARD ================= */}
+      {/* ================= HOME ================= */}
 
       <li>
         <Link
-          to="/dashboard"
+          to="/"
           onClick={closeMobileMenu}
-          className={menuItemClass("/dashboard")}
+          className={menuItemClass("/")}
         >
           <FaHome size={16} />
-          Dashboard
+          Home
         </Link>
       </li>
 

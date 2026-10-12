@@ -1,8 +1,7 @@
 import hero from "../../assets/hero.png";
 import { FaRobot, FaArrowRight } from "react-icons/fa";
-import { Link } from "react-router-dom";
 
-function AIAssistantCard() {
+function AIAssistantCard({ onStartChat }) {
   return (
     <section
       className="
@@ -19,10 +18,7 @@ function AIAssistantCard() {
         shadow-[0_10px_40px_rgba(37,99,235,0.08)]
       "
     >
-
-      {/* =====================================================
-          BACKGROUND GRADIENT GLOWS
-      ===================================================== */}
+      {/* BACKGROUND GRADIENT GLOWS */}
 
       <div
         className="
@@ -53,20 +49,12 @@ function AIAssistantCard() {
         "
       />
 
-
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
+      {/* CONTENT */}
 
       <div className="relative z-10 flex items-center justify-between gap-6">
-
-
-        {/* =================================================
-            LEFT SIDE
-        ================================================= */}
+        {/* LEFT SIDE */}
 
         <div className="max-w-xl">
-
           {/* Label */}
 
           <p
@@ -85,7 +73,6 @@ function AIAssistantCard() {
           >
             AI Assistant
           </p>
-
 
           {/* Heading */}
 
@@ -106,7 +93,6 @@ function AIAssistantCard() {
             Your AI Government Guide
           </div>
 
-
           {/* Description */}
 
           <p
@@ -123,13 +109,11 @@ function AIAssistantCard() {
             using our intelligent AI assistant.
           </p>
 
+          {/* START AI CHAT BUTTON */}
 
-          {/* =================================================
-              START AI CHAT BUTTON
-          ================================================= */}
-
-          <Link
-            to="/chat"
+          <button
+            type="button"
+            onClick={onStartChat}
             className="
               mt-5
               inline-flex
@@ -150,26 +134,23 @@ function AIAssistantCard() {
               hover:shadow-cyan-500/30
               transition-all
               duration-300
+              focus:outline-none
+              focus:ring-2
+              focus:ring-cyan-400
+              focus:ring-offset-2
             "
           >
-
             <FaRobot />
 
-            Start AI Chat
+            <span>Start AI Chat</span>
 
             <FaArrowRight className="text-sm" />
-
-          </Link>
-
+          </button>
         </div>
 
-
-        {/* =================================================
-            RIGHT SIDE — AI IMAGE
-        ================================================= */}
+        {/* RIGHT SIDE — AI IMAGE */}
 
         <div className="hidden lg:flex justify-center items-center relative">
-
           {/* Image Glow */}
 
           <div
@@ -182,7 +163,6 @@ function AIAssistantCard() {
               rounded-full
             "
           />
-
 
           <img
             src={hero}
@@ -197,11 +177,8 @@ function AIAssistantCard() {
               hover:scale-105
             "
           />
-
         </div>
-
       </div>
-
     </section>
   );
 }

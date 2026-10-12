@@ -177,4 +177,3 @@ def database_test():
             "status": "error",
             "message": str(e)
         }
-}

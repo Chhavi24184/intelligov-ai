@@ -85,7 +85,7 @@ def main():
             raise FileNotFoundError(f"Required catalogue missing: {path}")
         with path.open("w", encoding="utf-8") as f:
             json.dump(selected, f, ensure_ascii=False, indent=2)
-            f.write("\\n")
+            f.write("\n")
         with path.open("r", encoding="utf-8") as f:
             check = json.load(f)
         print(f"{path}: valid JSON; total {len(check)}; curated schemes {len(EXTRA_SCHEMES)}")

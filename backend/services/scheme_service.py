@@ -15,6 +15,9 @@ import logging
 import os
 from pathlib import Path
 
+from database import SessionLocal
+from models.scheme import Scheme
+
 try:
     import requests as _requests
     _REQUESTS_AVAILABLE = True
@@ -129,6 +132,98 @@ def _try_fetch_dynamic() -> list | None:
 
 
 # =========================================================
+# DATABASE CATALOGUE
+# =========================================================
+
+def seed_schemes_database() -> int:
+    """
+    Import/update the bundled JSON catalogue into SQL database.
+    Idempotent: existing schemes are updated by case-insensitive name,
+    new schemes are inserted, and unrelated application tables are untouched.
+    """
+    try:
+        bundled = _load_from_json()
+        db = SessionLocal()
+        try:
+            existing_rows = db.query(Scheme).all()
+            existing = {row.name.strip().casefold(): row for row in existing_rows}
+            inserted = 0
+            updated = 0
+
+            for item in bundled:
+                name = str(item.get("name") or "").strip()
+                if not name:
+                    continue
+                key = name.casefold()
+                raw_docs = item.get("documents", [])
+                if isinstance(raw_docs, list):
+                    docs = json.dumps(raw_docs, ensure_ascii=False)
+                elif isinstance(raw_docs, str):
+                    docs = json.dumps([d.strip() for d in raw_docs.split(",") if d.strip()], ensure_ascii=False)
+                else:
+                    docs = "[]"
+
+                row = existing.get(key)
+                if row is None:
+                    row = Scheme(name=name)
+                    db.add(row)
+                    existing[key] = row
+                    inserted += 1
+                else:
+                    updated += 1
+
+                row.category = str(item.get("category") or "Other sectors and public services")
+                row.description = str(item.get("description") or "")
+                row.benefits = str(item.get("benefits") or "")
+                row.eligibility = str(item.get("eligibility") or "")
+                row.documents = docs
+                row.deadline = str(item.get("deadline") or "") or None
+                row.official_url = str(item.get("official_url") or "")
+
+            db.commit()
+            logger.info("Government schemes database sync complete: %s inserted, %s updated", inserted, updated)
+            return inserted + updated
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+    except Exception as exc:
+        logger.warning("Could not seed government schemes database; JSON fallback remains active: %s", exc)
+        return 0
+
+
+def _load_from_database() -> list:
+    """Read the scheme catalogue from SQL, returning an empty list on failure."""
+    db = SessionLocal()
+    try:
+        rows = db.query(Scheme).order_by(Scheme.id.asc()).all()
+        result = []
+        for row in rows:
+            try:
+                documents = json.loads(row.documents or "[]")
+            except (TypeError, json.JSONDecodeError):
+                documents = [row.documents] if row.documents else []
+            result.append({
+                "id": row.id,
+                "name": row.name,
+                "category": row.category or "Other sectors and public services",
+                "description": row.description or "",
+                "benefits": row.benefits or "",
+                "eligibility": row.eligibility or "",
+                "documents": documents,
+                "deadline": row.deadline,
+                "official_url": row.official_url or "",
+            })
+        return result
+    except Exception as exc:
+        logger.warning("Database scheme read failed; using JSON fallback: %s", exc)
+        return []
+    finally:
+        db.close()
+
+
+# =========================================================
 # PUBLIC API
 # =========================================================
 
@@ -138,7 +233,9 @@ def get_all_schemes() -> list:
     The bundled dataset is the reliable baseline so a live API response with
     only a small page of results can never hide the full local catalogue.
     """
-    bundled = list(_load_from_json())
+    bundled = _load_from_database()
+    if not bundled:
+        bundled = list(_load_from_json())
     live = _try_fetch_dynamic()
     if not live:
         return bundled

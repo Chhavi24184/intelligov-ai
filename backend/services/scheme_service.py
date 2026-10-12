@@ -265,15 +265,15 @@ def get_schemes_source() -> dict:
     """
     api_key_set = bool(_MYSCHEME_API_KEY)
     return {
-        "source":        "bundled JSON + myScheme additions" if api_key_set else "bundled JSON catalogue",
-        "source_type":   "hybrid" if api_key_set else "static",
+        "source":        "SQL database + myScheme additions" if api_key_set else "SQL database (JSON fallback)",
+        "source_type":   "hybrid" if api_key_set else "database",
         "total_schemes": len(get_all_schemes()),
         "note": (
-            "Bundled catalogue is active; new live records are appended when available."
+            "Government schemes are read from the SQL database; live API records may be appended when available."
             if api_key_set
             else
-            "Using the bundled deduplicated government-scheme catalogue from backend/data/schemes.json. "
-            "Live API additions are optional; set MYSCHEME_API_KEY in backend/.env."
+            "Government schemes are served from the SQL database, seeded from backend/data/schemes.json. "
+            "The JSON file remains a fallback if the database is unavailable."
         ),
     }
 

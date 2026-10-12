@@ -226,3 +226,145 @@ def test_cors_headers_allowed_origin(client):
     # Origin should be reflected (not wildcard '*') when credentials are true
     assert response.headers.get("access-control-allow-origin") == "http://localhost:5173"
     assert response.headers.get("access-control-allow-credentials") == "true"
+
+
+# =========================================================
+# 6. LOGOUT & SECRET INTEGRITY
+# =========================================================
+
+def test_logout_endpoint(client, auth_headers_user1, test_user_1):
+    # Authenticated user calls logout -> 200 OK
+    resp = client.post("/auth/logout", headers=auth_headers_user1)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "success"
+    assert "Logged out successfully" in data["message"]
+    assert data["user_id"] == test_user_1.id
+
+    # Unauthenticated call -> 401 Unauthorized
+    resp_no_token = client.post("/auth/logout")
+    assert resp_no_token.status_code == 401
+
+    # Invalid token -> 401 Unauthorized
+    resp_bad = client.post("/auth/logout", headers={"Authorization": "Bearer invalid.jwt"})
+    assert resp_bad.status_code == 401
+
+
+def test_no_hardcoded_secrets_in_security_config():
+    import core.security as sec
+    # Verify SECRET_KEY is set and does not use hardcoded insecure default
+    assert sec.SECRET_KEY is not None
+    assert len(sec.SECRET_KEY) >= 16
+    assert sec.SECRET_KEY != "intelligov-ai-secure-jwt-secret-key-2026"
+
+
+def test_login_email_case_insensitivity(client, test_user_1):
+    # Logging in with uppercase email should succeed
+    response = client.post(
+        "/auth/login",
+        json={
+            "email": f"  {test_user_1.email.upper()}  ",
+            "password": "SecretPass123!"
+        }
+    )
+    assert response.status_code == 200
+    assert response.json()["user"]["id"] == test_user_1.id
+
+
+# =========================================================
+# 7. EXTENDED USER OWNERSHIP ACROSS PROTECTED APIS
+# =========================================================
+
+def test_match_schemes_ownership_enforcement(client, auth_headers_user1, test_user_1, test_user_2):
+    # User 1 attempts to run match-schemes for User 2 -> 403 Forbidden!
+    resp = client.get(f"/match-schemes/{test_user_2.id}", headers=auth_headers_user1)
+    assert resp.status_code == 403
+
+    # Unauthenticated call -> 401 Unauthorized
+    resp_unauth = client.get(f"/match-schemes/{test_user_1.id}")
+    assert resp_unauth.status_code == 401
+
+
+def test_eligibility_by_profile_ownership_enforcement(client, auth_headers_user1, test_user_1, test_user_2):
+    # User 1 attempts to check eligibility for User 2 -> 403 Forbidden!
+    resp = client.get(f"/eligibility/by-profile/{test_user_2.id}", headers=auth_headers_user1)
+    assert resp.status_code == 403
+
+    # Unauthenticated call -> 401 Unauthorized
+    resp_unauth = client.get(f"/eligibility/by-profile/{test_user_1.id}")
+    assert resp_unauth.status_code == 401
+
+
+def test_application_endpoints_ownership_enforcement(client, auth_headers_user1, test_user_2):
+    scheme_payload = {
+        "name": "PM Kisan Samman Nidhi",
+        "category": "Farmer",
+        "benefits": "6000 per year"
+    }
+
+    # User 1 attempts to prepare application for User 2 -> 403 Forbidden!
+    resp_prep = client.post(
+        "/application/prepare",
+        headers=auth_headers_user1,
+        json={"user_id": test_user_2.id, "scheme": scheme_payload}
+    )
+    assert resp_prep.status_code == 403
+
+    # User 1 attempts to submit demo application for User 2 -> 403 Forbidden!
+    resp_sub = client.post(
+        "/application/submit-demo",
+        headers=auth_headers_user1,
+        json={"user_id": test_user_2.id, "scheme_name": "PM Kisan", "form_values": {}}
+    )
+    assert resp_sub.status_code == 403
+
+
+def test_saved_schemes_extended_ownership(client, auth_headers_user1, test_user_2):
+    # User 1 attempts to save a scheme under User 2's id -> 403 Forbidden!
+    resp_save = client.post(
+        "/saved-schemes/save",
+        headers=auth_headers_user1,
+        json={"user_id": test_user_2.id, "scheme_name": "Scheme A"}
+    )
+    assert resp_save.status_code == 403
+
+    # User 1 attempts to check saved status for User 2 -> 403 Forbidden!
+    resp_check = client.get(
+        f"/saved-schemes/check/{test_user_2.id}/Scheme%20A",
+        headers=auth_headers_user1
+    )
+    assert resp_check.status_code == 403
+
+
+def test_notifications_extended_ownership(client, auth_headers_user1, test_user_2):
+    # User 1 attempts to create notification for User 2 -> 403 Forbidden!
+    resp_create = client.post(
+        "/notifications",
+        headers=auth_headers_user1,
+        json={"user_id": test_user_2.id, "title": "Spoof", "message": "Spoof message"}
+    )
+    assert resp_create.status_code == 403
+
+    # User 1 attempts to mark all read for User 2 -> 403 Forbidden!
+    resp_mark = client.patch(
+        f"/notifications/user/{test_user_2.id}/read-all",
+        headers=auth_headers_user1
+    )
+    assert resp_mark.status_code == 403
+
+    # User 1 attempts to delete all notifications for User 2 -> 403 Forbidden!
+    resp_del = client.delete(
+        f"/notifications/user/{test_user_2.id}",
+        headers=auth_headers_user1
+    )
+    assert resp_del.status_code == 403
+
+
+def test_chat_history_save_ownership(client, auth_headers_user1, test_user_2):
+    # User 1 attempts to save chat history under User 2's id -> 403 Forbidden!
+    resp = client.post(
+        "/chat-history/save",
+        headers=auth_headers_user1,
+        json={"user_id": test_user_2.id, "message": "Hi", "response": "Hello"}
+    )
+    assert resp.status_code == 403

@@ -24,23 +24,29 @@ TEST_QUESTIONS = [
 ]
 
 
-def test_chat_api():
-    url = "http://127.0.0.1:8000/chat"
-
+def test_chat_api(client):
     for number, question in enumerate(TEST_QUESTIONS, start=1):
         print("\n" + "=" * 70)
         print(f"TEST {number}")
         print("QUESTION:", question)
 
-        response = requests.post(
-            url,
-            json={"question": question},
-            timeout=120
-        )
+        if client:
+            response = client.post(
+                "/chat",
+                json={"question": question},
+            )
+        else:
+            url = "http://127.0.0.1:8000/chat"
+            response = requests.post(
+                url,
+                json={"question": question},
+                timeout=120
+            )
 
         response.raise_for_status()
 
         result = response.json()
+
 
         print("ANSWER:")
         print(result.get("answer"))

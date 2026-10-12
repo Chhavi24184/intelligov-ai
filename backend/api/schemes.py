@@ -1,5 +1,5 @@
-from typing import Optional
-
+from typing import Optional, Union
+from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException
 
 from core.logger import logger
@@ -10,9 +10,15 @@ from services.scheme_service import (
     get_schemes_source,
     search_schemes,
     get_scheme_by_id_or_name,
+    compare_two_schemes,
 )
 
 router = APIRouter()
+
+
+class CompareSchemesRequest(BaseModel):
+    scheme1: Union[int, str]
+    scheme2: Union[int, str]
 
 
 @router.get("/schemes")
@@ -50,6 +56,37 @@ def search(keyword: str):
         "message": "Search completed successfully.",
         "data": data
     }
+
+
+@router.get("/schemes/compare")
+def compare_schemes_get(
+    scheme1: str,
+    scheme2: str,
+):
+    """Compare two schemes by benefits, eligibility, documents, and official links."""
+    logger.info(f"Compare Schemes API (GET) | Scheme1: {scheme1}, Scheme2: {scheme2}")
+    result = compare_two_schemes(scheme1, scheme2)
+    if not result.get("success"):
+        raise HTTPException(
+            status_code=404,
+            detail=result.get("message", "Could not find schemes to compare")
+        )
+    return result
+
+
+@router.post("/schemes/compare")
+def compare_schemes_post(
+    body: CompareSchemesRequest,
+):
+    """Compare two schemes by benefits, eligibility, documents, and official links."""
+    logger.info(f"Compare Schemes API (POST) | Scheme1: {body.scheme1}, Scheme2: {body.scheme2}")
+    result = compare_two_schemes(body.scheme1, body.scheme2)
+    if not result.get("success"):
+        raise HTTPException(
+            status_code=404,
+            detail=result.get("message", "Could not find schemes to compare")
+        )
+    return result
 
 
 @router.get("/schemes/{scheme_id}")

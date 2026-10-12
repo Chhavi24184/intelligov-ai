@@ -1,4 +1,5 @@
 import re
+import time
 from agents.orchestrator import OrchestratorAgent
 from services.granite_service import granite_client
 from services.rag_service import search_full_schemes, _MAX_RELEVANT_DISTANCE
@@ -9,7 +10,7 @@ from services.personalization_service import (
 )
 from core.logger import logger
 from agents.document_agent import DocumentAssistanceAgent
-from services.scheme_service import get_all_schemes
+from services.scheme_service import get_all_schemes, compare_two_schemes
 
 
 # ============================================================
@@ -123,34 +124,15 @@ def _compare_schemes(message: str, language: str = "en") -> dict:
         }
 
     first, second = matched
-    comparison = {
-        "scheme_1": {
-            "name": first.get("name", ""),
-            "category": first.get("category", ""),
-            "description": first.get("description", ""),
-            "benefits": first.get("benefits", ""),
-            "eligibility": first.get("eligibility", ""),
-            "documents": first.get("documents", []),
-            "deadline": first.get("deadline", ""),
-            "official_url": first.get("official_url", ""),
-        },
-        "scheme_2": {
-            "name": second.get("name", ""),
-            "category": second.get("category", ""),
-            "description": second.get("description", ""),
-            "benefits": second.get("benefits", ""),
-            "eligibility": second.get("eligibility", ""),
-            "documents": second.get("documents", []),
-            "deadline": second.get("deadline", ""),
-            "official_url": second.get("official_url", ""),
-        },
-    }
+    comp_result = compare_two_schemes(first, second)
 
     return {
         "success": True,
-        "message": "Scheme comparison generated successfully.",
+        "message": comp_result.get("message", "Scheme comparison generated successfully."),
         "schemes": matched,
-        "comparison": comparison,
+        "comparison": comp_result.get("comparison"),
+        "scheme_1": comp_result.get("scheme_1"),
+        "scheme_2": comp_result.get("scheme_2"),
     }
 
 
@@ -260,9 +242,12 @@ def generate_reply(
     profile: dict | None = None,
     language: str = "en",
 ) -> dict:
+    start_total = time.perf_counter()
     message = message.strip()
 
     if not message:
+        total_time_ms = (time.perf_counter() - start_total) * 1000.0
+        logger.info("TIMING | Total Response Time: %.2fms", total_time_ms)
         return {
             "reply": "Please enter your question.",
             "recommended_scheme": None,
@@ -283,14 +268,24 @@ def generate_reply(
     logger.info(f"PROFILE: {_summarise_profile(profile)}")
     logger.info("=" * 60)
 
+    t0_intent = time.perf_counter()
     orchestration_result = orchestrator.run(query=message, profile=profile)
+    intent_detection_ms = (time.perf_counter() - t0_intent) * 1000.0
+
     intent_result = orchestration_result.get("intent", {})
     agent_result = orchestration_result.get("agent_result", {})
     intent = intent_result.get("intent", "general")
 
     logger.info(f"INTENT: {intent}")
+    logger.info(
+        "TIMING | Intent Detection: %.2fms | intent=%s",
+        intent_detection_ms,
+        intent,
+    )
 
     if not agent_result:
+        total_time_ms = (time.perf_counter() - start_total) * 1000.0
+        logger.info("TIMING | Total Response Time: %.2fms", total_time_ms)
         return {
             "reply": (
                 "I couldn't understand your request. "
@@ -311,6 +306,8 @@ def generate_reply(
             "IntelliGov AI will alert you about relevant "
             "government scheme updates and deadlines."
         )
+        total_time_ms = (time.perf_counter() - start_total) * 1000.0
+        logger.info("TIMING | Total Response Time: %.2fms", total_time_ms)
         return {
             "reply": reply,
             "recommended_scheme": None,
@@ -323,6 +320,8 @@ def generate_reply(
         comparison_result = _compare_schemes(message, language)
 
         if not comparison_result["success"]:
+            total_time_ms = (time.perf_counter() - start_total) * 1000.0
+            logger.info("TIMING | Total Response Time: %.2fms", total_time_ms)
             return {
                 "reply": comparison_result["message"],
                 "recommended_scheme": None,
@@ -346,6 +345,7 @@ def generate_reply(
             f"User query: {message}"
         )
 
+        t0_granite = time.perf_counter()
         try:
             reply = granite_client.generate(
                 query=granite_query,
@@ -365,6 +365,12 @@ def generate_reply(
                 f"• {comparison_context[0].get('benefits', 'Not available')}\n"
                 f"• {comparison_context[1].get('benefits', 'Not available')}"
             )
+        finally:
+            granite_ms = (time.perf_counter() - t0_granite) * 1000.0
+            logger.info("TIMING | Granite API: %.2fms", granite_ms)
+
+        total_time_ms = (time.perf_counter() - start_total) * 1000.0
+        logger.info("TIMING | Total Response Time: %.2fms", total_time_ms)
 
         return {
             "reply": reply,
@@ -389,6 +395,8 @@ def generate_reply(
         document_result = document_agent.run(query=message, available_documents=available_documents)
         schemes = document_result.get("schemes", [])
 
+        total_time_ms = (time.perf_counter() - start_total) * 1000.0
+        logger.info("TIMING | Total Response Time: %.2fms", total_time_ms)
         return {
             "reply": document_result.get("message", "Document information retrieved successfully."),
             "recommended_scheme": schemes[0] if schemes else None,
@@ -409,8 +417,11 @@ def generate_reply(
     if profile_dependent and not pc["has_minimum"]:
         logger.info("PROFILE INCOMPLETE — asking for missing conversational fields")
         nudge = _build_conversational_missing_prompt(pc["missing"], language)
+        total_time_ms = (time.perf_counter() - start_total) * 1000.0
+        logger.info("TIMING | Total Response Time: %.2fms", total_time_ms)
         return {
             "reply": nudge,
+            "text": nudge,
             "recommended_scheme": None,
             "recommended_schemes": [],
             "intent_type": "scheme",
@@ -419,6 +430,7 @@ def generate_reply(
             "agent_flow": ["OrchestratorAgent", "IntentDetectionAgent"],
         }
 
+    t0_rag = time.perf_counter()
     personalisation = personalise(query=message, intent=intent, profile=profile)
     context = personalisation["schemes"]
     intent_type = personalisation["intent_type"]
@@ -430,11 +442,17 @@ def generate_reply(
     )
 
     if intent == "eligibility" and agent_result.get("success") is False:
+        rag_ms = (time.perf_counter() - t0_rag) * 1000.0
+        total_time_ms = (time.perf_counter() - start_total) * 1000.0
+        logger.info("TIMING | RAG Retrieval: %.2fms | schemes=%d", rag_ms, len(context))
+        logger.info("TIMING | Total Response Time: %.2fms", total_time_ms)
+        elig_msg = agent_result.get(
+            "message",
+            "Please provide your profile details to check eligibility."
+        )
         return {
-            "reply": agent_result.get(
-                "message",
-                "Please provide your profile details to check eligibility."
-            ),
+            "reply": elig_msg,
+            "text": elig_msg,
             "recommended_scheme": None,
             "recommended_schemes": [],
             "intent_type": "scheme",
@@ -458,9 +476,16 @@ def generate_reply(
             logger.warning(f"RAG fallback failed: {e}")
             context = []
 
+    rag_ms = (time.perf_counter() - t0_rag) * 1000.0
+    logger.info("TIMING | RAG Retrieval: %.2fms | schemes=%d", rag_ms, len(context))
+
     if not context:
+        total_time_ms = (time.perf_counter() - start_total) * 1000.0
+        logger.info("TIMING | Total Response Time: %.2fms", total_time_ms)
+        no_data = _no_data_reply(language)
         return {
-            "reply": _no_data_reply(language),
+            "reply": no_data,
+            "text": no_data,
             "recommended_scheme": None,
             "recommended_schemes": [],
             "intent_type": intent_type,
@@ -470,6 +495,7 @@ def generate_reply(
     granite_query = _build_granite_query(message, profile, intent_type)
     logger.info(f"GRANITE: {len(context)} scheme(s), lang={language}, type={intent_type}")
 
+    t0_granite = time.perf_counter()
     try:
         reply = granite_client.generate(
             query=granite_query,
@@ -480,6 +506,9 @@ def generate_reply(
     except Exception as e:
         logger.error(f"GRANITE ERROR: {e}")
         reply = _safe_context_reply(context, language)
+    finally:
+        granite_ms = (time.perf_counter() - t0_granite) * 1000.0
+        logger.info("TIMING | Granite API: %.2fms", granite_ms)
 
     logger.info(f"REPLY: {reply[:120]}…")
 
@@ -500,8 +529,12 @@ def generate_reply(
             }
             reply = reply + suffix.get(language, suffix["en"])
 
+    total_time_ms = (time.perf_counter() - start_total) * 1000.0
+    logger.info("TIMING | Total Response Time: %.2fms", total_time_ms)
+
     return {
         "reply": reply,
+        "text": reply,
         "recommended_scheme": recommended_scheme,
         "recommended_schemes": context,
         "intent_type": intent_type,
@@ -548,7 +581,10 @@ def _no_data_reply(language: str) -> str:
     msgs = {
         "en": (
             "I couldn't find enough relevant government scheme information "
-            "for your query.\n\nI can help with:\n"
+            "for your query.\n\n"
+            "⚠️ Verification Warning: Required scheme evidence is missing from the available records. "
+            "Please verify official guidelines directly on government portals (such as myscheme.gov.in).\n\n"
+            "I can help with:\n"
             "• Government schemes (farming, education, health, housing, business)\n"
             "• Scholarships & skill development\n"
             "• Jobs, internships & career opportunities\n"
@@ -557,12 +593,16 @@ def _no_data_reply(language: str) -> str:
         ),
         "hi": (
             "आपकी क्वेरी के लिए पर्याप्त जानकारी नहीं मिली।\n\n"
+            "⚠️ सत्यापन चेतावनी: उपलब्ध रिकॉर्ड में आवश्यक योजना साक्ष्य उपलब्ध नहीं है। "
+            "कृपया आधिकारिक सरकारी पोर्टल (जैसे myscheme.gov.in) पर विवरण सत्यापित करें।\n\n"
             "मैं इनमें मदद कर सकता हूँ:\n"
             "• सरकारी योजनाएँ • छात्रवृत्ति • नौकरियाँ/इंटर्नशिप • पात्रता जाँच\n\n"
             "कृपया अपनी प्रोफ़ाइल भरें या प्रश्न दोबारा पूछें।"
         ),
         "pa": (
             "ਤੁਹਾਡੀ ਸਵਾਲ ਲਈ ਕਾਫ਼ੀ ਜਾਣਕਾਰੀ ਨਹੀਂ ਮਿਲੀ।\n\n"
+            "⚠️ ਪੁਸ਼ਟੀਕਰਨ ਚੇਤਾਵਨੀ: ਉਪਲਬਧ ਰਿਕਾਰਡਾਂ ਵਿੱਚ ਜ਼ਰੂਰੀ ਯੋਜਨਾ ਸਬੂਤ ਨਹੀਂ ਮਿਲੇ। "
+            "ਕਿਰਪਾ ਕਰਕੇ ਅਧਿਕਾਰਤ ਸਰਕਾਰੀ ਪੋਰਟਲ 'ਤੇ ਵੇਰਵਿਆਂ ਦੀ ਜਾਂਚ ਕਰੋ।\n\n"
             "ਮੈਂ ਇਹਨਾਂ ਵਿੱਚ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ:\n"
             "• ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ • ਵਜ਼ੀਫ਼ੇ • ਨੌਕਰੀਆਂ • ਯੋਗਤਾ ਜਾਂਚ\n\n"
             "ਆਪਣੀ ਪ੍ਰੋਫਾਈਲ ਭਰੋ ਜਾਂ ਸਵਾਲ ਦੁਬਾਰਾ ਪੁੱਛੋ।"
@@ -589,6 +629,17 @@ def _safe_context_reply(context: list, language: str = "en") -> str:
         if s.get("deadline"):
             lines.append(f"   Deadline: {s['deadline']}")
         lines.append("")
+
+    missing_evidence = any(
+        not s.get("eligibility") or not s.get("benefits") or not s.get("documents")
+        for s in context
+    )
+    if missing_evidence:
+        lines.append(
+            "⚠️ Verification Warning: Some scheme details (such as eligibility criteria, benefits, or documents) "
+            "are missing from retrieved records. Please verify current guidelines on the official portal before applying."
+        )
+
     return "\n".join(lines)
 
 

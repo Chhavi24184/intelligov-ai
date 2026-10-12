@@ -1,4 +1,6 @@
+import re
 from services.scheme_service import get_all_schemes
+
 
 
 # ============================================================
@@ -90,9 +92,9 @@ def _scheme_is_reserved_category(scheme: dict) -> str:
         str(scheme.get("description", "")),
     ]).lower()
 
-    if any(k in text for k in ["obc/ebc/dnt", "obc, ebc", "obc ebc"]):
+    if any(k in text for k in ["obc/ebc/dnt", "obc, ebc", "obc ebc", "other backward class"]) or re.search(r"\bobc\b", text):
         return "obc"
-    if any(k in text for k in ["sc/st", "sc / st", "scheduled caste", "scheduled tribe"]):
+    if any(k in text for k in ["sc/st", "sc / st", "scheduled caste", "scheduled tribe"]) or re.search(r"\b(sc|st)\b", text):
         return "sc_st"
     if any(k in text for k in ["ews", "ewis", "economically weaker"]):
         return "ews"

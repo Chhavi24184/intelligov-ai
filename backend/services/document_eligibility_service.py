@@ -129,7 +129,7 @@ def check_document_eligibility(
     total_required = len(required_documents)
 
     if total_required == 0:
-        match_percentage = 100
+        match_percentage = "N/A"
     else:
         match_percentage = round(
             (len(matched_documents) / total_required) * 100

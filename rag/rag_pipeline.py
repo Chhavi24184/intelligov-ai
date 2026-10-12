@@ -70,8 +70,8 @@ IMPORTANT RULES:
 3. Do not invent benefits.
 4. Do not invent required documents.
 5. Do not claim that a scheme exists if it is not present in the context.
-6. If the context does not contain enough information, clearly say:
-   "I don't have enough information in my available scheme data to answer that."
+6. If the context does not contain enough information or if evidence is missing, clearly say:
+   "I don't have enough information in my available scheme data to answer that. ⚠️ Verification Warning: Scheme evidence is missing. Please verify on official government portals."
 7. Keep the answer clear and concise.
 8. If multiple schemes are relevant, mention them separately.
 9. Never present assumptions as facts.
@@ -133,12 +133,34 @@ ANSWER:
             if result["score"] >= 0.50
         ]
 
+        if not relevant_results:
+            return {
+                "question": query,
+                "answer": (
+                    "I don't have enough information in my available scheme data to answer that.\n\n"
+                    "⚠️ Verification Warning: Required scheme evidence is missing from retrieved data. "
+                    "Please verify details directly on official government portals (such as myscheme.gov.in)."
+                ),
+                "sources": []
+            }
+
         prompt = self.build_prompt(
             query,
             relevant_results
         )
 
         answer = self.generate_answer(prompt)
+
+        evidence_missing = any(
+            isinstance(result, dict) and (not result.get("benefits") or not result.get("eligibility"))
+            for result in relevant_results
+        )
+        if evidence_missing and "⚠️" not in answer and "verification warning" not in answer.lower():
+            answer = (
+                answer.rstrip()
+                + "\n\n⚠️ Verification Warning: Complete evidence for some scheme details is missing from retrieved records. "
+                "Please verify current requirements on the official government portal."
+            )
 
         return {
             "question": query,

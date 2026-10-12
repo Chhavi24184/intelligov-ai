@@ -11,8 +11,10 @@ router = APIRouter()
 @router.post("/chat")
 def chat(request: ChatRequest):
 
+    query = request.query_text
+
     logger.info(
-        f"Chat API Called | Message: {request.message}"
+        f"Chat API Called | Message: {query}"
     )
 
     profile = (
@@ -29,13 +31,21 @@ def chat(request: ChatRequest):
     )
 
     response = generate_reply(
-        request.message,
+        query,
         profile,
         language=language
     )
 
+    if isinstance(response, dict) and "reply" in response and "text" not in response:
+        response["text"] = response["reply"]
+
+    answer = response.get("reply") or response.get("text") or ""
+    sources = response.get("recommended_schemes") or []
+
     return {
         "success": True,
         "message": "Chat response generated successfully.",
-        "data": response
+        "data": response,
+        "answer": answer,
+        "sources": sources,
     }

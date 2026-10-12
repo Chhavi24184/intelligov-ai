@@ -16,6 +16,12 @@ class Profile(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    message: str
+    message: Optional[str] = None
+    question: Optional[str] = None
     profile: Optional[Profile] = None
     language: Optional[str] = "en"
+
+    @property
+    def query_text(self) -> str:
+        return self.message or self.question or ""
+

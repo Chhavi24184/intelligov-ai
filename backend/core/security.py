@@ -24,9 +24,12 @@ load_dotenv()
 # CONFIGURATION
 # =========================================================
 
-# Read secret key from environment or fallback to a default for local development.
-# In production, set JWT_SECRET_KEY in backend/.env
-SECRET_KEY = os.getenv("JWT_SECRET_KEY") or os.getenv("SECRET_KEY") or "intelligov-ai-secure-jwt-secret-key-2026"
+# Read secret key from environment (never hardcode secrets)
+SECRET_KEY = os.getenv("JWT_SECRET_KEY") or os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    import secrets
+    # Generate cryptographically secure ephemeral key if none provided via environment
+    SECRET_KEY = secrets.token_urlsafe(32)
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 hours
 

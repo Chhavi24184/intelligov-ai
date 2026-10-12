@@ -46,11 +46,23 @@ def register_user(
     user_data: RegisterRequest,
     db: Session = Depends(get_db)
 ):
+    clean_email = user_data.email.strip().lower()
+    if not clean_email or "@" not in clean_email:
+        raise HTTPException(
+            status_code=400,
+            detail="A valid email address is required"
+        )
+
+    if not user_data.password or len(user_data.password) < 6:
+        raise HTTPException(
+            status_code=400,
+            detail="Password must be at least 6 characters long"
+        )
 
     # Check existing email
     existing_user = (
         db.query(User)
-        .filter(User.email == user_data.email)
+        .filter(User.email == clean_email)
         .first()
     )
 
@@ -67,8 +79,8 @@ def register_user(
 
     # Create user
     new_user = User(
-        name=user_data.name,
-        email=user_data.email,
+        name=user_data.name.strip(),
+        email=clean_email,
         password=hashed_password
     )
 
@@ -103,11 +115,12 @@ def login_user(
     user_data: LoginRequest,
     db: Session = Depends(get_db)
 ):
+    clean_email = user_data.email.strip().lower()
 
     # Find user by email
     user = (
         db.query(User)
-        .filter(User.email == user_data.email)
+        .filter(User.email == clean_email)
         .first()
     )
 
@@ -146,6 +159,25 @@ def login_user(
             "name": user.name,
             "email": user.email
         }
+    }
+
+
+# =========================================================
+# LOGOUT
+# =========================================================
+
+@router.post("/logout")
+def logout_user(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Logout the authenticated user.
+    Requires a valid bearer token to verify authentication.
+    """
+    return {
+        "status": "success",
+        "message": "Logged out successfully",
+        "user_id": current_user.id
     }
 
 

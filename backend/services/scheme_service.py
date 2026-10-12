@@ -220,3 +220,111 @@ def get_scheme_by_id_or_name(identifier) -> dict | None:
 
     return None
 
+
+def compare_two_schemes(scheme1_ref, scheme2_ref) -> dict:
+    """
+    Compare two government schemes by benefits, eligibility, documents, and official links
+    using existing scheme data, safely handling any missing fields.
+
+    Parameters:
+        scheme1_ref: int (id), str (name or id), or dict (scheme record)
+        scheme2_ref: int (id), str (name or id), or dict (scheme record)
+
+    Returns:
+        Dictionary with comparison details and safe fallback values for missing fields.
+    """
+    s1 = scheme1_ref if isinstance(scheme1_ref, dict) else get_scheme_by_id_or_name(scheme1_ref)
+    s2 = scheme2_ref if isinstance(scheme2_ref, dict) else get_scheme_by_id_or_name(scheme2_ref)
+
+    if not s1 or not s2:
+        missing = []
+        if not s1:
+            missing.append(f"Scheme 1 ({scheme1_ref})")
+        if not s2:
+            missing.append(f"Scheme 2 ({scheme2_ref})")
+        return {
+            "success": False,
+            "message": f"Could not find {' and '.join(missing)} in existing scheme records.",
+            "comparison": None,
+        }
+
+    def _normalize_scheme(scheme: dict) -> dict:
+        """Safely extract required comparison fields handling None, empty, or missing values."""
+        name = str(scheme.get("name") or "Unknown Scheme").strip()
+        category = str(scheme.get("category") or "General").strip()
+
+        # Benefits (handle string or missing)
+        benefits = str(scheme.get("benefits") or "").strip() or "Not specified"
+
+        # Eligibility (handle string or missing)
+        eligibility = str(scheme.get("eligibility") or "").strip() or "Not specified"
+
+        # Documents (handle list, None, string or missing)
+        raw_docs = scheme.get("documents")
+        if isinstance(raw_docs, list):
+            docs = [str(d).strip() for d in raw_docs if str(d).strip()]
+        elif isinstance(raw_docs, str) and raw_docs.strip():
+            docs = [d.strip() for d in raw_docs.split(",") if d.strip()]
+        else:
+            docs = []
+
+        # Official link / URL (check official_url, link, official_link)
+        official_url = (
+            str(
+                scheme.get("official_url")
+                or scheme.get("official_link")
+                or scheme.get("link")
+                or ""
+            ).strip()
+            or "Not available"
+        )
+
+        deadline = str(scheme.get("deadline") or "").strip() or "Not specified"
+
+        return {
+            "id": scheme.get("id"),
+            "name": name,
+            "category": category,
+            "benefits": benefits,
+            "eligibility": eligibility,
+            "documents": docs,
+            "documents_count": len(docs),
+            "official_url": official_url,
+            "deadline": deadline,
+        }
+
+    norm_s1 = _normalize_scheme(s1)
+    norm_s2 = _normalize_scheme(s2)
+
+    docs1_lower = {d.lower(): d for d in norm_s1["documents"]}
+    docs2_lower = {d.lower(): d for d in norm_s2["documents"]}
+    common_docs = [orig for low, orig in docs1_lower.items() if low in docs2_lower]
+
+    comparison = {
+        "benefits": {
+            norm_s1["name"]: norm_s1["benefits"],
+            norm_s2["name"]: norm_s2["benefits"],
+        },
+        "eligibility": {
+            norm_s1["name"]: norm_s1["eligibility"],
+            norm_s2["name"]: norm_s2["eligibility"],
+        },
+        "documents": {
+            norm_s1["name"]: norm_s1["documents"],
+            norm_s2["name"]: norm_s2["documents"],
+            "common_documents": common_docs,
+        },
+        "official_links": {
+            norm_s1["name"]: norm_s1["official_url"],
+            norm_s2["name"]: norm_s2["official_url"],
+        },
+    }
+
+    return {
+        "success": True,
+        "message": f"Successfully compared '{norm_s1['name']}' and '{norm_s2['name']}'.",
+        "scheme_1": norm_s1,
+        "scheme_2": norm_s2,
+        "comparison": comparison,
+    }
+

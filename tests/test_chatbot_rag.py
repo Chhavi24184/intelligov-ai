@@ -25,8 +25,12 @@ def test_query_rewriting():
 
 def test_intent_detection():
     orchestrator = OrchestratorAgent()
-    intent_scheme = orchestrator.route("Which scheme can give me financial help for agriculture?")
-    assert intent_scheme.intent == "scheme"
+    if hasattr(orchestrator, "route"):
+        intent_scheme = orchestrator.route("Which scheme can give me financial help for agriculture?")
+        assert intent_scheme.intent == "scheme"
+    else:
+        res = orchestrator.run("Which scheme can give me financial help for agriculture?")
+        assert res["intent"]["intent"] == "scheme"
 
 
 def test_mock_granite_client():
@@ -38,6 +42,7 @@ def test_mock_granite_client():
             "description": "Income support for farmers",
             "benefits": "₹6,000 per year",
             "eligibility": "Landholding farmers",
+            "documents": ["Aadhaar", "Land Records"],
         }
     ]
     reply = mock_client.generate(
@@ -59,6 +64,8 @@ def test_granite_client_active_or_fallback():
             "category": "Healthcare",
             "description": "Health coverage",
             "benefits": "₹5 lakh health cover",
+            "eligibility": "Low-income families",
+            "documents": ["Ration Card"],
         }
     ]
     reply = granite_client.generate(
@@ -101,3 +108,58 @@ def test_chat_api_endpoint(client):
     assert data["success"] is True
     assert "data" in data
     assert "text" in data["data"]
+
+
+def test_granite_verification_warning_when_evidence_empty():
+    mock_client = MockGraniteClient()
+    reply = mock_client.generate(
+        query="Give me scholarships for astronaut training in Delhi",
+        context=[],
+        language="en"
+    )
+    assert "Verification Warning" in reply or "⚠️" in reply
+
+
+def test_granite_verification_warning_when_evidence_missing_fields():
+    mock_client = MockGraniteClient()
+    # Context missing documents and eligibility
+    context = [
+        {
+            "name": "Incomplete Scheme",
+            "category": "General",
+            "description": "Brief description only",
+        }
+    ]
+    reply = mock_client.generate(
+        query="What are the details of Incomplete Scheme?",
+        context=context,
+        language="en"
+    )
+    assert "Verification Warning" in reply or "⚠️" in reply
+    assert "Incomplete Scheme" in reply
+
+
+def test_timing_logging_in_generate_reply(caplog):
+    import logging
+    profile = {
+        "age": 28,
+        "occupation": "farmer",
+        "state": "Punjab",
+        "income": "below 1 lakh",
+        "category": "general"
+    }
+    with caplog.at_level(logging.INFO):
+        res = generate_reply(
+            message="Tell me about schemes for farmers",
+            profile=profile,
+            language="en"
+        )
+    assert isinstance(res, dict)
+    assert "reply" in res
+
+    log_text = caplog.text
+    assert "TIMING | Intent Detection:" in log_text
+    assert "TIMING | RAG Retrieval:" in log_text
+    assert "TIMING | Granite API:" in log_text
+    assert "TIMING | Total Response Time:" in log_text
+

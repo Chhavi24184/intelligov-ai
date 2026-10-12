@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from core.logger import logger
 
@@ -9,6 +9,7 @@ from services.scheme_service import (
     get_schemes_by_category,
     get_schemes_source,
     search_schemes,
+    get_scheme_by_id_or_name,
 )
 
 router = APIRouter()
@@ -49,3 +50,21 @@ def search(keyword: str):
         "message": "Search completed successfully.",
         "data": data
     }
+
+
+@router.get("/schemes/{scheme_id}")
+def get_scheme_details(scheme_id: str):
+    logger.info(f"Scheme Detail API Called | ID: {scheme_id}")
+
+    scheme = get_scheme_by_id_or_name(scheme_id)
+    if not scheme:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Scheme '{scheme_id}' not found"
+        )
+
+    return {
+        "success": True,
+        "message": "Scheme fetched successfully.",
+        "data": scheme
+    }

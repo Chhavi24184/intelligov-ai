@@ -186,3 +186,37 @@ def search_schemes(keyword: str) -> list:
             or keyword in s.get("description", "").lower()
         )
     ]
+
+
+def get_scheme_by_id_or_name(identifier) -> dict | None:
+    """
+    Look up a scheme by integer ID or string name (case-insensitive).
+    Returns the scheme dict or None if not found.
+    """
+    if identifier is None:
+        return None
+
+    schemes = get_all_schemes()
+
+    # Try numeric ID
+    try:
+        scheme_id = int(identifier)
+        for s in schemes:
+            if s.get("id") == scheme_id:
+                return s
+    except (ValueError, TypeError):
+        pass
+
+    # Try name match
+    name_str = str(identifier).strip().lower()
+    for s in schemes:
+        if s.get("name", "").strip().lower() == name_str:
+            return s
+
+    # Try substring match if no exact match
+    for s in schemes:
+        if name_str in s.get("name", "").strip().lower():
+            return s
+
+    return None
+

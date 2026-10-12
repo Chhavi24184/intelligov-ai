@@ -28,6 +28,7 @@ from api.notifications import router as notifications_router
 from api.profile import router as profile_router
 from api.saved_schemes import router as saved_schemes_router
 from api.application import router as application_router
+from api.mcp import router as mcp_router
 
 
 # =========================================================
@@ -90,13 +91,29 @@ app = FastAPI(
 # CORS Configuration
 # =========================================================
 
+import os
+
+_allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
+if _allowed_origins_env:
+    allowed_origins = [o.strip() for o in _allowed_origins_env.split(",") if o.strip()]
+else:
+    allowed_origins = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://intelligov-ai.onrender.com",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app|http://localhost:\d+|http://127\.0\.0\.1:\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 # =========================================================
@@ -113,6 +130,7 @@ app.include_router(notifications_router)
 app.include_router(profile_router)
 app.include_router(saved_schemes_router)
 app.include_router(application_router)
+app.include_router(mcp_router)
 
 
 # =========================================================

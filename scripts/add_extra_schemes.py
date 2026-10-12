@@ -87,7 +87,7 @@ def main():
         if added or len(data) != len(existing_names):
             with path.open("w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
-                f.write("\\n")
+                f.write("\n")
         print(f"{path}: added {added}; total kept {len(data)}")
         total_added = max(total_added, added)
     print("Done. Existing scheme records were preserved; duplicate names were skipped.")

@@ -54,6 +54,11 @@ _KNOWN_PORTALS: dict[str, dict] = {
         "note": "Registration via mobile / Aadhaar on the portal.",
         "direct": True,
     },
+    "beneficiary.nha.gov.in": {
+        "name": "Ayushman Bharat PM-JAY Beneficiary Portal",
+        "note": "Use the official NHA beneficiary portal to check eligibility and access beneficiary services.",
+        "direct": True,
+    },
     "pmjay.gov.in": {
         "name": "Ayushman Bharat PM-JAY Portal",
         "note": "Eligibility check and e-card download available.",
@@ -79,6 +84,11 @@ _KNOWN_PORTALS: dict[str, dict] = {
         "note": "Enrol via CSC centre or Maandhan app with Aadhaar.",
         "direct": True,
     },
+    "skillindiadigital.gov.in": {
+        "name": "Skill India Digital Hub",
+        "note": "Use the official Skill India Digital Hub to explore training and skill programmes.",
+        "direct": True,
+    },
     "skillindia.gov.in": {
         "name": "Skill India Portal",
         "note": "Register on Skill India portal; choose course and centre.",
@@ -99,10 +109,30 @@ _KNOWN_PORTALS: dict[str, dict] = {
         "note": "Register at Common Service Centres with Aadhaar.",
         "direct": True,
     },
+    "nrega.dord.gov.in": {
+        "name": "MGNREGA Official Portal",
+        "note": "Use the Ministry of Rural Development's official MGNREGA portal.",
+        "direct": True,
+    },
+    "pmmvy.wcd.gov.in": {
+        "name": "PM Matru Vandana Yojana Portal",
+        "note": "Use the official PMMVY portal for beneficiary registration and application.",
+        "direct": True,
+    },
+    "kaushal.rural.gov.in": {
+        "name": "DDU-GKY and RSETI Unified IT Platform",
+        "note": "Use the Ministry of Rural Development's official skill programme portal.",
+        "direct": True,
+    },
     "pmkvyofficial.org": {
         "name": "PMKVY Official Portal",
         "note": "Find a training centre near you and enrol.",
         "direct": True,
+    },
+    "financialservices.gov.in": {
+        "name": "Pradhan Mantri MUDRA Yojana — Department of Financial Services",
+        "note": "Review scheme details and follow the listed bank application process.",
+        "direct": False,
     },
     "mudra.org.in": {
         "name": "PM Mudra Yojana — apply via your bank",

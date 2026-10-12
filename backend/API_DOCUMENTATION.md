@@ -836,52 +836,66 @@ Career Recommendations
 
 ---
 
-# 11. Backend Project Structure
+# 11. Project Architecture and Backend Structure
 
-The relevant backend structure is:
+## Technology Stack
+
+- **Frontend:** React + Vite, Tailwind CSS, React Router, Axios
+- **Backend:** Python + FastAPI
+- **Database:** SQLAlchemy with the configured SQL database (PostgreSQL when `DATABASE_URL` points to PostgreSQL)
+- **Government scheme catalogue:** `backend/data/schemes.json` (currently 530 curated/catalogue entries in the repository)
+- **Retrieval / vector search:** ChromaDB integration where configured
+- **AI logic:** Modular services and agents, including the chat/orchestration and scheme eligibility flows
+- **API format:** REST endpoints with JSON request/response bodies
+
+## Request Flow
+
+```text
+React/Vite Client
+      |
+      v
+FastAPI Router (backend/api/)
+      |
+      v
+Service / Agent Logic (backend/services/, backend/agents/)
+      |
+      +---- SQL database (users, profiles, saved schemes, history)
+      +---- Scheme catalogue (backend/data/schemes.json)
+      +---- Retrieval/vector store (when configured)
+      |
+      v
+JSON Response to Frontend
+```
+
+## Backend Folder Structure
 
 ```text
 backend/
-│
-├── agents/
-│   ├── career_agent.py
-│   ├── document_agent.py
-│   ├── eligibility_agent.py
-│   ├── intent_agent.py
-│   ├── orchestrator.py
-│   └── schemes_agent.py
-│
+├── main.py                    # FastAPI app, middleware, router registration, startup setup
+├── database.py                # SQLAlchemy engine/session configuration
+├── migrate.py                 # Safe database migrations
+├── API_DOCUMENTATION.md       # API reference
+├── requirements.txt           # Python dependencies
 ├── api/
-│   ├── chat.py
-│   ├── eligibility.py
-│   ├── health.py
-│   └── schemes.py
-│
-├── services/
-│   ├── chat_service.py
-│   ├── eligibility_service.py
-│   ├── granite_service.py
-│   └── scheme_service.py
-│
-├── models/
-│   ├── chat.py
-│   └── eligibility.py
-│
-├── core/
-│   ├── config.py
-│   ├── constants.py
-│   └── logger.py
-│
+│   ├── health.py              # GET /health
+│   ├── chat.py                # POST /chat
+│   ├── eligibility.py         # POST /eligibility and match-schemes
+│   ├── schemes.py             # Scheme list, search, detail, compare, source
+│   ├── auth.py                # Authentication endpoints under /auth
+│   ├── profile.py             # Profile endpoints under /profile
+│   ├── saved_schemes.py       # Saved scheme endpoints
+│   ├── chat_history.py        # Chat history endpoints
+│   ├── notifications.py       # Notification endpoints
+│   ├── application.py         # Application guidance/demo endpoints
+│   └── mcp.py                 # MCP tools and JSON-RPC endpoints
+├── agents/                    # Agent implementations used by services/routes
+├── services/                  # Chat, eligibility, scheme, RAG and related business logic
+├── models/                    # Pydantic request schemas and SQLAlchemy models
+├── core/                      # Logging, security, configuration/helpers
 ├── data/
-│   └── schemes.json
-│
-├── utils/
-│
-├── main.py
-└── requirements.txt
+│   └── schemes.json           # Authoritative local scheme catalogue
+└── vector_store/              # Local vector-store data, when enabled
 ```
-
----
 
 # 12. Running the Backend
 
@@ -1063,13 +1077,32 @@ data/schemes.json
 
 # 16. API Summary
 
+The following core routes are registered directly in `backend/main.py`. Additional routes are provided by the registered routers; the live Swagger UI at `/docs` is the source of truth for the complete list.
+
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/health` | Checks backend health |
-| POST | `/chat` | Provides AI citizen assistance |
-| POST | `/eligibility` | Checks citizen eligibility |
-| GET | `/schemes` | Retrieves government schemes |
-| GET | `/schemes/search` | Searches government schemes |
+| GET | `/` | Backend welcome/version response |
+| GET | `/health` | Health status |
+| POST | `/chat` | AI citizen assistance; accepts `message` or `question`, optional `profile`, and optional `language` |
+| POST | `/eligibility` | Check scheme eligibility using age, occupation, income, gender, and state |
+| GET | `/schemes` | List schemes; optional `category` query parameter |
+| GET | `/schemes/search?keyword=...` | Search schemes |
+| GET | `/schemes/source` | Report the active scheme data source |
+| GET | `/schemes/{scheme_id}` | Retrieve scheme details by ID/name |
+| GET / POST | `/schemes/compare` | Compare two schemes |
+| POST | `/auth/register` | Register an account |
+| POST | `/auth/login` | Log in |
+| GET / PUT | `/profile/{user_id}` | Read/update a user profile (authenticated) |
+| GET / POST / DELETE | `/saved-schemes/...` | Saved-scheme operations (see `/docs`) |
+| GET / POST | `/chat-history/...` | Chat-history operations |
+| GET / POST | `/notifications/...` | Notification operations |
+| POST / GET | `/application/...` | Application guidance/demo status operations |
+| GET / POST | `/mcp/...` | MCP tools and JSON-RPC operations |
+
+**Frontend:** React + Vite + Tailwind CSS.  
+**Database:** SQLAlchemy with the database configured by the backend environment; PostgreSQL is supported through `DATABASE_URL`.  
+**Scheme data:** `backend/data/schemes.json`. The app also registers account, profile, saved-scheme, chat-history, notification, application, and MCP routers.
+
 
 ---
 

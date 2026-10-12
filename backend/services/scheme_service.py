@@ -180,8 +180,24 @@ def seed_schemes_database() -> int:
                 row.deadline = str(item.get("deadline") or "") or None
                 row.official_url = str(item.get("official_url") or "")
 
+            # Keep SQL catalogue in sync with the curated JSON catalogue.
+            # Otherwise removed schemes remain in SQL and the dashboard still
+            # reports the old 2,083 count after the JSON file is reduced to 500.
+            bundled_names = {
+                str(item.get("name") or "").strip().casefold()
+                for item in bundled if str(item.get("name") or "").strip()
+            }
+            removed = 0
+            for key, row in existing.items():
+                if key not in bundled_names:
+                    db.delete(row)
+                    removed += 1
+
             db.commit()
-            logger.info("Government schemes database sync complete: %s inserted, %s updated", inserted, updated)
+            logger.info(
+                "Government schemes database sync complete: %s inserted, %s updated, %s obsolete removed",
+                inserted, updated, removed
+            )
             return inserted + updated
         except Exception:
             db.rollback()

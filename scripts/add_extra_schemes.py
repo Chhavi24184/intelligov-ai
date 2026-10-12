@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Append the 30 additional schemes supplied for IntelliGov AI, without duplicating names.
+"""Keep a fast 500-scheme catalogue, prioritizing the curated extra schemes supplied for IntelliGov AI.
 
 Run from the repository root:
     python scripts/add_extra_schemes.py
@@ -78,11 +78,17 @@ def main():
             data.append(new_item)
             existing_names.add(key)
             added += 1
-        if added:
+        # Keep all curated EXTRA_SCHEMES first, then fill the remaining slots
+        # with existing catalogue entries, capped at 500 for faster startup.
+        preferred_names = {s["name"].strip().casefold() for s in EXTRA_SCHEMES}
+        preferred = [item for item in data if str(item.get("name", "")).strip().casefold() in preferred_names]
+        remaining = [item for item in data if str(item.get("name", "")).strip().casefold() not in preferred_names]
+        data = (preferred + remaining)[:500]
+        if added or len(data) != len(existing_names):
             with path.open("w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
-                f.write("\n")
-        print(f"{path}: added {added}; total {len(data)}")
+                f.write("\\n")
+        print(f"{path}: added {added}; total kept {len(data)}")
         total_added = max(total_added, added)
     print("Done. Existing scheme records were preserved; duplicate names were skipped.")
     print("Note: verify current benefits/deadlines against official portals before presenting them as definitive.")

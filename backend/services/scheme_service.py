@@ -4,13 +4,10 @@ scheme_service.py
 Provides government scheme data for IntelliGov AI.
 
 Data source:
-  - PRIMARY : schemes.json  (30 curated, enriched, verified schemes)
-  - DYNAMIC : myscheme.gov.in public API — attempted on each call.
-              Returns 401 Unauthorized without an API key, so always
-              falls back to the JSON file.  The fallback is intentional
-              and the JSON data is the canonical authoritative source.
-
-The schemes.json file is NEVER removed — it is always the safety net.
+  - PRIMARY : backend/data/schemes.json (deduplicated 2,000+ scheme catalogue).
+  - RAG     : Government_Schemes.json uses the same schema/catalogue.
+  - DYNAMIC : optional myscheme.gov.in API additions when an API key is set.
+  - The bundled catalogue always remains available as the baseline.
 """
 
 import json
@@ -171,11 +168,11 @@ def get_schemes_source() -> dict:
     """
     api_key_set = bool(_MYSCHEME_API_KEY)
     return {
-        "source":        "myscheme.gov.in (live)" if api_key_set else "schemes.json (curated)",
-        "source_type":   "dynamic" if api_key_set else "static",
+        "source":        "bundled JSON + myScheme additions" if api_key_set else "bundled JSON catalogue",
+        "source_type":   "hybrid" if api_key_set else "static",
         "total_schemes": len(get_all_schemes()),
         "note": (
-            "Live data from myscheme.gov.in is active."
+            "Bundled catalogue is active; new live records are appended when available."
             if api_key_set
             else
             "Using the bundled deduplicated government-scheme catalogue from backend/data/schemes.json. "

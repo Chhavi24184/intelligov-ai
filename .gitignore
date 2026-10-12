@@ -109,3 +109,5 @@ desktop.ini
 *.swp
 .env.example.local
 seed_data_cache/
+# Ignore generated ChromaDB vector store
+backend/vector_store/

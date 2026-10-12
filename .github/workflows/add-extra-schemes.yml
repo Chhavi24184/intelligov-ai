@@ -1,4 +1,4 @@
-name: Add extra government schemes
+name: Optimize scheme catalogue to 500
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Append the 30 schemes without duplicates
+      - name: Prioritize curated schemes and cap catalogue at 500
         run: python scripts/add_extra_schemes.py
       - name: Commit updated catalogues
         run: |
@@ -33,6 +33,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No scheme changes needed."
           else
-            git commit -m "Add 30 additional government schemes"
+            git commit -m "Optimize scheme catalogue to 500 entries"
             git push origin HEAD:main
           fi

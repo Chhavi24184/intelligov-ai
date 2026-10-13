@@ -65,19 +65,33 @@ _schemes_cache: list | None = None
 
 
 def load_schemes() -> list:
-
+    """Load the catalogue, tolerating concatenated JSON arrays/objects."""
     global _schemes_cache
-
     if _schemes_cache is not None:
         return _schemes_cache
 
-    with open(
-        SCHEMES_FILE,
-        "r",
-        encoding="utf-8"
-    ) as file:
-        _schemes_cache = json.load(file)
+    raw = SCHEMES_FILE.read_text(encoding="utf-8-sig").strip()
+    if not raw:
+        _schemes_cache = []
+        return _schemes_cache
 
+    decoder = json.JSONDecoder()
+    schemes = []
+    position = 0
+    while position < len(raw):
+        while position < len(raw) and raw[position].isspace():
+            position += 1
+        if position >= len(raw):
+            break
+        value, position = decoder.raw_decode(raw, position)
+        if isinstance(value, list):
+            schemes.extend(value)
+        elif isinstance(value, dict):
+            schemes.append(value)
+        else:
+            raise ValueError(f"Unsupported JSON catalogue value: {type(value).__name__}")
+
+    _schemes_cache = schemes
     return _schemes_cache
 
 

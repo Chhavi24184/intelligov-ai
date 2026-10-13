@@ -117,61 +117,30 @@ def create_scheme_text(scheme):
 # INDEX SCHEMES
 # ============================================================
 
-def index_schemes():
-
+def index_schemes(batch_size: int = 10):
+    """Index schemes in small batches to limit peak RAM on free instances."""
     schemes = load_schemes()
-
     if not schemes:
-
         print("No schemes found.")
-
         return
 
-    documents = []
-    ids = []
-    metadatas = []
+    total = len(schemes)
+    for offset in range(0, total, max(1, batch_size)):
+        batch = schemes[offset:offset + max(1, batch_size)]
+        documents = [create_scheme_text(scheme) for scheme in batch]
+        ids = [str(scheme["id"]) for scheme in batch]
+        metadatas = [
+            {
+                "scheme_id": str(scheme["id"]),
+                "name": scheme.get("name", ""),
+                "category": scheme.get("category", ""),
+            }
+            for scheme in batch
+        ]
+        collection.upsert(ids=ids, documents=documents, metadatas=metadatas)
+        print(f"Indexed schemes {min(offset + len(batch), total)}/{total}.")
 
-    for scheme in schemes:
-
-        scheme_id = str(
-            scheme["id"]
-        )
-
-        documents.append(
-            create_scheme_text(scheme)
-        )
-
-        ids.append(
-            scheme_id
-        )
-
-        metadatas.append({
-            "scheme_id": scheme_id,
-            "name": scheme.get(
-                "name",
-                ""
-            ),
-            "category": scheme.get(
-                "category",
-                ""
-            )
-        })
-
-    # --------------------------------------------------------
-    # Store documents in ChromaDB
-    # ChromaDB generates embeddings automatically
-    # --------------------------------------------------------
-
-    collection.upsert(
-        ids=ids,
-        documents=documents,
-        metadatas=metadatas
-    )
-
-    print(
-        f"Successfully indexed {len(schemes)} schemes."
-    )
-
+    print(f"Successfully indexed {total} schemes.")
 
 
 # ============================================================

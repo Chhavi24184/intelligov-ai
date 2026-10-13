@@ -1,0 +1,39 @@
+name: Optimize scheme catalogue to 500
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/add_extra_schemes.py"
+      - ".github/workflows/add-extra-schemes.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  append-schemes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Prioritize curated schemes and cap catalogue at 500
+        run: python scripts/add_extra_schemes.py
+      - name: Commit updated catalogues
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/data/schemes.json Government_Schemes.json
+          if git diff --cached --quiet; then
+            echo "No scheme changes needed."
+          else
+            git commit -m "Optimize scheme catalogue to 500 entries"
+            git push origin HEAD:main
+          fi

@@ -91,18 +91,18 @@ function Dashboard() {
     };
   }, [chatPanelMounted]);
 
-  // Prevent background scrolling while the panel is open.
+  // Lock scrolling only while the drawer is actually open. Restoring on close
+  // prevents a stale mounted drawer from leaving the dashboard in a blocked state.
   useEffect(() => {
-    if (!chatPanelMounted) return;
+    if (!chatPanelOpen) return;
 
     const previousOverflow = document.body.style.overflow;
-
     document.body.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [chatPanelMounted]);
+  }, [chatPanelOpen]);
 
   // =========================================================
   // LOAD SAVED SCHEMES FROM DATABASE
@@ -469,7 +469,10 @@ function Dashboard() {
       ========================================================= */}
 
       {chatPanelMounted && (
-        <div className="fixed inset-0 z-[100] isolate">
+        <div
+          className={`fixed inset-0 z-[100] isolate ${chatPanelOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+          aria-hidden={!chatPanelOpen}
+        >
           {/* BACKDROP */}
 
           <button
@@ -481,7 +484,7 @@ function Dashboard() {
               bg-slate-950/25
               backdrop-blur-[2px]
               transition-opacity duration-300
-              ${chatPanelOpen ? "opacity-100" : "opacity-0"}
+              ${chatPanelOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
             `}
           />
 
@@ -502,7 +505,7 @@ function Dashboard() {
               overflow-hidden
               transform
               transition-transform duration-300 ease-in-out
-              ${chatPanelOpen ? "translate-x-0" : "translate-x-full"}
+              ${chatPanelOpen ? "translate-x-0 pointer-events-auto" : "translate-x-full pointer-events-none"}
             `}
           >
             {/* PANEL HEADER */}

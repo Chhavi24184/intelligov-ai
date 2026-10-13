@@ -1,53 +1,95 @@
 # Test Cases
 
 ## API: `/`
-1. **Input:** GET request, no params
-   **Expected:** 200 OK, welcome message
-2. **Input:** GET request with trailing slash variations
-   **Expected:** 200 OK, same response
-3. **Input:** Wrong method (POST /)
-   **Expected:** 405 Method Not Allowed
+
+### Test Case 1: Default GET Request
+- **Input:** GET request with no parameters.
+- **Expected Result:** `200 OK` with the welcome message.
+
+### Test Case 2: Trailing Slash Variations
+- **Input:** GET request to `/` and supported trailing-slash variations.
+- **Expected Result:** `200 OK` with the appropriate response for supported routes.
+
+### Test Case 3: Unsupported HTTP Method
+- **Input:** POST request to `/`.
+- **Expected Result:** `405 Method Not Allowed`.
 
 ---
 
 ## API: `/health`
-1. **Input:** GET request
-   **Expected:** 200 OK, `{"status": "ok"}` (or actual shape)
-2. **Input:** Server under load / DB down (if applicable)
-   **Expected:** 503 or degraded status
-3. **Input:** Wrong method (POST /health)
-   **Expected:** 405 Method Not Allowed
+
+### Test Case 1: Health Check
+- **Input:** GET request to `/health`.
+- **Expected Result:** `200 OK` with the health status response, as defined by the backend.
+
+### Test Case 2: Server or Database Failure
+- **Input:** Request when the server is overloaded or a required database service is unavailable.
+- **Expected Result:** An appropriate error or degraded status, if health checks cover these dependencies.
+
+### Test Case 3: Unsupported HTTP Method
+- **Input:** POST request to `/health`.
+- **Expected Result:** `405 Method Not Allowed`, if POST is not supported.
 
 ---
 
 ## API: `/chat`
-1. **Input:** `"I am a farmer"`
-   **Expected:** PM Kisan recommendation
-2. **Input:** `""` (empty message)
-   **Expected:** 400 Bad Request / validation error
-3. **Input:** `"I am a student"`
-   **Expected:** Scholarship/education scheme recommendation
-4. **Input:** Missing `message` field in body
-   **Expected:** 422 Unprocessable Entity
+
+### Test Case 1: Farmer Scheme Recommendation
+- **Input:** POST request with the message `"I am a farmer"`.
+- **Expected Result:** A relevant response recommending suitable agricultural schemes, such as PM-KISAN when applicable.
+
+### Test Case 2: Empty Message
+- **Input:** POST request with an empty message: `""`.
+- **Expected Result:** A validation error if empty messages are rejected by the backend.
+
+### Test Case 3: Student Scheme Recommendation
+- **Input:** POST request with the message `"I am a student"`.
+- **Expected Result:** Relevant scholarship or education scheme recommendations, where applicable.
+
+### Test Case 4: Missing Message Field
+- **Input:** POST request with the required message field missing.
+- **Expected Result:** `422 Unprocessable Entity` if the request schema requires a message or question.
 
 ---
 
 ## API: `/eligibility`
-1. **Input:** Valid farmer profile (age, income, land ownership)
-   **Expected:** 200 OK, eligible schemes list
-2. **Input:** Missing required field(s)
-   **Expected:** 422 Unprocessable Entity
-3. **Input:** Invalid data type (e.g., age as string "abc")
-   **Expected:** 422 Unprocessable Entity
-4. **Input:** Ineligible profile (income too high)
-   **Expected:** 200 OK, empty/no matching schemes
+
+### Test Case 1: Valid User Profile
+- **Input:** POST request with valid eligibility details, including age, occupation, income, gender, and state.
+- **Expected Result:** `200 OK` with eligibility results or a list of matching schemes.
+
+### Test Case 2: Missing Required Fields
+- **Input:** POST request with one or more required fields missing.
+- **Expected Result:** `422 Unprocessable Entity` if the missing fields are required by the request schema.
+
+### Test Case 3: Invalid Data Type
+- **Input:** POST request with an invalid value, such as `"abc"` for age.
+- **Expected Result:** A validation error if the field requires a numeric value.
+
+### Test Case 4: Ineligible User Profile
+- **Input:** POST request with a valid profile that does not meet the eligibility criteria for a scheme.
+- **Expected Result:** `200 OK` with no matching schemes or an appropriate eligibility result, depending on the API response format.
 
 ---
 
 ## API: `/schemes`
-1. **Input:** GET request, no params
-   **Expected:** 200 OK, full list of schemes
-2. **Input:** GET with query filter (if supported, e.g. `?category=agriculture`)
-   **Expected:** 200 OK, filtered list
-3. **Input:** GET when scheme DB is empty
-   **Expected:** 200 OK, empty array `[]`
+
+### Test Case 1: Retrieve All Schemes
+- **Input:** GET request to `/schemes` without query parameters.
+- **Expected Result:** `200 OK` with the available government schemes.
+
+### Test Case 2: Filter Schemes by Category
+- **Input:** GET request with a category filter, such as `/schemes?category=agriculture`, if supported.
+- **Expected Result:** `200 OK` with schemes matching the requested category.
+
+### Test Case 3: Empty Scheme Data
+- **Input:** GET request when the scheme data source contains no records.
+- **Expected Result:** An empty list (`[]`) with `200 OK`, if this is the API's defined behavior.
+
+---
+
+## Notes
+
+- These test cases describe expected behavior and should be verified against the actual backend implementation.
+- HTTP status codes and response formats may differ depending on the validation rules and error-handling logic.
+- Use the interactive API documentation at `/docs` to verify supported routes, request schemas, and response formats.

@@ -65,19 +65,33 @@ _schemes_cache: list | None = None
 
 
 def load_schemes() -> list:
-
+    """Load the catalogue, tolerating concatenated JSON arrays/objects."""
     global _schemes_cache
-
     if _schemes_cache is not None:
         return _schemes_cache
 
-    with open(
-        SCHEMES_FILE,
-        "r",
-        encoding="utf-8"
-    ) as file:
-        _schemes_cache = json.load(file)
+    raw = SCHEMES_FILE.read_text(encoding="utf-8-sig").strip()
+    if not raw:
+        _schemes_cache = []
+        return _schemes_cache
 
+    decoder = json.JSONDecoder()
+    schemes = []
+    position = 0
+    while position < len(raw):
+        while position < len(raw) and raw[position].isspace():
+            position += 1
+        if position >= len(raw):
+            break
+        value, position = decoder.raw_decode(raw, position)
+        if isinstance(value, list):
+            schemes.extend(value)
+        elif isinstance(value, dict):
+            schemes.append(value)
+        else:
+            raise ValueError(f"Unsupported JSON catalogue value: {type(value).__name__}")
+
+    _schemes_cache = schemes
     return _schemes_cache
 
 
@@ -103,61 +117,30 @@ def create_scheme_text(scheme):
 # INDEX SCHEMES
 # ============================================================
 
-def index_schemes():
-
+def index_schemes(batch_size: int = 10):
+    """Index schemes in small batches to limit peak RAM on free instances."""
     schemes = load_schemes()
-
     if not schemes:
-
         print("No schemes found.")
-
         return
 
-    documents = []
-    ids = []
-    metadatas = []
+    total = len(schemes)
+    for offset in range(0, total, max(1, batch_size)):
+        batch = schemes[offset:offset + max(1, batch_size)]
+        documents = [create_scheme_text(scheme) for scheme in batch]
+        ids = [str(scheme["id"]) for scheme in batch]
+        metadatas = [
+            {
+                "scheme_id": str(scheme["id"]),
+                "name": scheme.get("name", ""),
+                "category": scheme.get("category", ""),
+            }
+            for scheme in batch
+        ]
+        collection.upsert(ids=ids, documents=documents, metadatas=metadatas)
+        print(f"Indexed schemes {min(offset + len(batch), total)}/{total}.")
 
-    for scheme in schemes:
-
-        scheme_id = str(
-            scheme["id"]
-        )
-
-        documents.append(
-            create_scheme_text(scheme)
-        )
-
-        ids.append(
-            scheme_id
-        )
-
-        metadatas.append({
-            "scheme_id": scheme_id,
-            "name": scheme.get(
-                "name",
-                ""
-            ),
-            "category": scheme.get(
-                "category",
-                ""
-            )
-        })
-
-    # --------------------------------------------------------
-    # Store documents in ChromaDB
-    # ChromaDB generates embeddings automatically
-    # --------------------------------------------------------
-
-    collection.upsert(
-        ids=ids,
-        documents=documents,
-        metadatas=metadatas
-    )
-
-    print(
-        f"Successfully indexed {len(schemes)} schemes."
-    )
-
+    print(f"Successfully indexed {total} schemes.")
 
 
 # ============================================================

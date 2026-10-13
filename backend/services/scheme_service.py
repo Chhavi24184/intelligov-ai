@@ -40,12 +40,34 @@ _schemes_cache: list | None = None
 # LOAD FROM schemes.json  (authoritative fallback)
 # =========================================================
 
+def _load_json_catalogue(path: Path) -> list:
+    """Load a JSON array and tolerate concatenated JSON arrays/objects."""
+    raw = path.read_text(encoding="utf-8-sig").strip()
+    if not raw:
+        return []
+    decoder = json.JSONDecoder()
+    records = []
+    position = 0
+    while position < len(raw):
+        while position < len(raw) and raw[position].isspace():
+            position += 1
+        if position >= len(raw):
+            break
+        value, position = decoder.raw_decode(raw, position)
+        if isinstance(value, list):
+            records.extend(value)
+        elif isinstance(value, dict):
+            records.append(value)
+        else:
+            raise ValueError(f"Unsupported JSON catalogue value: {type(value).__name__}")
+    return records
+
+
 def _load_from_json() -> list:
     global _schemes_cache
     if _schemes_cache is not None:
         return _schemes_cache
-    with open(_DATA_FILE, "r", encoding="utf-8") as f:
-        _schemes_cache = json.load(f)
+    _schemes_cache = _load_json_catalogue(_DATA_FILE)
     logger.info(f"Loaded {len(_schemes_cache)} schemes from schemes.json")
     return _schemes_cache
 

@@ -62,34 +62,35 @@ except Exception as _me:
 
 
 # =========================================================
-# Ensure ChromaDB is indexed on startup only when needed.
-# Re-embedding the full catalogue on every restart causes
-# long startup times. Existing complete indexes are reused.
+# Optional ChromaDB indexing.
+# Keep this disabled on low-memory web instances: indexing embeddings
+# before Uvicorn binds its port can exceed Render Free's memory limit.
+# Enable explicitly only on a worker/instance with sufficient RAM.
 # =========================================================
 
-try:
-    from services.rag_service import get_collection_count, index_schemes
-    from services.scheme_service import get_all_schemes as _get_all_schemes
+import os
 
-    _chroma_count = get_collection_count()
-    _scheme_count = len(_get_all_schemes())
+if os.getenv("ENABLE_STARTUP_INDEXING", "false").strip().lower() in {"1", "true", "yes"}:
+    try:
+        from services.rag_service import get_collection_count, index_schemes
+        from services.scheme_service import get_all_schemes as _get_all_schemes
 
-    if _chroma_count == 0 or _chroma_count != _scheme_count:
-        logger.info(
-            "ChromaDB count (%s) vs schemes (%s) — indexing required...",
-            _chroma_count,
-            _scheme_count,
-        )
-        index_schemes()
-        logger.info("ChromaDB indexed: %s documents", get_collection_count())
-    else:
-        logger.info(
-            "ChromaDB index already contains %s schemes; skipping re-index.",
-            _chroma_count,
-        )
-except Exception as _e:
-    logger.warning("ChromaDB startup indexing skipped: %s", _e)
-
+        _chroma_count = get_collection_count()
+        _scheme_count = len(_get_all_schemes())
+        if _chroma_count == 0 or _chroma_count != _scheme_count:
+            logger.info(
+                "ChromaDB count (%s) vs schemes (%s) — indexing required...",
+                _chroma_count,
+                _scheme_count,
+            )
+            index_schemes()
+            logger.info("ChromaDB indexed: %s documents", get_collection_count())
+        else:
+            logger.info("ChromaDB index already contains %s schemes; skipping re-index.", _chroma_count)
+    except Exception as _e:
+        logger.warning("ChromaDB startup indexing skipped: %s", _e)
+else:
+    logger.info("ChromaDB startup indexing disabled; web server can bind before optional indexing.")
 
 # =========================================================
 # FastAPI Application

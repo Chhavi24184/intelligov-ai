@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -13,6 +13,7 @@ import {
   FaCalendarAlt,
   FaGift,
   FaExclamationTriangle,
+  FaArrowUp,
 } from "react-icons/fa";
 
 import {
@@ -25,7 +26,8 @@ import {
 } from "../services/api";
 
 const DEFAULT_API_URL =
-  typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname)
+  typeof window !== "undefined" &&
+  ["localhost", "127.0.0.1"].includes(window.location.hostname)
     ? "http://127.0.0.1:8000"
     : "https://intelligov-ai.onrender.com";
 
@@ -43,6 +45,7 @@ function SchemeRecommendation({ profileOnly = false }) {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [visibleCount, setVisibleCount] = useState(50);
+
   const PAGE_SIZE = 50;
 
   const [loading, setLoading] = useState(true);
@@ -55,7 +58,41 @@ function SchemeRecommendation({ profileOnly = false }) {
   const [selectedSchemeModal, setSelectedSchemeModal] = useState(null);
   const [saveLoading, setSaveLoading] = useState(false);
 
+  // Scroll-to-top button visibility.
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Stores the index of the first newly loaded scheme.
+  const pendingScrollIndexRef = useRef(null);
+
   const userId = localStorage.getItem("userId");
+
+  // =========================================================
+  // SCROLL-TO-TOP BUTTON
+  // =========================================================
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show the button immediately after scrolling even 1 pixel.
+      setShowScrollTop(window.scrollY > 0);
+    };
+
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   // =========================================================
   // HELPERS
@@ -132,7 +169,7 @@ function SchemeRecommendation({ profileOnly = false }) {
   };
 
   // Normalize every scheme before saving.
-  // This makes curated + dynamic/API/RAG schemes use the same structure.
+  // This makes curated and dynamic/API/RAG schemes use the same structure.
   const normalizeScheme = (scheme) => ({
     id:
       scheme?.id ||
@@ -150,7 +187,6 @@ function SchemeRecommendation({ profileOnly = false }) {
     deadline: getDeadline(scheme),
     official_url: getOfficialUrl(scheme),
 
-    // Keep source information when available.
     source:
       scheme?.source ||
       scheme?.source_type ||
@@ -201,6 +237,7 @@ function SchemeRecommendation({ profileOnly = false }) {
 
     try {
       const data = await getSavedSchemesAPI(userId);
+
       const savedSchemes = Array.isArray(data?.schemes)
         ? data.schemes
         : [];
@@ -242,6 +279,7 @@ function SchemeRecommendation({ profileOnly = false }) {
       if (profileOnly) {
         if (!userId) {
           setSchemes([]);
+          setVisibleCount(PAGE_SIZE);
           return;
         }
 
@@ -249,6 +287,8 @@ function SchemeRecommendation({ profileOnly = false }) {
         const matched = response?.data?.recommended_schemes;
 
         setSchemes(Array.isArray(matched) ? matched : []);
+        setVisibleCount(PAGE_SIZE);
+
         return;
       }
 
@@ -256,6 +296,7 @@ function SchemeRecommendation({ profileOnly = false }) {
       const list = extractSchemes(response);
 
       setSchemes(Array.isArray(list) ? list : []);
+      setVisibleCount(PAGE_SIZE);
     } catch (err) {
       console.error("Failed to load schemes:", err);
 
@@ -273,8 +314,8 @@ function SchemeRecommendation({ profileOnly = false }) {
     loadSavedFromDB();
     loadSchemes();
 
-    // Source endpoint is intentionally kept for backend functionality,
-    // but no fallback/source information is shown to the user.
+    // Keep the source endpoint for backend functionality.
+    // No fallback/source information is shown to the user.
     fetchSchemesSource().catch(() => null);
   }, [profileOnly]);
 
@@ -301,6 +342,7 @@ function SchemeRecommendation({ profileOnly = false }) {
 
       setSchemes(Array.isArray(list) ? list : []);
       setVisibleCount(PAGE_SIZE);
+      setSelectedCategory("All");
     } catch (err) {
       console.error("Scheme search failed:", err);
 
@@ -315,8 +357,63 @@ function SchemeRecommendation({ profileOnly = false }) {
     setSearch("");
     setSelectedCategory("All");
     setVisibleCount(PAGE_SIZE);
+
     await loadSchemes();
   };
+
+  // =========================================================
+  // SHOW MORE SCHEMES
+  // =========================================================
+
+  const handleShowMore = () => {
+    // The first scheme to be displayed after this click.
+    const firstNewIndex = visibleCount;
+
+    // Save its index so we can scroll to it after React renders.
+    pendingScrollIndexRef.current = firstNewIndex;
+
+    // Load the next 50 schemes, or the remaining schemes if fewer.
+    setVisibleCount((currentCount) =>
+      Math.min(currentCount + PAGE_SIZE, filteredSchemes.length)
+    );
+  };
+
+  // After the additional schemes have rendered, position the first
+  // newly loaded scheme approximately in the center of the viewport.
+  useEffect(() => {
+    const firstNewIndex = pendingScrollIndexRef.current;
+
+    if (firstNewIndex === null) return;
+
+    const animationFrame = requestAnimationFrame(() => {
+      const firstNewScheme = document.querySelector(
+        `[data-scheme-index="${firstNewIndex}"]`
+      );
+
+      if (!firstNewScheme) {
+        pendingScrollIndexRef.current = null;
+        return;
+      }
+
+      const rect = firstNewScheme.getBoundingClientRect();
+
+      const targetY =
+        window.scrollY +
+        rect.top -
+        (window.innerHeight - rect.height) / 2;
+
+      window.scrollTo({
+        top: Math.max(0, targetY),
+        behavior: "smooth",
+      });
+
+      pendingScrollIndexRef.current = null;
+    });
+
+    return () => {
+      cancelAnimationFrame(animationFrame);
+    };
+  }, [visibleCount]);
 
   // =========================================================
   // SAVE / UNSAVE
@@ -354,10 +451,7 @@ function SchemeRecommendation({ profileOnly = false }) {
           return next;
         });
       } else {
-        // Send normalized complete scheme.
-        // Works for curated and dynamically fetched schemes.
         const result = await saveSchemeAPI(userId, normalizedScheme);
-
         const savedId = result?.saved_id;
 
         setBookmarkedNames((prev) => {
@@ -373,8 +467,7 @@ function SchemeRecommendation({ profileOnly = false }) {
           }));
         }
 
-        // Refresh saved state from DB so frontend reflects actual
-        // persisted data rather than only local state.
+        // Refresh saved state from the database.
         await loadSavedFromDB();
       }
     } catch (err) {
@@ -522,6 +615,7 @@ function SchemeRecommendation({ profileOnly = false }) {
               type="button"
               onClick={onClose}
               className="p-2 rounded-xl hover:bg-slate-100 text-slate-500"
+              aria-label="Close scheme details"
             >
               <FaTimes />
             </button>
@@ -672,8 +766,7 @@ function SchemeRecommendation({ profileOnly = false }) {
       </div>
     );
   };
-
-  // =========================================================
+    // =========================================================
   // UI
   // =========================================================
 
@@ -738,6 +831,7 @@ function SchemeRecommendation({ profileOnly = false }) {
                   type="button"
                   onClick={handleClearSearch}
                   className="p-2 rounded-xl hover:bg-slate-100 text-slate-400"
+                  aria-label="Clear search"
                 >
                   <FaTimes />
                 </button>
@@ -746,7 +840,7 @@ function SchemeRecommendation({ profileOnly = false }) {
               <button
                 type="submit"
                 disabled={searching}
-                className="px-5 py-2.5 rounded-xl bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition-all"
+                className="px-5 py-2.5 rounded-xl bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition-all disabled:opacity-60"
               >
                 {searching ? "..." : "Search"}
               </button>
@@ -763,6 +857,7 @@ function SchemeRecommendation({ profileOnly = false }) {
                   key={cat}
                   type="button"
                   onClick={() => {
+                    pendingScrollIndexRef.current = null;
                     setSelectedCategory(cat);
                     setVisibleCount(PAGE_SIZE);
                   }}
@@ -793,156 +888,179 @@ function SchemeRecommendation({ profileOnly = false }) {
             </div>
           ) : (
             <>
-            {!loading && filteredSchemes.length > 0 && (
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-5 text-sm text-slate-500">
-                <p>
-                  Showing <span className="font-semibold text-slate-800">{Math.min(visibleCount, filteredSchemes.length)}</span> of{" "}
-                  <span className="font-semibold text-slate-800">{filteredSchemes.length.toLocaleString()}</span> schemes
-                </p>
-                <p className="text-xs">Load 50 schemes at a time for easier browsing</p>
-              </div>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredSchemes.slice(0, visibleCount).map((scheme, index) => {
-                const normalized = normalizeScheme(scheme);
+              {!loading && filteredSchemes.length > 0 && (
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-5 text-sm text-slate-500">
+                  <p>
+                    Showing{" "}
+                    <span className="font-semibold text-slate-800">
+                      {Math.min(visibleCount, filteredSchemes.length)}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-semibold text-slate-800">
+                      {filteredSchemes.length.toLocaleString()}
+                    </span>{" "}
+                    schemes
+                  </p>
 
-                const {
-                  name,
-                  category,
-                  description,
-                  benefits,
-                  deadline,
-                  official_url: url,
-                } = normalized;
-
-                const isBookmarked = bookmarkedNames.has(name);
-
-                const schemeId =
-                  scheme?.id ||
-                  scheme?.scheme_id ||
-                  scheme?.slug ||
-                  `scheme-${index}`;
-
-                return (
-                  <div
-                    key={schemeId}
-                    className="relative bg-white rounded-3xl border border-sky-100 shadow-[0_4px_24px_rgba(14,165,233,0.07)] hover:shadow-[0_8px_32px_rgba(14,165,233,0.13)] hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group"
-                  >
-                    {/* Top accent */}
-                    <div className="h-1 w-full bg-gradient-to-r from-sky-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                    <div className="p-5 flex flex-col flex-1">
-                      {/* Category + Save */}
-                      <div className="flex items-start justify-between gap-2 mb-3">
-                        <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${catColor(
-                            category
-                          )}`}
-                        >
-                          {category}
-                        </span>
-
-                        <button
-                          type="button"
-                          onClick={() => toggleBookmark(scheme)}
-                          disabled={saveLoading}
-                          className={`shrink-0 p-1.5 rounded-xl transition-all duration-200 ${
-                            isBookmarked
-                              ? "text-amber-500 hover:bg-amber-50"
-                              : "text-slate-400 hover:text-sky-500 hover:bg-sky-50"
-                          }`}
-                          title={
-                            isBookmarked
-                              ? "Remove from saved"
-                              : "Save scheme"
-                          }
-                        >
-                          {isBookmarked ? (
-                            <FaBookmark />
-                          ) : (
-                            <FaRegBookmark />
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Name */}
-                      <h3 className="text-base font-bold text-slate-900 leading-snug mb-2 line-clamp-2">
-                        {name}
-                      </h3>
-
-                      {/* Description */}
-                      <p className="text-xs text-slate-500 leading-relaxed mb-3 line-clamp-3 flex-1">
-                        {description}
-                      </p>
-
-                      {/* Benefits */}
-                      {benefits && (
-                        <div className="mb-3 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-100">
-                          <p className="text-xs text-emerald-700 line-clamp-2">
-                            <FaGift className="inline mr-1 text-emerald-500" />
-                            {benefits}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Deadline */}
-                      {deadline && (
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-4">
-                          <FaCalendarAlt className="text-sky-400 shrink-0" />
-                          <span className="truncate">{deadline}</span>
-                        </div>
-                      )}
-
-                      {/* Actions */}
-                      <div className="flex gap-2 mt-auto">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setSelectedSchemeModal(scheme)
-                          }
-                          className="flex-1 py-2.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold hover:bg-sky-100 transition-all"
-                        >
-                          View Details
-                        </button>
-
-                        {url && (
-                          <a
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white text-xs font-semibold hover:scale-[1.02] transition-all shadow-sm"
-                          >
-                            <FaExternalLinkAlt className="text-[10px]" />
-                            Apply
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {filteredSchemes.length === 0 && !loading && (
-                <div className="col-span-3 text-center py-16 text-slate-400">
-                  No schemes found matching your criteria.
+                  <p className="text-xs">
+                    Load 50 schemes at a time for easier browsing
+                  </p>
                 </div>
               )}
-            </div>
-            {!loading && filteredSchemes.length > visibleCount && (
-              <div className="flex flex-col items-center gap-3 mt-10">
-                <p className="text-sm text-slate-500">
-                  {filteredSchemes.length - visibleCount} more schemes available
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setVisibleCount((count) => Math.min(count + PAGE_SIZE, filteredSchemes.length))}
-                  className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-white border border-sky-300 text-sky-700 text-sm font-bold shadow-sm hover:bg-sky-50 hover:border-sky-400 transition-all"
-                >
-                  Show More Schemes
-                  <span aria-hidden="true">↓</span>
-                </button>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredSchemes
+                  .slice(0, visibleCount)
+                  .map((scheme, index) => {
+                    const normalized = normalizeScheme(scheme);
+
+                    const {
+                      name,
+                      category,
+                      description,
+                      benefits,
+                      deadline,
+                      official_url: url,
+                    } = normalized;
+
+                    const isBookmarked = bookmarkedNames.has(name);
+
+                    const schemeId =
+                      scheme?.id ||
+                      scheme?.scheme_id ||
+                      scheme?.slug ||
+                      `scheme-${index}`;
+
+                    return (
+                      <div
+                        key={schemeId}
+                        data-scheme-index={index}
+                        className="relative bg-white rounded-3xl border border-sky-100 shadow-[0_4px_24px_rgba(14,165,233,0.07)] hover:shadow-[0_8px_32px_rgba(14,165,233,0.13)] hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group"
+                      >
+                        {/* Top accent */}
+                        <div className="h-1 w-full bg-gradient-to-r from-sky-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        <div className="p-5 flex flex-col flex-1">
+                          {/* Category + Save */}
+                          <div className="flex items-start justify-between gap-2 mb-3">
+                            <span
+                              className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${catColor(
+                                category
+                              )}`}
+                            >
+                              {category}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => toggleBookmark(scheme)}
+                              disabled={saveLoading}
+                              className={`shrink-0 p-1.5 rounded-xl transition-all duration-200 ${
+                                isBookmarked
+                                  ? "text-amber-500 hover:bg-amber-50"
+                                  : "text-slate-400 hover:text-sky-500 hover:bg-sky-50"
+                              }`}
+                              title={
+                                isBookmarked
+                                  ? "Remove from saved"
+                                  : "Save scheme"
+                              }
+                              aria-label={
+                                isBookmarked
+                                  ? "Remove saved scheme"
+                                  : "Save scheme"
+                              }
+                            >
+                              {isBookmarked ? (
+                                <FaBookmark />
+                              ) : (
+                                <FaRegBookmark />
+                              )}
+                            </button>
+                          </div>
+
+                          {/* Name */}
+                          <h3 className="text-base font-bold text-slate-900 leading-snug mb-2 line-clamp-2">
+                            {name}
+                          </h3>
+
+                          {/* Description */}
+                          <p className="text-xs text-slate-500 leading-relaxed mb-3 line-clamp-3 flex-1">
+                            {description}
+                          </p>
+
+                          {/* Benefits */}
+                          {benefits && (
+                            <div className="mb-3 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-100">
+                              <p className="text-xs text-emerald-700 line-clamp-2">
+                                <FaGift className="inline mr-1 text-emerald-500" />
+                                {benefits}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Deadline */}
+                          {deadline && (
+                            <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-4">
+                              <FaCalendarAlt className="text-sky-400 shrink-0" />
+                              <span className="truncate">{deadline}</span>
+                            </div>
+                          )}
+
+                          {/* Actions */}
+                          <div className="flex gap-2 mt-auto">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setSelectedSchemeModal(scheme)
+                              }
+                              className="flex-1 py-2.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold hover:bg-sky-100 transition-all"
+                            >
+                              View Details
+                            </button>
+
+                            {url && (
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white text-xs font-semibold hover:scale-[1.02] transition-all shadow-sm"
+                              >
+                                <FaExternalLinkAlt className="text-[10px]" />
+                                Apply
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                {filteredSchemes.length === 0 && !loading && (
+                  <div className="col-span-full text-center py-16 text-slate-400">
+                    No schemes found matching your criteria.
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Show More */}
+              {!loading && filteredSchemes.length > visibleCount && (
+                <div className="flex flex-col items-center gap-3 mt-10">
+                  <p className="text-sm text-slate-500">
+                    {filteredSchemes.length - visibleCount} more schemes
+                    available
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handleShowMore}
+                    className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-white border border-sky-300 text-sky-700 text-sm font-bold shadow-sm hover:bg-sky-50 hover:border-sky-400 transition-all"
+                  >
+                    Show More Schemes
+                    <span aria-hidden="true">↓</span>
+                  </button>
+                </div>
+              )}
             </>
           )}
 
@@ -976,6 +1094,19 @@ function SchemeRecommendation({ profileOnly = false }) {
           scheme={selectedSchemeModal}
           onClose={() => setSelectedSchemeModal(null)}
         />
+      )}
+
+      {/* Scroll-to-Top Button */}
+      {showScrollTop && (
+        <button
+          type="button"
+          onClick={scrollToTop}
+          aria-label="Scroll to top"
+          title="Scroll to top"
+          className="fixed bottom-6 right-6 z-[60] flex h-12 w-12 items-center justify-center rounded-full border border-sky-200 bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-200 transition-all duration-300 hover:scale-110 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-sky-200"
+        >
+          <FaArrowUp className="text-lg" />
+        </button>
       )}
     </div>
   );
